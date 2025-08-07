@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import Logo from "./Logo";
 
 export default function Navigation(): React.JSX.Element {
   const location = useLocation();
@@ -14,9 +15,10 @@ export default function Navigation(): React.JSX.Element {
         <div className="flex justify-between items-center h-16">
           <Link
             to="/"
-            className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-2 text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
           >
-            TrailMaster
+            <Logo size="sm" />
+            WayMaker
           </Link>
           <div className="flex space-x-4">
             <Link

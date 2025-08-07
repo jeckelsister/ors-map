@@ -1,15 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Logo from "../components/Logo";
 
 export default function Home(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-5xl font-bold text-gray-900 mb-6">
-          Welcome to TrailMaster
-        </h1>
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <Logo size="lg" />
+          <h1 className="text-5xl font-bold text-gray-900">WayMaker</h1>
+        </div>
         <p className="text-xl text-gray-600 mb-8">
-          A powerful route planning application using OpenRouteService API
+          Your path to adventure - A powerful route planning application
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
