@@ -71,7 +71,7 @@ const Map = () => {
   return (
     <div className="relative h-screen w-screen bg-black">
       <div className="absolute top-6 left-6 z-10 bg-white p-6 rounded-xl min-w-[350px] w-fit flex flex-col gap-4">
-        <div className="mb-2">
+        <div className="mb-2 relative">
           <div className="flex items-center gap-2">
             <FaSearchLocation className="h-5 w-5 text-blue-600" />
             <input
@@ -118,7 +118,7 @@ const Map = () => {
             </Button>
           </div>
           {focusSuggestions.length > 0 && (
-            <ul className="bg-white border rounded shadow mt-1 max-h-40 overflow-auto">
+            <ul className="absolute left-0 top-full w-full bg-white border rounded shadow-lg z-20 max-h-40 overflow-auto">
               {focusSuggestions.map((s) => (
                 <li
                   key={s.place_id}
