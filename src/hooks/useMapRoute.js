@@ -14,6 +14,8 @@ export default function useMapRoute(
   profile = "foot-hiking"
 ) {
   const mapRef = useRef(null);
+  const routeLayersRef = useRef({});
+  const summariesRef = useRef({});
   const [error, setError] = useState(null);
   const [summary, setSummary] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,20 +57,63 @@ export default function useMapRoute(
   }, []);
 
   useEffect(() => {
-    if (!showTrace) return;
+    // Initialisation unique de la carte
+    const initMap = () => {
+      if (!mapRef.current) {
+        const center = [46.603354, 1.888334]; // Centre de la France
+        const map = initializeMap("map", center);
+        if (map) {
+          mapRef.current = map;
+        }
+      }
+    };
+
+    // S'assurer que le conteneur de la carte existe
+    const mapContainer = document.getElementById("map");
+    if (mapContainer) {
+      initMap();
+    } else {
+      // Si le conteneur n'existe pas encore, attendre qu'il soit créé
+      const observer = new MutationObserver((mutations, obs) => {
+        const container = document.getElementById("map");
+        if (container) {
+          initMap();
+          obs.disconnect();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      return () => observer.disconnect();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!showTrace || !traceStart?.[0] || !traceEnd?.[0] || !mapRef.current)
+      return;
+
+    // Vérifier si on a déjà calculé cet itinéraire pour ce profil
+    if (routeLayersRef.current[profile]) {
+      // Si l'itinéraire existe déjà, juste mettre à jour le résumé affiché
+      const existingSummary = summariesRef.current[profile];
+      if (existingSummary) {
+        setSummary(existingSummary);
+        setIsLoading(false);
+        return;
+      }
+    }
 
     const fetchAndDisplayRoute = async () => {
       setError(null);
-      setSummary(null);
       setIsLoading(true);
 
       try {
-        // Nettoyage de la carte existante
-        cleanupMap(mapRef.current, "map");
-
-        // Initialisation de la nouvelle carte
+        // Mise à jour du centre de la carte existante
         const center = calculateCenter(traceStart, traceEnd);
-        mapRef.current = initializeMap("map", center);
+        mapRef.current?.setView(center, 13);
 
         // Récupération de l'itinéraire
         const routeData = await fetchRoute(
@@ -85,8 +130,17 @@ export default function useMapRoute(
         // Traitement des données et affichage
         const feature = routeData.features[0];
         const summaryData = await processSummaryData(feature);
+
+        // Ajouter la nouvelle trace à la carte
+        routeLayersRef.current[profile] = addRouteToMap(
+          mapRef.current,
+          routeData,
+          profile
+        );
+
+        // Mettre à jour les résumés
+        summariesRef.current[profile] = summaryData;
         setSummary(summaryData);
-        addRouteToMap(mapRef.current, routeData);
       } catch (err) {
         setError(
           err.message || "Erreur lors de la récupération de l'itinéraire."
@@ -100,7 +154,7 @@ export default function useMapRoute(
     fetchAndDisplayRoute();
 
     return () => {
-      cleanupMap(mapRef.current, "map");
+      // Ne pas nettoyer la carte ici, on veut la garder
     };
   }, [
     traceStart,
@@ -111,5 +165,52 @@ export default function useMapRoute(
     processSummaryData,
   ]);
 
-  return { mapRef, error, summary, isLoading };
+  // Nettoyage des traces quand showTrace devient false
+  useEffect(() => {
+    if (!showTrace) {
+      // Nettoyer seulement les traces, pas la carte elle-même
+      Object.values(routeLayersRef.current).forEach((layer) => {
+        if (layer && layer.remove) {
+          layer.remove();
+        }
+      });
+      routeLayersRef.current = {};
+      summariesRef.current = {};
+      setSummary(null);
+    }
+  }, [showTrace]);
+
+  // Nettoyage de la carte uniquement lorsque le composant est démonté
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        cleanupMap(mapRef.current, "map");
+        mapRef.current = null;
+        routeLayersRef.current = {};
+      }
+    };
+  }, []);
+
+  const removeRoute = useCallback(
+    (profileToRemove) => {
+      const layer = routeLayersRef.current[profileToRemove];
+      if (layer && layer.remove) {
+        layer.remove();
+        delete routeLayersRef.current[profileToRemove];
+        delete summariesRef.current[profileToRemove];
+
+        // Si on supprime la trace du profil actuellement sélectionné, vider le résumé
+        if (profileToRemove === profile) {
+          setSummary(null);
+        }
+      }
+    },
+    [profile]
+  );
+
+  const getActiveRoutes = useCallback(() => {
+    return Object.keys(routeLayersRef.current);
+  }, []);
+
+  return { mapRef, error, summary, isLoading, removeRoute, getActiveRoutes };
 }

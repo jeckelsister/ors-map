@@ -1,6 +1,6 @@
 import "leaflet/dist/leaflet.css";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useAutocomplete from "../hooks/useAutocomplete";
 import useMapRoute from "../hooks/useMapRoute";
 import LocationForm from "./LocationForm";
@@ -15,12 +15,20 @@ const Map = () => {
   const [showTrace, setShowTrace] = useState(false);
 
   const autocompleteProps = useAutocomplete();
-  const { mapRef, error, summary, isLoading } = useMapRoute(
-    autocompleteProps.traceStart,
-    autocompleteProps.traceEnd,
-    showTrace,
-    profile
-  );
+  const { mapRef, error, summary, isLoading, removeRoute, getActiveRoutes } =
+    useMapRoute(
+      autocompleteProps.traceStart,
+      autocompleteProps.traceEnd,
+      showTrace,
+      profile
+    );
+
+  const [activeRoutes, setActiveRoutes] = useState([]);
+
+  // Mettre à jour les routes actives
+  useEffect(() => {
+    setActiveRoutes(getActiveRoutes());
+  }, [summary, getActiveRoutes]); // Se déclenche quand une nouvelle trace est ajoutée ou supprimée
 
   const handleFocusSearch = useCallback(async (query) => {
     if (query.length < 3) {
@@ -49,6 +57,24 @@ const Map = () => {
     [mapRef]
   );
 
+  const handleProfileChange = useCallback(
+    (clickedProfile) => {
+      const isCurrentlyActive = activeRoutes.includes(clickedProfile);
+
+      if (isCurrentlyActive) {
+        // Si la trace existe, la supprimer
+        removeRoute(clickedProfile);
+      } else {
+        // Si la trace n'existe pas, changer de profil pour la calculer
+        setProfile(clickedProfile);
+      }
+
+      // Mettre à jour immédiatement les routes actives
+      setTimeout(() => setActiveRoutes(getActiveRoutes()), 0);
+    },
+    [activeRoutes, removeRoute, getActiveRoutes]
+  );
+
   const handleCreateTrace = useCallback(() => {
     setShowTrace(false);
     setTimeout(() => setShowTrace(true), 0);
@@ -67,7 +93,8 @@ const Map = () => {
 
         <TransportModeSelector
           selectedProfile={profile}
-          onProfileChange={setProfile}
+          activeRoutes={activeRoutes}
+          onProfileChange={handleProfileChange}
         />
 
         <LocationForm

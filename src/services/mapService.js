@@ -1,5 +1,6 @@
 import axios from "axios";
 import L from "leaflet";
+import { TRANSPORT_MODES } from "../constants/transportModes";
 
 const MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ORS_API_URL = "https://api.openrouteservice.org/v2/directions";
@@ -15,12 +16,23 @@ export const initializeMap = (elementId, center, zoom = 13) => {
 };
 
 export const cleanupMap = (mapInstance, elementId) => {
+  // Si une instance de carte existe, on la supprime proprement
   if (mapInstance) {
     mapInstance.remove();
+    mapInstance = null;
   }
+
+  // Nettoyage complet du conteneur
   const mapContainer = document.getElementById(elementId);
-  if (mapContainer && mapContainer._leaflet_id) {
-    mapContainer._leaflet_id = null;
+  if (mapContainer) {
+    // Supprimer toutes les références Leaflet
+    mapContainer._leaflet_id = undefined;
+    mapContainer._leaflet = undefined;
+
+    // Vider le conteneur de tout contenu résiduel
+    while (mapContainer.firstChild) {
+      mapContainer.removeChild(mapContainer.firstChild);
+    }
   }
 };
 
@@ -83,8 +95,29 @@ export const calculateElevation = async (coordinates) => {
   };
 };
 
-export const addRouteToMap = (map, geojson) => {
-  return L.geoJSON(geojson, {
-    style: { color: "blue", weight: 4 },
-  }).addTo(map);
+export const addRouteToMap = (map, geojson, profile) => {
+  if (!map || !map.addLayer) {
+    console.error("La carte n'est pas correctement initialisée");
+    return null;
+  }
+
+  // Trouver la couleur correspondant au profil
+  const transportMode = TRANSPORT_MODES.find((mode) => mode.id === profile);
+  const color = transportMode?.color || "#2563eb"; // Bleu par défaut si profil non trouvé
+
+  try {
+    const layer = L.geoJSON(geojson, {
+      style: {
+        color: color,
+        weight: 4,
+        opacity: 0.8,
+        lineCap: "round",
+        lineJoin: "round",
+      },
+    });
+    return layer.addTo(map);
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la trace à la carte:", error);
+    return null;
+  }
 };

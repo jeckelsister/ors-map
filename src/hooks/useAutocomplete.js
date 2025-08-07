@@ -15,8 +15,8 @@ export default function useAutocomplete() {
   const [endQuery, setEndQuery] = useState("");
   const [startSuggestions, setStartSuggestions] = useState([]);
   const [endSuggestions, setEndSuggestions] = useState([]);
-  const [traceStart, setTraceStart] = useState([45.9237, 6.8694]);
-  const [traceEnd, setTraceEnd] = useState([45.90558, 6.88272]);
+  const [traceStart, setTraceStart] = useState(null);
+  const [traceEnd, setTraceEnd] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
