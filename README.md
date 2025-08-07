@@ -58,7 +58,8 @@ tests/
 ├── hooks/              # Tests des hooks personnalisés
 ├── services/           # Tests des services/API
 ├── ui/                 # Tests des composants UI
-└── setup/              # Configuration des tests
+├── setup.js            # Configuration globale des tests
+└── README.md           # Documentation des tests
 ```
 
 Les tests suivent la même structure que le code source dans `src/`.
