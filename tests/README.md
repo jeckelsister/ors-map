@@ -37,9 +37,8 @@ tests/
 │   └── mapService.test.js
 ├── ui/
 │   └── Button.test.jsx
-└── setup/
-    ├── setup.js
-    └── README.md
+├── setup.js                           # Configuration globale des tests
+└── README.md                          # Documentation des tests
 
 src/
 ├── components/
@@ -56,7 +55,7 @@ Les tests suivent la même structure que le code source dans `src/`, mais sont o
 
 ## Mocks disponibles
 
-### Global Setup (tests/setup/setup.js)
+### Global Setup (tests/setup.js)
 
 - **Leaflet** : Mock complet de la bibliothèque de cartes
 - **Navigator.geolocation** : Mock de l'API de géolocalisation
