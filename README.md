@@ -1,4 +1,4 @@
-# ORS Map - Application de cartographie et itinéraires
+# Waymaker - Application de cartographie et itinéraires
 
 Application React utilisant l'API OpenRouteService pour calculer et afficher des itinéraires sur une carte interactive.
 
