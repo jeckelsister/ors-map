@@ -16,7 +16,7 @@ export default function Navigation(): React.JSX.Element {
             to="/"
             className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
           >
-            ORS Map
+            TrailMaster
           </Link>
           <div className="flex space-x-4">
             <Link
