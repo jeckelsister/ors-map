@@ -1,5 +1,21 @@
+import React from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import type { LocationSuggestion } from "@/types/profile";
+
+interface AutocompleteInputProps {
+  label: string;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  suggestions: LocationSuggestion[];
+  onSuggestionClick: (suggestion: LocationSuggestion) => void;
+  setSuggestions?: (suggestions: LocationSuggestion[]) => void;
+  placeholder?: string;
+}
+
+interface LocationSuggestionWithKey extends LocationSuggestion {
+  _uniqueKey: string;
+}
 
 const AutocompleteInput = ({
   label,
@@ -8,20 +24,26 @@ const AutocompleteInput = ({
   suggestions,
   onSuggestionClick,
   placeholder = "Nom du lieu",
-}) => (
-  <Autocomplete
+}: AutocompleteInputProps): React.JSX.Element => (
+  <Autocomplete<LocationSuggestionWithKey, false, false, true>
     freeSolo
     options={suggestions.map((s, i) => ({
       ...s,
       _uniqueKey: `${s.place_id || s.display_name}-${i}`,
     }))}
-    getOptionLabel={(option) => option.display_name || ""}
+    getOptionLabel={(option) =>
+      typeof option === "string" ? option : option.display_name || ""
+    }
     inputValue={value}
     onInputChange={(_, newInputValue) =>
-      onChange({ target: { value: newInputValue } })
+      onChange({
+        target: { value: newInputValue } as HTMLInputElement,
+      } as React.ChangeEvent<HTMLInputElement>)
     }
     onChange={(_, newValue) => {
-      if (newValue) onSuggestionClick(newValue);
+      if (newValue && typeof newValue !== "string") {
+        onSuggestionClick(newValue);
+      }
     }}
     renderOption={(props, option) => (
       <li {...props} key={option._uniqueKey}>

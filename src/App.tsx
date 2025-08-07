@@ -1,13 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 
 // Import pages
-import Home from './pages/Home';
-import MapPage from './pages/MapPage';
-import About from './pages/About';
-import NotFound from './pages/NotFound';
+import About from "./pages/About";
+import Home from "./pages/Home";
+import MapPage from "./pages/MapPage";
+import NotFound from "./pages/NotFound";
 
-export default function App() {
+export default function App(): React.JSX.Element {
   return (
     <Router>
       <Routes>

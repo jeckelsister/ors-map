@@ -1,66 +1,85 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type {
+  Location,
+  RouteSummaryData,
+  UseMapRouteReturn,
+} from "@/types/profile";
 import {
   addRouteToMap,
   calculateElevation,
   cleanupMap,
   fetchRoute,
   initializeMap,
-} from "../services/mapService";
+} from "@/services/mapService";
+import type { Map as LeafletMap, GeoJSON } from "leaflet";
 
-export default function useMapRoute(
+interface UseMapRouteProps {
+  traceStart: Location | null;
+  traceEnd: Location | null;
+  showTrace: boolean;
+  profile?: string;
+}
+
+export default function useMapRoute({
   traceStart,
   traceEnd,
   showTrace,
-  profile = "foot-hiking"
-) {
-  const mapRef = useRef(null);
-  const routeLayersRef = useRef({});
-  const summariesRef = useRef({});
-  const [error, setError] = useState(null);
-  const [summary, setSummary] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  profile = "foot-hiking",
+}: UseMapRouteProps): UseMapRouteReturn {
+  const mapRef = useRef<LeafletMap | null>(null);
+  const routeLayersRef = useRef<Record<string, GeoJSON>>({});
+  const summariesRef = useRef<Record<string, RouteSummaryData>>({});
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<RouteSummaryData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const calculateCenter = useCallback((start, end) => {
-    return [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-  }, []);
+  const calculateCenter = useCallback(
+    (start: Location, end: Location): [number, number] => {
+      return [(start.lat + end.lat) / 2, (start.lng + end.lng) / 2];
+    },
+    []
+  );
 
-  const processSummaryData = useCallback(async (feature) => {
-    const { summary: routeSummary, ascent, descent } = feature.properties;
+  const processSummaryData = useCallback(
+    async (feature: any): Promise<RouteSummaryData> => {
+      const { summary: routeSummary, ascent, descent } = feature.properties;
 
-    if (typeof ascent === "number" && typeof descent === "number") {
-      return {
-        duration: routeSummary.duration,
-        distance: routeSummary.distance,
-        ascent,
-        descent,
-      };
-    }
+      if (typeof ascent === "number" && typeof descent === "number") {
+        return {
+          duration: routeSummary.duration,
+          distance: routeSummary.distance,
+          ascent,
+          descent,
+        };
+      }
 
-    try {
-      const elevationData = await calculateElevation(
-        feature.geometry.coordinates
-      );
-      return {
-        duration: routeSummary.duration,
-        distance: routeSummary.distance,
-        ...elevationData,
-      };
-    } catch (error) {
-      console.warn("Erreur lors du calcul de l'élévation :", error);
-      return {
-        duration: routeSummary.duration,
-        distance: routeSummary.distance,
-        ascent: null,
-        descent: null,
-      };
-    }
-  }, []);
+      try {
+        const elevationData = await calculateElevation(
+          feature.geometry.coordinates
+        );
+        return {
+          duration: routeSummary.duration,
+          distance: routeSummary.distance,
+          ...elevationData,
+        };
+      } catch (error) {
+        console.warn("Erreur lors du calcul de l'élévation :", error);
+        return {
+          duration: routeSummary.duration,
+          distance: routeSummary.distance,
+          ascent: null,
+          descent: null,
+        };
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     // Initialize map only once
     const initMap = () => {
       if (!mapRef.current) {
-        const center = [46.603354, 1.888334]; // Center of France
+        const center: [number, number] = [46.603354, 1.888334]; // Center of France
         const map = initializeMap("map", center);
         if (map) {
           mapRef.current = map;
@@ -74,7 +93,7 @@ export default function useMapRoute(
       initMap();
     } else {
       // If container doesn't exist yet, wait for it to be created
-      const observer = new MutationObserver((mutations, obs) => {
+      const observer = new MutationObserver((_, obs) => {
         const container = document.getElementById("map");
         if (container) {
           initMap();
@@ -92,7 +111,7 @@ export default function useMapRoute(
   }, []);
 
   useEffect(() => {
-    if (!showTrace || !traceStart?.[0] || !traceEnd?.[0] || !mapRef.current)
+    if (!showTrace || !traceStart?.lat || !traceEnd?.lat || !mapRef.current)
       return;
 
     // Check if we already calculated this route for this profile
@@ -117,8 +136,8 @@ export default function useMapRoute(
 
         // Route retrieval
         const routeData = await fetchRoute(
-          traceStart,
-          traceEnd,
+          [traceStart.lat, traceStart.lng],
+          [traceEnd.lat, traceEnd.lng],
           profile,
           import.meta.env.VITE_ORS_API_KEY
         );
@@ -132,17 +151,22 @@ export default function useMapRoute(
         const summaryData = await processSummaryData(feature);
 
         // Add the new trace to the map
-        routeLayersRef.current[profile] = addRouteToMap(
-          mapRef.current,
-          routeData,
-          profile
-        );
+        if (mapRef.current) {
+          const routeLayer = addRouteToMap(mapRef.current, routeData, profile);
+          if (routeLayer) {
+            routeLayersRef.current[profile] = routeLayer;
+          }
+        }
 
         // Update summaries
         summariesRef.current[profile] = summaryData;
         setSummary(summaryData);
       } catch (err) {
-        setError(err.message || "Error while retrieving the route.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Error while retrieving the route."
+        );
         console.error("Route processing error:", err);
       } finally {
         setIsLoading(false);
@@ -190,7 +214,7 @@ export default function useMapRoute(
   }, []);
 
   const removeRoute = useCallback(
-    (profileToRemove) => {
+    (profileToRemove: string) => {
       const layer = routeLayersRef.current[profileToRemove];
       if (layer && layer.remove) {
         layer.remove();

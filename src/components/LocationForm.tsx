@@ -1,6 +1,22 @@
-import { useCallback } from "react";
-import Button from "../ui/Button";
+import React, { useCallback } from "react";
+import Button from "@/ui/Button";
 import AutocompleteInput from "./AutocompleteInput";
+import type { LocationSuggestion, Location } from "@/types/profile";
+
+interface LocationFormProps {
+  startQuery: string;
+  setStartQuery: (query: string) => void;
+  startSuggestions: LocationSuggestion[];
+  setStartSuggestions: (suggestions: LocationSuggestion[]) => void;
+  handleStartSuggestion: (suggestion: LocationSuggestion) => void;
+  endQuery: string;
+  setEndQuery: (query: string) => void;
+  endSuggestions: LocationSuggestion[];
+  setEndSuggestions: (suggestions: LocationSuggestion[]) => void;
+  handleEndSuggestion: (suggestion: LocationSuggestion) => void;
+  setTraceStart: (location: Location | null) => void;
+  onCreateTrace: () => void;
+}
 
 const LocationForm = ({
   startQuery,
@@ -15,7 +31,7 @@ const LocationForm = ({
   handleEndSuggestion,
   setTraceStart,
   onCreateTrace,
-}) => {
+}: LocationFormProps): React.JSX.Element => {
   const handleGeolocation = useCallback(() => {
     if (!navigator.geolocation) {
       alert("La géolocalisation n'est pas supportée par ce navigateur.");
@@ -26,7 +42,11 @@ const LocationForm = ({
       (pos) => {
         const { latitude, longitude } = pos.coords;
         setStartQuery(`${latitude}, ${longitude}`);
-        setTraceStart([latitude, longitude]);
+        setTraceStart({
+          lat: latitude,
+          lng: longitude,
+          name: "Ma position"
+        });
       },
       (err) => {
         alert("Impossible d'obtenir la position : " + err.message);
@@ -40,7 +60,7 @@ const LocationForm = ({
         <AutocompleteInput
           label="Départ :"
           value={startQuery}
-          onChange={(e) => setStartQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartQuery(e.target.value)}
           suggestions={startSuggestions}
           onSuggestionClick={handleStartSuggestion}
           setSuggestions={setStartSuggestions}
@@ -75,7 +95,7 @@ const LocationForm = ({
       <AutocompleteInput
         label="Arrivée :"
         value={endQuery}
-        onChange={(e) => setEndQuery(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndQuery(e.target.value)}
         suggestions={endSuggestions}
         onSuggestionClick={handleEndSuggestion}
         setSuggestions={setEndSuggestions}

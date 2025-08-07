@@ -1,12 +1,17 @@
 import axios from "axios";
 import L from "leaflet";
-import { TRANSPORT_MODES } from "../constants/transportModes";
+import type { RouteResponse } from "@/types/profile";
+import { TRANSPORT_MODES } from "@/constants/transportModes";
 
 const MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ORS_API_URL = "https://api.openrouteservice.org/v2/directions";
 const ELEVATION_API_URL = "https://api.open-elevation.com/api/v1/lookup";
 
-export const initializeMap = (elementId, center, zoom = 13) => {
+export const initializeMap = (
+  elementId: string,
+  center: [number, number],
+  zoom: number = 13
+): L.Map => {
   const map = L.map(elementId, { zoomControl: false }).setView(center, zoom);
   L.tileLayer(MAP_TILE_URL, {
     attribution: "&copy; OpenStreetMap contributors",
@@ -15,19 +20,22 @@ export const initializeMap = (elementId, center, zoom = 13) => {
   return map;
 };
 
-export const cleanupMap = (mapInstance, elementId) => {
-  // Si une instance de carte existe, on la supprime proprement
+export const cleanupMap = (
+  mapInstance: L.Map | null,
+  elementId: string
+): void => {
+  // If a map instance exists, remove it properly
   if (mapInstance) {
     mapInstance.remove();
     mapInstance = null;
   }
 
-  // Nettoyage complet du conteneur
+  // Complete container cleanup
   const mapContainer = document.getElementById(elementId);
   if (mapContainer) {
     // Remove all Leaflet references
-    mapContainer._leaflet_id = undefined;
-    mapContainer._leaflet = undefined;
+    (mapContainer as any)._leaflet_id = undefined;
+    (mapContainer as any)._leaflet = undefined;
 
     // Clear the container of any residual content
     while (mapContainer.firstChild) {
@@ -36,7 +44,12 @@ export const cleanupMap = (mapInstance, elementId) => {
   }
 };
 
-export const fetchRoute = async (start, end, profile, apiKey) => {
+export const fetchRoute = async (
+  start: [number, number],
+  end: [number, number],
+  profile: string,
+  apiKey: string
+): Promise<RouteResponse> => {
   const response = await axios.post(
     `${ORS_API_URL}/${profile}/geojson`,
     {
@@ -56,12 +69,14 @@ export const fetchRoute = async (start, end, profile, apiKey) => {
   return response.data;
 };
 
-export const calculateElevation = async (coordinates) => {
+export const calculateElevation = async (
+  coordinates: [number, number][]
+): Promise<{ ascent: number; descent: number }> => {
   // Limit to 100 points for the API
   let coords = coordinates;
   if (coords.length > 100) {
     const step = Math.ceil(coords.length / 100);
-    coords = coords.filter((_, i) => i % step === 0);
+    coords = coords.filter((_, i: number) => i % step === 0);
     if (coords[coords.length - 1] !== coordinates[coordinates.length - 1]) {
       coords.push(coordinates[coordinates.length - 1]);
     }
@@ -71,7 +86,7 @@ export const calculateElevation = async (coordinates) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      locations: coords.map(([lng, lat]) => ({
+      locations: coords.map(([lng, lat]: [number, number]) => ({
         latitude: lat,
         longitude: lng,
       })),
@@ -79,7 +94,7 @@ export const calculateElevation = async (coordinates) => {
   });
 
   const data = await response.json();
-  const elevations = data.results.map((pt) => pt.elevation);
+  const elevations = data.results.map((pt: any) => pt.elevation);
 
   let ascent = 0,
     descent = 0;
@@ -95,7 +110,11 @@ export const calculateElevation = async (coordinates) => {
   };
 };
 
-export const addRouteToMap = (map, geojson, profile) => {
+export const addRouteToMap = (
+  map: L.Map,
+  geojson: any,
+  profile: string
+): L.GeoJSON | null => {
   if (!map || !map.addLayer) {
     console.error("La carte n'est pas correctement initialisée");
     return null;

@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-export default function Home() {
+export default function Home(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
       <div className="max-w-4xl mx-auto text-center">
@@ -24,7 +25,7 @@ export default function Home() {
             Learn More
           </Link>
         </div>
-        
+
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-blue-600 text-4xl mb-4">🗺️</div>
@@ -33,7 +34,7 @@ export default function Home() {
               Navigate through detailed maps with multiple transport modes
             </p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-green-600 text-4xl mb-4">🚀</div>
             <h3 className="text-lg font-semibold mb-2">Fast Routing</h3>
@@ -41,7 +42,7 @@ export default function Home() {
               Get optimal routes for walking, cycling, and driving
             </p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-purple-600 text-4xl mb-4">📊</div>
             <h3 className="text-lg font-semibold mb-2">Detailed Analytics</h3>

@@ -1,9 +1,14 @@
 import { memo } from "react";
-import { TRANSPORT_MODES } from "../constants/transportModes";
-import Button from "../ui/Button";
+import { TRANSPORT_MODES } from "@/constants/transportModes";
+import Button from "@/ui/Button";
 
-const TransportModeSelector = memo(
-  ({ selectedProfile, activeRoutes = [], onProfileChange }) => (
+interface TransportModeSelectorProps {
+  activeRoutes?: string[];
+  onProfileChange: (profileId: string) => void;
+}
+
+const TransportModeSelector = memo<TransportModeSelectorProps>(
+  ({ activeRoutes = [], onProfileChange }) => (
     <div className="grid grid-cols-2 gap-2 mb-2">
       {TRANSPORT_MODES.map(({ id, icon: Icon, label, color }) => {
         const isActive = activeRoutes.includes(id);

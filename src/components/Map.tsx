@@ -1,36 +1,37 @@
 import "leaflet/dist/leaflet.css";
-
+import React from "react";
 import { useCallback, useEffect, useState } from "react";
-import useAutocomplete from "../hooks/useAutocomplete";
-import useMapRoute from "../hooks/useMapRoute";
+import useAutocomplete from "@/hooks/useAutocomplete";
+import useMapRoute from "@/hooks/useMapRoute";
 import LocationForm from "./LocationForm";
 import LocationSearchBox from "./LocationSearchBox";
 import SummaryDisplay from "./SummaryDisplay";
 import TransportModeSelector from "./TransportModeSelector";
+import type { LocationSuggestion } from "@/types/profile";
 
-const Map = () => {
-  const [profile, setProfile] = useState("foot-hiking");
-  const [focusQuery, setFocusQuery] = useState("");
-  const [focusSuggestions, setFocusSuggestions] = useState([]);
-  const [showTrace, setShowTrace] = useState(false);
+const Map = (): React.JSX.Element => {
+  const [profile, setProfile] = useState<string>("foot-hiking");
+  const [focusQuery, setFocusQuery] = useState<string>("");
+  const [focusSuggestions, setFocusSuggestions] = useState<any[]>([]);
+  const [showTrace, setShowTrace] = useState<boolean>(false);
 
   const autocompleteProps = useAutocomplete();
   const { mapRef, error, summary, isLoading, removeRoute, getActiveRoutes } =
-    useMapRoute(
-      autocompleteProps.traceStart,
-      autocompleteProps.traceEnd,
+    useMapRoute({
+      traceStart: autocompleteProps.traceStart,
+      traceEnd: autocompleteProps.traceEnd,
       showTrace,
       profile
-    );
+    });
 
-  const [activeRoutes, setActiveRoutes] = useState([]);
+  const [activeRoutes, setActiveRoutes] = useState<string[]>([]);
 
   // Update active routes
   useEffect(() => {
     setActiveRoutes(getActiveRoutes());
   }, [summary, getActiveRoutes]); // Triggers when a new trace is added or removed
 
-  const handleFocusSearch = useCallback(async (query) => {
+  const handleFocusSearch = useCallback(async (query: string) => {
     if (query.length < 3) {
       setFocusSuggestions([]);
       return;
@@ -45,7 +46,7 @@ const Map = () => {
   }, []);
 
   const handleFocusSelect = useCallback(
-    (suggestion) => {
+    (suggestion: LocationSuggestion) => {
       setFocusQuery(suggestion.display_name);
       setFocusSuggestions([]);
       const lat = parseFloat(suggestion.lat);
@@ -58,7 +59,7 @@ const Map = () => {
   );
 
   const handleProfileChange = useCallback(
-    (clickedProfile) => {
+    (clickedProfile: string) => {
       const isCurrentlyActive = activeRoutes.includes(clickedProfile);
 
       if (isCurrentlyActive) {
@@ -92,7 +93,6 @@ const Map = () => {
         />
 
         <TransportModeSelector
-          selectedProfile={profile}
           activeRoutes={activeRoutes}
           onProfileChange={handleProfileChange}
         />

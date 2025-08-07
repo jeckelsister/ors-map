@@ -1,8 +1,18 @@
 import { memo, useCallback } from "react";
 import { FaSearchLocation } from "react-icons/fa";
 import Button from "../ui/Button";
+import type { LocationSuggestion } from "@/types/profile";
 
-const LocationSearchBox = memo(
+interface LocationSearchBoxProps {
+  query: string;
+  onQueryChange: (query: string) => void;
+  suggestions: LocationSuggestion[];
+  onSuggestionSelect: (suggestion: LocationSuggestion) => void;
+  onSearchClick: () => Promise<void>;
+  placeholder?: string;
+}
+
+const LocationSearchBox = memo<LocationSearchBoxProps>(
   ({
     query,
     onQueryChange,
