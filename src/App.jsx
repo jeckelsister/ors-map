@@ -1,4 +1,5 @@
-import Map from "./Map";
+import "./App.css";
+import Map from "./components/Map";
 
 export default function App() {
   return <Map />;
