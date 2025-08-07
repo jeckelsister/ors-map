@@ -30,9 +30,9 @@ export default function LocationSearch({
       </div>
       {Array.isArray(suggestions) && suggestions.length > 0 && (
         <ul className="bg-white border rounded shadow mt-1 max-h-40 overflow-auto">
-          {suggestions.map((s) => (
+          {suggestions.map((s, i) => (
             <li
-              key={s.place_id}
+              key={s.place_id ? `${s.place_id}-${i}` : `${s.display_name}-${i}`}
               className="px-3 py-2 cursor-pointer hover:bg-blue-100"
               onClick={() => onSuggestionClick(s)}
             >

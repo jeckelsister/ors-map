@@ -16,9 +16,15 @@ export default function useMapRoute(
     if (!showTrace) return;
     setError(null);
     setSummary(null);
+    // Supprime l'instance Leaflet existante si présente
     if (mapRef.current) {
       mapRef.current.remove();
       mapRef.current = null;
+    }
+    const mapContainer = document.getElementById("map");
+    if (mapContainer && mapContainer._leaflet_id) {
+      // Leaflet attache _leaflet_id au DOM, il faut le supprimer
+      mapContainer._leaflet_id = null;
     }
     const startLatLng = traceStart;
     const endLatLng = traceEnd;

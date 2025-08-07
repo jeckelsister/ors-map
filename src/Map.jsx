@@ -13,6 +13,24 @@ import useMapRoute from "./hooks/useMapRoute";
 import Button from "./ui/Button";
 
 const Map = () => {
+  const [profile, setProfile] = useState("foot-hiking");
+  const [focusQuery, setFocusQuery] = useState("");
+  const [focusSuggestions, setFocusSuggestions] = useState([]);
+  const handleFocusChange = async (e) => {
+    const value = e.target.value;
+    setFocusQuery(value);
+    if (value.length < 3) {
+      setFocusSuggestions([]);
+      return;
+    }
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        value
+      )}`
+    );
+    const data = await res.json();
+    setFocusSuggestions(data);
+  };
   const {
     startQuery,
     setStartQuery,
@@ -29,52 +47,21 @@ const Map = () => {
     setTraceStart,
   } = useAutocomplete();
   const [showTrace, setShowTrace] = useState(false);
-  const [profile, setProfile] = useState("foot-hiking");
-  const [focusQuery, setFocusQuery] = useState("");
-  const [focusSuggestions, setFocusSuggestions] = useState([]);
-  // Recherche Nominatim pour suggestions de focus
-  const handleFocusChange = async (e) => {
-    const value = e.target.value;
-    setFocusQuery(value);
-    if (value.length < 3) {
-      setFocusSuggestions([]);
-      return;
-    }
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        value
-      )}`
-    );
-    const data = await res.json();
-    setFocusSuggestions(data);
-  };
-
-  const handleFocusSuggestion = (suggestion) => {
-    setFocusQuery(suggestion.display_name);
-    setFocusSuggestions([]);
-    if (window && window.L && window.L.map) {
-      // Si Leaflet map existe, recentre
-      const lat = parseFloat(suggestion.lat);
-      const lon = parseFloat(suggestion.lon);
-      const mapEl = window.L.map("map");
-      mapEl.setView([lat, lon], 13);
-    } else {
-      // Fallback: recentre via DOM
-      const mapEl = document.getElementById("map");
-      if (mapEl && mapEl._leaflet_map) {
-        mapEl._leaflet_map.setView(
-          [parseFloat(suggestion.lat), parseFloat(suggestion.lon)],
-          13
-        );
-      }
-    }
-  };
-  const { error, summary } = useMapRoute(
+  const { mapRef, error, summary } = useMapRoute(
     traceStart,
     traceEnd,
     showTrace,
     profile
   );
+  const handleFocusSuggestion = (suggestion) => {
+    setFocusQuery(suggestion.display_name);
+    setFocusSuggestions([]);
+    const lat = parseFloat(suggestion.lat);
+    const lon = parseFloat(suggestion.lon);
+    if (mapRef && mapRef.current) {
+      mapRef.current.setView([lat, lon], 13);
+    }
+  };
 
   const handleCreateTrace = () => {
     setShowTrace(false);
