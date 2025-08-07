@@ -6,7 +6,7 @@ import { calculateElevation, fetchRoute } from "../../src/services/mapService";
 vi.mock("axios");
 const mockedAxios = vi.mocked(axios);
 
-// Mock de fetch pour l'API d'élévation
+// Mock for the elevation API fetch
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 
@@ -124,7 +124,7 @@ describe("mapService", () => {
     });
 
     it("should limit coordinates to 100 points", async () => {
-      // Créer plus de 100 coordonnées
+      // Create more than 100 coordinates
       const coordinates = Array.from({ length: 150 }, (_, i) => [
         2.3522 + i * 0.001,
         48.8566 + i * 0.001,
@@ -142,7 +142,7 @@ describe("mapService", () => {
       const lastCall = mockFetch.mock.calls[mockFetch.mock.calls.length - 1];
       const body = JSON.parse(lastCall[1].body);
 
-      // Doit être limité à 100 points maximum
+      // Should be limited to a maximum of 100 points
       expect(body.locations.length).toBeLessThanOrEqual(100);
     });
   });

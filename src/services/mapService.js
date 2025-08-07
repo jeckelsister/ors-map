@@ -25,11 +25,11 @@ export const cleanupMap = (mapInstance, elementId) => {
   // Nettoyage complet du conteneur
   const mapContainer = document.getElementById(elementId);
   if (mapContainer) {
-    // Supprimer toutes les références Leaflet
+    // Remove all Leaflet references
     mapContainer._leaflet_id = undefined;
     mapContainer._leaflet = undefined;
 
-    // Vider le conteneur de tout contenu résiduel
+    // Clear the container of any residual content
     while (mapContainer.firstChild) {
       mapContainer.removeChild(mapContainer.firstChild);
     }
@@ -57,7 +57,7 @@ export const fetchRoute = async (start, end, profile, apiKey) => {
 };
 
 export const calculateElevation = async (coordinates) => {
-  // Limite à 100 points pour l'API
+  // Limit to 100 points for the API
   let coords = coordinates;
   if (coords.length > 100) {
     const step = Math.ceil(coords.length / 100);
@@ -103,7 +103,7 @@ export const addRouteToMap = (map, geojson, profile) => {
 
   // Trouver la couleur correspondant au profil
   const transportMode = TRANSPORT_MODES.find((mode) => mode.id === profile);
-  const color = transportMode?.color || "#2563eb"; // Bleu par défaut si profil non trouvé
+  const color = transportMode?.color || "#2563eb"; // Default blue if profile not found
 
   try {
     const layer = L.geoJSON(geojson, {

@@ -34,7 +34,7 @@ describe("TransportModeSelector", () => {
     const hikingButton = screen.getByTitle("Randonnée");
     const cyclingButton = screen.getByTitle("Vélo classique");
 
-    // Les boutons actifs ont un style différent (RGB au lieu de white)
+    // Active buttons have a different style (RGB instead of white)
     expect(hikingButton).toHaveStyle({ color: "rgb(255, 255, 255)" });
     expect(cyclingButton).toHaveStyle({ color: "rgb(255, 255, 255)" });
   });
@@ -58,7 +58,7 @@ describe("TransportModeSelector", () => {
     render(<TransportModeSelector {...defaultProps} activeRoutes={[]} />);
 
     const hikingButton = screen.getByTitle("Randonnée");
-    // Vérifier que le bouton a bien le style CSS appliqué
+    // Verify that the button has the CSS style applied
     expect(hikingButton).toHaveClass("bg-white");
   });
 });

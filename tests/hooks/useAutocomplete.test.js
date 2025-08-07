@@ -52,7 +52,7 @@ describe("useAutocomplete", () => {
       result.current.setStartQuery("Paris");
     });
 
-    // Avancer les timers pour déclencher le debounce
+    // Advance timers to trigger debounce
     act(() => {
       vi.advanceTimersByTime(300);
     });

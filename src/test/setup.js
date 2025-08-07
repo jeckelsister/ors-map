@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 
-// Mock de l'API de géolocalisation
+// Mock for the geolocation API
 Object.defineProperty(globalThis.navigator, "geolocation", {
   value: {
     getCurrentPosition: vi.fn(),
@@ -12,7 +12,7 @@ Object.defineProperty(globalThis.navigator, "geolocation", {
 // Mock de fetch pour les tests
 globalThis.fetch = vi.fn();
 
-// Mock de Leaflet pour éviter les erreurs dans les tests
+// Mock for Leaflet to avoid errors in tests
 vi.mock("leaflet", () => ({
   map: vi.fn(() => ({
     setView: vi.fn(),
@@ -33,7 +33,7 @@ vi.mock("leaflet", () => ({
   })),
 }));
 
-// Nettoyage après chaque test
+// Cleanup after each test
 afterEach(() => {
   vi.clearAllMocks();
 });

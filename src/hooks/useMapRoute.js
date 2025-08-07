@@ -57,10 +57,10 @@ export default function useMapRoute(
   }, []);
 
   useEffect(() => {
-    // Initialisation unique de la carte
+    // Initialize map only once
     const initMap = () => {
       if (!mapRef.current) {
-        const center = [46.603354, 1.888334]; // Centre de la France
+        const center = [46.603354, 1.888334]; // Center of France
         const map = initializeMap("map", center);
         if (map) {
           mapRef.current = map;
@@ -68,12 +68,12 @@ export default function useMapRoute(
       }
     };
 
-    // S'assurer que le conteneur de la carte existe
+    // Ensure map container exists
     const mapContainer = document.getElementById("map");
     if (mapContainer) {
       initMap();
     } else {
-      // Si le conteneur n'existe pas encore, attendre qu'il soit créé
+      // If container doesn't exist yet, wait for it to be created
       const observer = new MutationObserver((mutations, obs) => {
         const container = document.getElementById("map");
         if (container) {
@@ -95,9 +95,9 @@ export default function useMapRoute(
     if (!showTrace || !traceStart?.[0] || !traceEnd?.[0] || !mapRef.current)
       return;
 
-    // Vérifier si on a déjà calculé cet itinéraire pour ce profil
+    // Check if we already calculated this route for this profile
     if (routeLayersRef.current[profile]) {
-      // Si l'itinéraire existe déjà, juste mettre à jour le résumé affiché
+      // If the route already exists, just update the displayed summary
       const existingSummary = summariesRef.current[profile];
       if (existingSummary) {
         setSummary(existingSummary);
@@ -111,11 +111,11 @@ export default function useMapRoute(
       setIsLoading(true);
 
       try {
-        // Mise à jour du centre de la carte existante
+        // Update the center of the existing map
         const center = calculateCenter(traceStart, traceEnd);
         mapRef.current?.setView(center, 13);
 
-        // Récupération de l'itinéraire
+        // Route retrieval
         const routeData = await fetchRoute(
           traceStart,
           traceEnd,
@@ -124,28 +124,26 @@ export default function useMapRoute(
         );
 
         if (!routeData?.features?.length) {
-          throw new Error("Aucun itinéraire trouvé entre ces deux points.");
+          throw new Error("No route found between these two points.");
         }
 
-        // Traitement des données et affichage
+        // Data processing and display
         const feature = routeData.features[0];
         const summaryData = await processSummaryData(feature);
 
-        // Ajouter la nouvelle trace à la carte
+        // Add the new trace to the map
         routeLayersRef.current[profile] = addRouteToMap(
           mapRef.current,
           routeData,
           profile
         );
 
-        // Mettre à jour les résumés
+        // Update summaries
         summariesRef.current[profile] = summaryData;
         setSummary(summaryData);
       } catch (err) {
-        setError(
-          err.message || "Erreur lors de la récupération de l'itinéraire."
-        );
-        console.error("Erreur de traitement de l'itinéraire :", err);
+        setError(err.message || "Error while retrieving the route.");
+        console.error("Route processing error:", err);
       } finally {
         setIsLoading(false);
       }
@@ -168,7 +166,7 @@ export default function useMapRoute(
   // Nettoyage des traces quand showTrace devient false
   useEffect(() => {
     if (!showTrace) {
-      // Nettoyer seulement les traces, pas la carte elle-même
+      // Clean only the traces, not the map itself
       Object.values(routeLayersRef.current).forEach((layer) => {
         if (layer && layer.remove) {
           layer.remove();
@@ -180,7 +178,7 @@ export default function useMapRoute(
     }
   }, [showTrace]);
 
-  // Nettoyage de la carte uniquement lorsque le composant est démonté
+  // Map cleanup only when the component is unmounted
   useEffect(() => {
     return () => {
       if (mapRef.current) {
@@ -199,7 +197,7 @@ export default function useMapRoute(
         delete routeLayersRef.current[profileToRemove];
         delete summariesRef.current[profileToRemove];
 
-        // Si on supprime la trace du profil actuellement sélectionné, vider le résumé
+        // If we remove the trace for the currently selected profile, clear the summary
         if (profileToRemove === profile) {
           setSummary(null);
         }

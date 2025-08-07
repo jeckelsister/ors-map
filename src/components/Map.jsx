@@ -25,10 +25,10 @@ const Map = () => {
 
   const [activeRoutes, setActiveRoutes] = useState([]);
 
-  // Mettre à jour les routes actives
+  // Update active routes
   useEffect(() => {
     setActiveRoutes(getActiveRoutes());
-  }, [summary, getActiveRoutes]); // Se déclenche quand une nouvelle trace est ajoutée ou supprimée
+  }, [summary, getActiveRoutes]); // Triggers when a new trace is added or removed
 
   const handleFocusSearch = useCallback(async (query) => {
     if (query.length < 3) {
@@ -69,7 +69,7 @@ const Map = () => {
         setProfile(clickedProfile);
       }
 
-      // Mettre à jour immédiatement les routes actives
+      // Update active routes immediately
       setTimeout(() => setActiveRoutes(getActiveRoutes()), 0);
     },
     [activeRoutes, removeRoute, getActiveRoutes]
