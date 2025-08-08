@@ -4,7 +4,7 @@ import { calculateElevation, fetchRoute } from '../../src/services/mapService';
 // Mock d'axios avec vi.hoisted
 const { mockPost, mockGet } = vi.hoisted(() => ({
   mockPost: vi.fn(),
-  mockGet: vi.fn()
+  mockGet: vi.fn(),
 }));
 
 vi.mock('axios', () => ({
@@ -14,14 +14,14 @@ vi.mock('axios', () => ({
       get: mockGet,
       interceptors: {
         response: {
-          use: vi.fn()
-        }
-      }
+          use: vi.fn(),
+        },
+      },
     })),
     post: mockPost,
     get: mockGet,
-    isAxiosError: vi.fn(() => true)
-  }
+    isAxiosError: vi.fn(() => true),
+  },
 }));
 
 // Mock for the elevation API fetch

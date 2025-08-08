@@ -455,7 +455,7 @@ export const addRouteToMap = (
     return null;
   }
 
-  // Trouver la couleur correspondant au profil
+  // Find the color corresponding to the profile
   const transportMode = TRANSPORT_MODES.find(mode => mode.id === profile);
   const color = transportMode?.color || '#2563eb'; // Default blue if profile not found
 
