@@ -27,6 +27,8 @@ interface LocationFormProps {
   ) => void;
   disableMapClickForEnd: () => void;
   clearEndMarker: () => void;
+  createStartMarkerFromLocation: (location: Location) => void;
+  createEndMarkerFromLocation: (location: Location) => void;
 }
 
 const LocationForm = ({
@@ -49,6 +51,8 @@ const LocationForm = ({
   enableMapClickForEnd,
   disableMapClickForEnd,
   clearEndMarker,
+  createStartMarkerFromLocation,
+  createEndMarkerFromLocation,
 }: LocationFormProps): React.JSX.Element => {
   const [isMapClickMode, setIsMapClickMode] = useState(false);
   const [isEndMapClickMode, setIsEndMapClickMode] = useState(false);
@@ -82,12 +86,14 @@ const LocationForm = ({
         const { latitude, longitude } = pos.coords;
         const coordString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         setStartQuery(coordString);
-        setTraceStart({
+        const location: Location = {
           lat: latitude,
           lng: longitude,
           name: "Ma position",
-        });
-        clearStartMarker();
+        };
+        setTraceStart(location);
+        // Create marker for geolocation
+        createStartMarkerFromLocation(location);
       },
       (err) => {
         console.error("Geolocation error:", err);
@@ -99,7 +105,7 @@ const LocationForm = ({
         maximumAge: 60000,
       }
     );
-  }, [setStartQuery, setTraceStart, clearStartMarker]);
+  }, [setStartQuery, setTraceStart, createStartMarkerFromLocation]);
 
   // Optimized map click mode handler with better state management
   const handleMapClickMode = useCallback(() => {
@@ -154,9 +160,15 @@ const LocationForm = ({
   const handleSuggestionClick = useCallback(
     (suggestion: LocationSuggestion) => {
       handleStartSuggestion(suggestion);
-      clearStartMarker();
+      // Create marker for the selected start location
+      const location: Location = {
+        lat: Number(suggestion.lat),
+        lng: Number(suggestion.lon),
+        name: suggestion.display_name
+      };
+      createStartMarkerFromLocation(location);
     },
-    [handleStartSuggestion, clearStartMarker]
+    [handleStartSuggestion, createStartMarkerFromLocation]
   );
 
   // Optimized map click mode handler for end point
@@ -212,9 +224,15 @@ const LocationForm = ({
   const handleEndSuggestionClick = useCallback(
     (suggestion: LocationSuggestion) => {
       handleEndSuggestion(suggestion);
-      clearEndMarker();
+      // Create marker for the selected end location
+      const location: Location = {
+        lat: Number(suggestion.lat),
+        lng: Number(suggestion.lon),
+        name: suggestion.display_name
+      };
+      createEndMarkerFromLocation(location);
     },
-    [handleEndSuggestion, clearEndMarker]
+    [handleEndSuggestion, createEndMarkerFromLocation]
   );
 
   // Optimized icons as constants to avoid re-creation

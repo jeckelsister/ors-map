@@ -2,12 +2,14 @@ import {
   addClickHandler,
   addClickHandlerForEnd,
   addRouteToMap,
+  addStartMarker,
+  addEndMarker,
   calculateElevation,
   cleanupMap,
   fetchRoute,
   initializeMap,
-  removeEndMarker,
   removeStartMarker,
+  removeEndMarker,
 } from "@/services/mapService";
 import type {
   Location,
@@ -357,6 +359,16 @@ export default function useMapRoute({
     removeEndMarker(mapRef.current);
   }, []);
 
+  const createStartMarkerFromLocation = useCallback((location: Location) => {
+    if (!mapRef.current) return;
+    addStartMarker(mapRef.current, location.lat, location.lng);
+  }, []);
+
+  const createEndMarkerFromLocation = useCallback((location: Location) => {
+    if (!mapRef.current) return;
+    addEndMarker(mapRef.current, location.lat, location.lng);
+  }, []);
+
   return {
     mapRef,
     error,
@@ -370,5 +382,7 @@ export default function useMapRoute({
     enableMapClickForEnd,
     disableMapClickForEnd,
     clearEndMarker,
+    createStartMarkerFromLocation,
+    createEndMarkerFromLocation,
   };
 }

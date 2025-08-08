@@ -117,6 +117,8 @@ export interface UseMapRouteReturn {
   ) => void;
   disableMapClickForEnd: () => void;
   clearEndMarker: () => void;
+  createStartMarkerFromLocation: (location: Location) => void;
+  createEndMarkerFromLocation: (location: Location) => void;
 }
 
 export interface UseAutocompleteReturn {

@@ -263,6 +263,23 @@ export const removeEndMarker = (map: L.Map): void => {
   }
 };
 
+// Helper functions to add markers directly when locations are selected
+export const addStartMarker = (
+  map: L.Map,
+  lat: number,
+  lng: number
+): L.Marker => {
+  return createStartMarker(map, lat, lng);
+};
+
+export const addEndMarker = (
+  map: L.Map,
+  lat: number,
+  lng: number
+): L.Marker => {
+  return createEndMarker(map, lat, lng);
+};
+
 // Optimized map cleanup with better error handling
 export const cleanupMap = (
   mapInstance: L.Map | null,
