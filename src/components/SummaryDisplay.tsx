@@ -1,5 +1,5 @@
-import { memo } from "react";
 import type { RouteSummaryData } from "@/types/profile";
+import { memo } from "react";
 
 interface SummaryDisplayProps {
   summary: RouteSummaryData | null;
