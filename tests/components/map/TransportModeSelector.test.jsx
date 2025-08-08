@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import TransportModeSelector from '../../src/components/map/TransportModeSelector';
+import TransportModeSelector from '../../../src/components/map/TransportModeSelector';
 
 describe('TransportModeSelector', () => {
   const defaultProps = {

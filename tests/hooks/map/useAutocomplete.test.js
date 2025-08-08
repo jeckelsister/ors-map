@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import useAutocomplete from '../../src/hooks/map/useAutocomplete';
+import useAutocomplete from '../../../src/hooks/map/useAutocomplete';
 
 // Mock de fetch
 const mockFetch = vi.fn();

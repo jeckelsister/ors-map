@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, test } from 'vitest';
-import Navigation from '../../src/components/shared/Navigation';
+import Navigation from '../../../src/components/shared/Navigation';
 
 // Helper function to render components with router
 const renderWithRouter = (component, initialEntries = ['/']) => {
