@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import OfflineIndicator from './components/shared/OfflineIndicator';
 import { ToastProvider } from './hooks/shared/useToast';
