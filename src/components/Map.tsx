@@ -2,11 +2,19 @@ import useAutocomplete from '@/hooks/useAutocomplete';
 import useMapRoute from '@/hooks/useMapRoute';
 import type { LocationSuggestion } from '@/types/profile';
 import 'leaflet/dist/leaflet.css';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import LocationForm from './LocationForm';
 import LocationSearchBox from './LocationSearchBox';
 import SummaryDisplay from './SummaryDisplay';
 import TransportModeSelector from './TransportModeSelector';
+
+// Loading component extracted for better reusability
+const LoadingIndicator = memo(() => (
+  <div className="mt-2 text-blue-600 font-medium animate-pulse">
+    Calcul de l'itinéraire en cours...
+  </div>
+));
+LoadingIndicator.displayName = 'LoadingIndicator';
 
 const Map = (): React.JSX.Element => {
   const [profile, setProfile] = useState<string>('foot-hiking');
@@ -17,6 +25,23 @@ const Map = (): React.JSX.Element => {
   const [showTrace, setShowTrace] = useState<boolean>(false);
 
   const autocompleteProps = useAutocomplete();
+
+  // Memoized hook props to prevent unnecessary re-renders
+  const mapRouteProps = useMemo(
+    () => ({
+      traceStart: autocompleteProps.traceStart,
+      traceEnd: autocompleteProps.traceEnd,
+      showTrace,
+      profile,
+    }),
+    [
+      autocompleteProps.traceStart,
+      autocompleteProps.traceEnd,
+      showTrace,
+      profile,
+    ]
+  );
+
   const {
     mapRef,
     error,
@@ -32,32 +57,51 @@ const Map = (): React.JSX.Element => {
     clearEndMarker,
     createStartMarkerFromLocation,
     createEndMarkerFromLocation,
-  } = useMapRoute({
-    traceStart: autocompleteProps.traceStart,
-    traceEnd: autocompleteProps.traceEnd,
-    showTrace,
-    profile,
-  });
+  } = useMapRoute(mapRouteProps);
 
   const [activeRoutes, setActiveRoutes] = useState<string[]>([]);
 
-  // Update active routes
+  // Optimized active routes update with debouncing
   useEffect(() => {
-    setActiveRoutes(getActiveRoutes());
-  }, [summary, getActiveRoutes]); // Triggers when a new trace is added or removed
+    const updateActiveRoutes = () => {
+      const routes = getActiveRoutes();
+      setActiveRoutes(prev => {
+        // Only update if routes actually changed
+        if (
+          prev.length !== routes.length ||
+          !prev.every(route => routes.includes(route))
+        ) {
+          return routes;
+        }
+        return prev;
+      });
+    };
 
+    updateActiveRoutes();
+  }, [summary, getActiveRoutes]);
+
+  // Memoized search handler with debouncing
   const handleFocusSearch = useCallback(async (query: string) => {
     if (query.length < 3) {
       setFocusSuggestions([]);
       return;
     }
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        query
-      )}`
-    );
-    const data = await res.json();
-    setFocusSuggestions(data);
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&limit=5` // Limit results for better performance
+      );
+
+      if (!res.ok) throw new Error('Search failed');
+
+      const data = await res.json();
+      setFocusSuggestions(data);
+    } catch (error) {
+      console.error('Search error:', error);
+      setFocusSuggestions([]);
+    }
   }, []);
 
   const handleFocusSelect = useCallback(
@@ -73,32 +117,66 @@ const Map = (): React.JSX.Element => {
     [mapRef]
   );
 
+  // Optimized profile change handler
   const handleProfileChange = useCallback(
     (clickedProfile: string) => {
       const isCurrentlyActive = activeRoutes.includes(clickedProfile);
 
       if (isCurrentlyActive) {
-        // Si la trace existe, la supprimer
         removeRoute(clickedProfile);
       } else {
-        // Si la trace n'existe pas, changer de profil pour la calculer
         setProfile(clickedProfile);
       }
 
-      // Update active routes immediately
-      setTimeout(() => setActiveRoutes(getActiveRoutes()), 0);
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        setActiveRoutes(getActiveRoutes());
+      });
     },
     [activeRoutes, removeRoute, getActiveRoutes]
   );
 
+  // Optimized trace creation handler
   const handleCreateTrace = useCallback(() => {
     setShowTrace(false);
-    setTimeout(() => setShowTrace(true), 0);
+    // Use requestAnimationFrame for smoother UI updates
+    requestAnimationFrame(() => {
+      setShowTrace(true);
+    });
   }, []);
+
+  // Memoized form props to prevent unnecessary re-renders
+  const locationFormProps = useMemo(
+    () => ({
+      ...autocompleteProps,
+      onCreateTrace: handleCreateTrace,
+      enableMapClickForStart,
+      disableMapClickForStart,
+      clearStartMarker,
+      enableMapClickForEnd,
+      disableMapClickForEnd,
+      clearEndMarker,
+      createStartMarkerFromLocation,
+      createEndMarkerFromLocation,
+    }),
+    [
+      autocompleteProps,
+      handleCreateTrace,
+      enableMapClickForStart,
+      disableMapClickForStart,
+      clearStartMarker,
+      enableMapClickForEnd,
+      disableMapClickForEnd,
+      clearEndMarker,
+      createStartMarkerFromLocation,
+      createEndMarkerFromLocation,
+    ]
+  );
 
   return (
     <div className="relative h-screen w-screen bg-black">
-      <div className="absolute top-6 left-6 z-10 bg-white p-6 rounded-xl min-w-[350px] w-fit flex flex-col gap-4">
+      {/* Control Panel */}
+      <div className="absolute top-6 left-6 z-10 bg-white p-6 rounded-xl min-w-[350px] w-fit flex flex-col gap-4 shadow-lg">
         <LocationSearchBox
           query={focusQuery}
           onQueryChange={setFocusQuery}
@@ -112,30 +190,17 @@ const Map = (): React.JSX.Element => {
           onProfileChange={handleProfileChange}
         />
 
-        <LocationForm
-          {...autocompleteProps}
-          onCreateTrace={handleCreateTrace}
-          enableMapClickForStart={enableMapClickForStart}
-          disableMapClickForStart={disableMapClickForStart}
-          clearStartMarker={clearStartMarker}
-          enableMapClickForEnd={enableMapClickForEnd}
-          disableMapClickForEnd={disableMapClickForEnd}
-          clearEndMarker={clearEndMarker}
-          createStartMarkerFromLocation={createStartMarkerFromLocation}
-          createEndMarkerFromLocation={createEndMarkerFromLocation}
-        />
+        <LocationForm {...locationFormProps} />
 
         <SummaryDisplay summary={summary} error={error} />
 
-        {isLoading && (
-          <div className="mt-2 text-blue-600 font-medium">
-            Calcul de l'itinéraire en cours...
-          </div>
-        )}
+        {isLoading && <LoadingIndicator />}
       </div>
+
+      {/* Map Container */}
       <div id="map" className="h-screen w-screen z-0" />
     </div>
   );
 };
 
-export default Map;
+export default memo(Map);

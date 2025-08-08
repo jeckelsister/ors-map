@@ -1,7 +1,12 @@
+import useGeolocation from '@/hooks/useGeolocation';
 import type { Location, LocationSuggestion } from '@/types/profile';
 import Button from '@/ui/Button';
+import { formatCoordinates } from '@/utils/routeUtils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import AutocompleteInput from './AutocompleteInput';
+import IconButton from './ui/IconButton';
+import { GeolocationIcon, MapPinIcon } from './ui/Icons';
+import StatusIndicator from './ui/StatusIndicator';
 
 interface LocationFormProps {
   startQuery: string;
@@ -57,6 +62,9 @@ const LocationForm = ({
   const [isMapClickMode, setIsMapClickMode] = useState(false);
   const [isEndMapClickMode, setIsEndMapClickMode] = useState(false);
 
+  // Use geolocation hook
+  const { getCurrentPosition } = useGeolocation();
+
   // Optimized cleanup on unmount with useEffect cleanup
   useEffect(() => {
     return () => {
@@ -74,38 +82,25 @@ const LocationForm = ({
     disableMapClickForEnd,
   ]);
 
-  // Memoized geolocation handler
+  // Simplified geolocation handler using the hook
   const handleGeolocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      alert("La géolocalisation n'est pas supportée par ce navigateur.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const { latitude, longitude } = pos.coords;
-        const coordString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+    getCurrentPosition(
+      location => {
+        const coordString = formatCoordinates(location.lat, location.lng);
         setStartQuery(coordString);
-        const location: Location = {
-          lat: latitude,
-          lng: longitude,
-          name: 'Ma position',
-        };
         setTraceStart(location);
-        // Create marker for geolocation
         createStartMarkerFromLocation(location);
       },
-      err => {
-        console.error('Geolocation error:', err);
-        alert("Impossible d'obtenir la position : " + err.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
+      error => {
+        alert(error);
       }
     );
-  }, [setStartQuery, setTraceStart, createStartMarkerFromLocation]);
+  }, [
+    getCurrentPosition,
+    setStartQuery,
+    setTraceStart,
+    createStartMarkerFromLocation,
+  ]);
 
   // Optimized map click mode handler with better state management
   const handleMapClickMode = useCallback(() => {
@@ -120,7 +115,7 @@ const LocationForm = ({
       }
 
       enableMapClickForStart((lat: number, lng: number) => {
-        const coordString = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        const coordString = formatCoordinates(lat, lng);
         setStartQuery(coordString);
         setTraceStart({
           lat,
@@ -184,7 +179,7 @@ const LocationForm = ({
       }
 
       enableMapClickForEnd((lat: number, lng: number) => {
-        const coordString = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        const coordString = formatCoordinates(lat, lng);
         setEndQuery(coordString);
         setTraceEnd({
           lat,
@@ -235,167 +230,145 @@ const LocationForm = ({
     [handleEndSuggestion, createEndMarkerFromLocation]
   );
 
-  // Optimized icons as constants to avoid re-creation
-  const GeolocationIcon = useMemo(
-    () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="none"
-        />
-        <circle cx="12" cy="12" r="4" fill="currentColor" />
-      </svg>
-    ),
-    []
-  );
-
-  const MapPinIcon = useMemo(
-    () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className={`h-5 w-5 transition-all duration-200 ${
-          isMapClickMode ? 'animate-pulse' : ''
-        }`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
+  // Memoized icons using centralized icon components
+  const startMapIcon = useMemo(
+    () => <MapPinIcon isAnimated={isMapClickMode} />,
     [isMapClickMode]
   );
 
-  const EndMapPinIcon = useMemo(
-    () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className={`h-5 w-5 transition-all duration-200 ${
-          isEndMapClickMode ? 'animate-pulse' : ''
-        }`}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
+  const endMapIcon = useMemo(
+    () => <MapPinIcon isAnimated={isEndMapClickMode} />,
     [isEndMapClickMode]
   );
 
-  const ActiveIndicator = useMemo(
-    () => (
-      <span className="flex items-center gap-1">
-        <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-        Actif
-      </span>
-    ),
-    []
+  const geolocationIcon = useMemo(() => <GeolocationIcon />, []);
+
+  // Memoized validation for form submission
+  const canCreateTrace = useMemo(() => {
+    return startQuery.trim() !== '' && endQuery.trim() !== '';
+  }, [startQuery, endQuery]);
+
+  // Memoized CSS classes to prevent recalculation
+  const startButtonClasses = useMemo(
+    () =>
+      `ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 hover:shadow-md ${
+        isMapClickMode
+          ? 'border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200'
+          : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
+      }`,
+    [isMapClickMode]
+  );
+
+  const endButtonClasses = useMemo(
+    () =>
+      `ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 hover:shadow-md ${
+        isEndMapClickMode
+          ? 'border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200'
+          : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
+      }`,
+    [isEndMapClickMode]
+  );
+
+  const traceButtonClasses = useMemo(
+    () =>
+      `w-full font-semibold py-3 rounded-lg transition-all duration-200 ${
+        canCreateTrace
+          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
+          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+      }`,
+    [canCreateTrace]
   );
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <AutocompleteInput
-          label="Départ :"
-          value={startQuery}
-          onChange={handleInputChange}
-          suggestions={startSuggestions}
-          onSuggestionClick={handleSuggestionClick}
-          setSuggestions={setStartSuggestions}
-        />
-        <Button
-          type="button"
-          className="ml-2 flex items-center gap-1 border border-blue-400 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-150"
-          title="Utiliser ma position GPS"
-          onClick={handleGeolocation}
-        >
-          {GeolocationIcon}
-          <span className="hidden sm:inline">Ma position</span>
-        </Button>
-        <Button
-          type="button"
-          className={`ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 ${
-            isMapClickMode
-              ? 'border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200'
-              : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
-          } hover:shadow-md`}
-          title={
-            isMapClickMode
-              ? 'Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver'
-              : 'Activer le mode de sélection par clic sur la carte'
-          }
-          onClick={handleMapClickMode}
-        >
-          {MapPinIcon}
-          <span className="hidden sm:inline">
-            {isMapClickMode ? ActiveIndicator : 'Clic carte'}
-          </span>
-        </Button>
+      {/* Start Location Input */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <AutocompleteInput
+            label="Départ :"
+            value={startQuery}
+            onChange={handleInputChange}
+            suggestions={startSuggestions}
+            onSuggestionClick={handleSuggestionClick}
+            setSuggestions={setStartSuggestions}
+            placeholder="Rechercher un lieu de départ..."
+          />
+          <IconButton
+            icon={geolocationIcon}
+            onClick={handleGeolocation}
+            title="Utiliser ma position GPS"
+            label="Ma position"
+            className="flex items-center gap-1 border border-blue-400 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-150"
+            aria-label="Utiliser ma position GPS"
+          />
+          <IconButton
+            icon={startMapIcon}
+            onClick={handleMapClickMode}
+            isActive={isMapClickMode}
+            title={
+              isMapClickMode
+                ? 'Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver'
+                : 'Activer le mode de sélection par clic sur la carte'
+            }
+            label={
+              <StatusIndicator
+                isActive={isMapClickMode}
+                inactiveLabel="Clic carte"
+              />
+            }
+            className={startButtonClasses}
+            aria-label={
+              isMapClickMode
+                ? 'Désactiver le mode clic carte'
+                : 'Activer le mode clic carte'
+            }
+          />
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <AutocompleteInput
-          label="Arrivée :"
-          value={endQuery}
-          onChange={handleEndInputChange}
-          suggestions={endSuggestions}
-          onSuggestionClick={handleEndSuggestionClick}
-          setSuggestions={setEndSuggestions}
-        />
-        <Button
-          type="button"
-          className={`ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 ${
-            isEndMapClickMode
-              ? 'border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200'
-              : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
-          } hover:shadow-md`}
-          title={
-            isEndMapClickMode
-              ? "Mode actif - Cliquez sur la carte pour sélectionner l'arrivée, ou cliquez ici pour désactiver"
-              : "Activer le mode de sélection par clic sur la carte pour l'arrivée"
-          }
-          onClick={handleEndMapClickMode}
-        >
-          {EndMapPinIcon}
-          <span className="hidden sm:inline">
-            {isEndMapClickMode ? ActiveIndicator : 'Clic carte'}
-          </span>
-        </Button>
+
+      {/* End Location Input */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <AutocompleteInput
+            label="Arrivée :"
+            value={endQuery}
+            onChange={handleEndInputChange}
+            suggestions={endSuggestions}
+            onSuggestionClick={handleEndSuggestionClick}
+            setSuggestions={setEndSuggestions}
+            placeholder="Rechercher un lieu d'arrivée..."
+          />
+          <IconButton
+            icon={endMapIcon}
+            onClick={handleEndMapClickMode}
+            isActive={isEndMapClickMode}
+            title={
+              isEndMapClickMode
+                ? "Mode actif - Cliquez sur la carte pour sélectionner l'arrivée, ou cliquez ici pour désactiver"
+                : "Activer le mode de sélection par clic sur la carte pour l'arrivée"
+            }
+            label={
+              <StatusIndicator
+                isActive={isEndMapClickMode}
+                inactiveLabel="Clic carte"
+              />
+            }
+            className={endButtonClasses}
+            aria-label={
+              isEndMapClickMode
+                ? 'Désactiver le mode clic carte pour arrivée'
+                : 'Activer le mode clic carte pour arrivée'
+            }
+          />
+        </div>
       </div>
+
+      {/* Create Trace Button */}
       <Button
-        className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700"
+        className={traceButtonClasses}
         onClick={onCreateTrace}
+        disabled={!canCreateTrace}
+        aria-label="Créer la trace avec les points sélectionnés"
       >
         Créer la trace
       </Button>

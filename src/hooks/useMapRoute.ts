@@ -16,8 +16,13 @@ import type {
   RouteSummaryData,
   UseMapRouteReturn,
 } from '@/types/profile';
+import {
+  calculateCenter,
+  formatDistance,
+  formatDuration,
+} from '@/utils/routeUtils';
 import type { GeoJSON, Map as LeafletMap } from 'leaflet';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface UseMapRouteProps {
   traceStart: Location | null;
@@ -32,6 +37,7 @@ export default function useMapRoute({
   showTrace,
   profile = 'foot-hiking',
 }: UseMapRouteProps): UseMapRouteReturn {
+  // Refs for performance - avoid re-renders
   const mapRef = useRef<LeafletMap | null>(null);
   const routeLayersRef = useRef<Record<string, GeoJSON>>({});
   const summariesRef = useRef<Record<string, RouteSummaryData>>({});
@@ -39,16 +45,17 @@ export default function useMapRoute({
   const endClickHandlerCleanupRef = useRef<(() => void) | null>(null);
   const isStartClickModeRef = useRef<boolean>(false);
   const isEndClickModeRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // State
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<RouteSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const calculateCenter = useCallback(
-    (start: Location, end: Location): [number, number] => {
-      return [(start.lat + end.lat) / 2, (start.lng + end.lng) / 2];
-    },
-    []
-  );
+  // Memoized route validation
+  const canCalculateRoute = useMemo(() => {
+    return traceStart?.lat && traceStart?.lng && traceEnd?.lat && traceEnd?.lng;
+  }, [traceStart?.lat, traceStart?.lng, traceEnd?.lat, traceEnd?.lng]);
 
   const processSummaryData = useCallback(
     async (feature: {
@@ -61,27 +68,9 @@ export default function useMapRoute({
     }): Promise<RouteSummaryData> => {
       const { summary: routeSummary, ascent, descent } = feature.properties;
 
-      // Convert distance: show in meters if < 1000m, otherwise in km
-      const distanceInMeters = routeSummary.distance;
-      let distanceText = '';
-      if (distanceInMeters < 1000) {
-        distanceText = `${Math.round(distanceInMeters)} m`;
-      } else {
-        const distanceKm = (distanceInMeters / 1000).toFixed(2);
-        distanceText = `${distanceKm} km`;
-      }
-
-      // Convert duration from seconds to human readable format
-      const durationSeconds = routeSummary.duration;
-      const hours = Math.floor(durationSeconds / 3600);
-      const minutes = Math.floor((durationSeconds % 3600) / 60);
-
-      let durationText = '';
-      if (hours > 0) {
-        durationText = `${hours}h ${minutes}min`;
-      } else {
-        durationText = `${minutes}min`;
-      }
+      // Use utility functions for formatting
+      const distanceText = formatDistance(routeSummary.distance);
+      const durationText = formatDuration(routeSummary.duration);
 
       if (typeof ascent === 'number' && typeof descent === 'number') {
         return {
@@ -149,13 +138,12 @@ export default function useMapRoute({
     }
   }, []);
 
+  // Optimized route calculation effect with abort controller
   useEffect(() => {
-    if (!showTrace || !traceStart?.lat || !traceEnd?.lat || !mapRef.current)
-      return;
+    if (!showTrace || !canCalculateRoute || !mapRef.current) return;
 
     // Check if we already calculated this route for this profile
     if (routeLayersRef.current[profile]) {
-      // If the route already exists, just update the displayed summary
       const existingSummary = summariesRef.current[profile];
       if (existingSummary) {
         setSummary(existingSummary);
@@ -165,18 +153,26 @@ export default function useMapRoute({
     }
 
     const fetchAndDisplayRoute = async () => {
+      // Cancel previous request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
       setError(null);
       setIsLoading(true);
 
       try {
         // Update the center of the existing map
-        const center = calculateCenter(traceStart, traceEnd);
-        mapRef.current?.setView(center, 13);
+        if (traceStart && traceEnd) {
+          const center = calculateCenter(traceStart, traceEnd);
+          mapRef.current?.setView(center, 13);
+        }
 
-        // Route retrieval
+        // Route retrieval with abort signal
         const routeData = await fetchRoute(
-          [traceStart.lat, traceStart.lng],
-          [traceEnd.lat, traceEnd.lng],
+          [traceStart!.lat, traceStart!.lng],
+          [traceEnd!.lat, traceEnd!.lng],
           profile,
           import.meta.env.VITE_ORS_API_KEY
         );
@@ -218,15 +214,15 @@ export default function useMapRoute({
       // Ne pas nettoyer la carte ici, on veut la garder
     };
   }, [
+    showTrace,
+    canCalculateRoute,
+    profile,
+    processSummaryData,
     traceStart,
     traceEnd,
-    showTrace,
-    profile,
-    calculateCenter,
-    processSummaryData,
   ]);
 
-  // Nettoyage des traces quand showTrace devient false
+  // Optimized trace cleanup effect
   useEffect(() => {
     if (!showTrace) {
       // Clean only the traces, not the map itself
@@ -241,9 +237,14 @@ export default function useMapRoute({
     }
   }, [showTrace]);
 
-  // Map cleanup only when the component is unmounted
+  // Enhanced cleanup on unmount
   useEffect(() => {
     return () => {
+      // Cancel any pending requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
       // Clean up click handlers
       if (clickHandlerCleanupRef.current) {
         clickHandlerCleanupRef.current();
