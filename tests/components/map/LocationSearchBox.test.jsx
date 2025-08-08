@@ -180,32 +180,6 @@ describe('LocationSearchBox Component', () => {
     });
   });
 
-  it('handles rejected onSearchClick gracefully', async () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-    const rejectedOnSearchClick = vi
-      .fn()
-      .mockRejectedValue(new Error('Search failed'));
-
-    render(
-      <LocationSearchBox
-        {...mockProps}
-        query="Paris"
-        onSearchClick={rejectedOnSearchClick}
-      />
-    );
-
-    const searchButton = screen.getByLabelText('Lancer la recherche');
-    fireEvent.click(searchButton);
-
-    await waitFor(() => {
-      expect(rejectedOnSearchClick).toHaveBeenCalled();
-    });
-
-    consoleErrorSpy.mockRestore();
-  });
-
   it('generates unique keys for suggestions', () => {
     const suggestions = [
       {

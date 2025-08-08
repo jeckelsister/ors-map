@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToastProvider, useToast } from '../../../src/hooks/shared/useToast';
 
@@ -267,14 +267,14 @@ describe('useToast Hook', () => {
     expect(container).toBeInTheDocument();
   });
 
-  it('removes specific toast by ID', () => {
+  it('removes specific toast by ID', async () => {
     const TestComponent = () => {
       const { showToast } = useToast();
 
       return (
         <div>
           <button
-            onClick={() => showToast('First toast', 'success')}
+            onClick={() => showToast('First toast', 'info')}
             data-testid="first-btn"
           >
             First
@@ -295,21 +295,38 @@ describe('useToast Hook', () => {
       </ToastProvider>
     );
 
-    // Add two toasts
+    // Add first toast
     act(() => {
       screen.getByTestId('first-btn').click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('First toast')).toBeInTheDocument();
+    });
+
+    // Add second toast
+    act(() => {
       screen.getByTestId('second-btn').click();
     });
 
+    await waitFor(() => {
+      expect(screen.getByText('Second toast')).toBeInTheDocument();
+    });
+
+    // Both should be visible
     expect(screen.getByText('First toast')).toBeInTheDocument();
     expect(screen.getByText('Second toast')).toBeInTheDocument();
 
-    // Remove first toast
+    // Remove first toast by clicking on it
     act(() => {
       screen.getByText('First toast').click();
     });
 
-    expect(screen.queryByText('First toast')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('First toast')).not.toBeInTheDocument();
+    });
+
+    // Second toast should still be there
     expect(screen.getByText('Second toast')).toBeInTheDocument();
   });
 });
