@@ -15,12 +15,18 @@ interface LocationFormProps {
   setEndSuggestions: (suggestions: LocationSuggestion[]) => void;
   handleEndSuggestion: (suggestion: LocationSuggestion) => void;
   setTraceStart: (location: Location | null) => void;
+  setTraceEnd: (location: Location | null) => void;
   onCreateTrace: () => void;
   enableMapClickForStart: (
     onLocationSelect: (lat: number, lng: number) => void
   ) => void;
   disableMapClickForStart: () => void;
   clearStartMarker: () => void;
+  enableMapClickForEnd: (
+    onLocationSelect: (lat: number, lng: number) => void
+  ) => void;
+  disableMapClickForEnd: () => void;
+  clearEndMarker: () => void;
 }
 
 const LocationForm = ({
@@ -35,12 +41,17 @@ const LocationForm = ({
   setEndSuggestions,
   handleEndSuggestion,
   setTraceStart,
+  setTraceEnd,
   onCreateTrace,
   enableMapClickForStart,
   disableMapClickForStart,
   clearStartMarker,
+  enableMapClickForEnd,
+  disableMapClickForEnd,
+  clearEndMarker,
 }: LocationFormProps): React.JSX.Element => {
   const [isMapClickMode, setIsMapClickMode] = useState(false);
+  const [isEndMapClickMode, setIsEndMapClickMode] = useState(false);
 
   // Optimized cleanup on unmount with useEffect cleanup
   useEffect(() => {
@@ -48,8 +59,16 @@ const LocationForm = ({
       if (isMapClickMode) {
         disableMapClickForStart();
       }
+      if (isEndMapClickMode) {
+        disableMapClickForEnd();
+      }
     };
-  }, [isMapClickMode, disableMapClickForStart]);
+  }, [
+    isMapClickMode,
+    isEndMapClickMode,
+    disableMapClickForStart,
+    disableMapClickForEnd,
+  ]);
 
   // Memoized geolocation handler
   const handleGeolocation = useCallback(() => {
@@ -88,6 +107,12 @@ const LocationForm = ({
       disableMapClickForStart();
       setIsMapClickMode(false);
     } else {
+      // Disable end mode if active
+      if (isEndMapClickMode) {
+        disableMapClickForEnd();
+        setIsEndMapClickMode(false);
+      }
+
       enableMapClickForStart((lat: number, lng: number) => {
         const coordString = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         setStartQuery(coordString);
@@ -96,13 +121,18 @@ const LocationForm = ({
           lng,
           name: "Point sélectionné sur la carte",
         });
+        // Auto-disable after selection
+        setIsMapClickMode(false);
+        disableMapClickForStart();
       });
       setIsMapClickMode(true);
     }
   }, [
     isMapClickMode,
+    isEndMapClickMode,
     enableMapClickForStart,
     disableMapClickForStart,
+    disableMapClickForEnd,
     setStartQuery,
     setTraceStart,
   ]);
@@ -127,6 +157,64 @@ const LocationForm = ({
       clearStartMarker();
     },
     [handleStartSuggestion, clearStartMarker]
+  );
+
+  // Optimized map click mode handler for end point
+  const handleEndMapClickMode = useCallback(() => {
+    if (isEndMapClickMode) {
+      disableMapClickForEnd();
+      setIsEndMapClickMode(false);
+    } else {
+      // Disable start mode if active
+      if (isMapClickMode) {
+        disableMapClickForStart();
+        setIsMapClickMode(false);
+      }
+
+      enableMapClickForEnd((lat: number, lng: number) => {
+        const coordString = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        setEndQuery(coordString);
+        setTraceEnd({
+          lat,
+          lng,
+          name: "Point d'arrivée sélectionné sur la carte",
+        });
+        // Auto-disable after selection
+        setIsEndMapClickMode(false);
+        disableMapClickForEnd();
+      });
+      setIsEndMapClickMode(true);
+    }
+  }, [
+    isEndMapClickMode,
+    isMapClickMode,
+    enableMapClickForEnd,
+    disableMapClickForEnd,
+    disableMapClickForStart,
+    setEndQuery,
+    setTraceEnd,
+  ]);
+
+  // Memoized end input change handler
+  const handleEndInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setEndQuery(newValue);
+      // Only clear the marker if the field is completely emptied
+      if (newValue.trim() === "") {
+        clearEndMarker();
+      }
+    },
+    [setEndQuery, clearEndMarker]
+  );
+
+  // Memoized end suggestion click handler
+  const handleEndSuggestionClick = useCallback(
+    (suggestion: LocationSuggestion) => {
+      handleEndSuggestion(suggestion);
+      clearEndMarker();
+    },
+    [handleEndSuggestion, clearEndMarker]
   );
 
   // Optimized icons as constants to avoid re-creation
@@ -181,6 +269,33 @@ const LocationForm = ({
     [isMapClickMode]
   );
 
+  const EndMapPinIcon = useMemo(
+    () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className={`h-5 w-5 transition-all duration-200 ${
+          isEndMapClickMode ? "animate-pulse" : ""
+        }`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+      </svg>
+    ),
+    [isEndMapClickMode]
+  );
+
   const ActiveIndicator = useMemo(
     () => (
       <span className="flex items-center gap-1">
@@ -231,16 +346,35 @@ const LocationForm = ({
           </span>
         </Button>
       </div>
-      <AutocompleteInput
-        label="Arrivée :"
-        value={endQuery}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setEndQuery(e.target.value)
-        }
-        suggestions={endSuggestions}
-        onSuggestionClick={handleEndSuggestion}
-        setSuggestions={setEndSuggestions}
-      />
+      <div className="flex items-center gap-2">
+        <AutocompleteInput
+          label="Arrivée :"
+          value={endQuery}
+          onChange={handleEndInputChange}
+          suggestions={endSuggestions}
+          onSuggestionClick={handleEndSuggestionClick}
+          setSuggestions={setEndSuggestions}
+        />
+        <Button
+          type="button"
+          className={`ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 ${
+            isEndMapClickMode
+              ? "border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200"
+              : "border-gray-400 bg-white text-gray-600 hover:bg-gray-50"
+          } hover:shadow-md`}
+          title={
+            isEndMapClickMode
+              ? "Mode actif - Cliquez sur la carte pour sélectionner l'arrivée, ou cliquez ici pour désactiver"
+              : "Activer le mode de sélection par clic sur la carte pour l'arrivée"
+          }
+          onClick={handleEndMapClickMode}
+        >
+          {EndMapPinIcon}
+          <span className="hidden sm:inline">
+            {isEndMapClickMode ? ActiveIndicator : "Clic carte"}
+          </span>
+        </Button>
+      </div>
       <Button
         className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700"
         onClick={onCreateTrace}

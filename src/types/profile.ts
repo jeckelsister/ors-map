@@ -112,6 +112,11 @@ export interface UseMapRouteReturn {
   ) => void;
   disableMapClickForStart: () => void;
   clearStartMarker: () => void;
+  enableMapClickForEnd: (
+    onLocationSelect: (lat: number, lng: number) => void
+  ) => void;
+  disableMapClickForEnd: () => void;
+  clearEndMarker: () => void;
 }
 
 export interface UseAutocompleteReturn {

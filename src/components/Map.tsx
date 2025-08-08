@@ -25,6 +25,9 @@ const Map = (): React.JSX.Element => {
     enableMapClickForStart,
     disableMapClickForStart,
     clearStartMarker,
+    enableMapClickForEnd,
+    disableMapClickForEnd,
+    clearEndMarker,
   } = useMapRoute({
     traceStart: autocompleteProps.traceStart,
     traceEnd: autocompleteProps.traceEnd,
@@ -111,6 +114,9 @@ const Map = (): React.JSX.Element => {
           enableMapClickForStart={enableMapClickForStart}
           disableMapClickForStart={disableMapClickForStart}
           clearStartMarker={clearStartMarker}
+          enableMapClickForEnd={enableMapClickForEnd}
+          disableMapClickForEnd={disableMapClickForEnd}
+          clearEndMarker={clearEndMarker}
         />
 
         <SummaryDisplay summary={summary} error={error} />

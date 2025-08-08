@@ -1,10 +1,12 @@
 import {
   addClickHandler,
+  addClickHandlerForEnd,
   addRouteToMap,
   calculateElevation,
   cleanupMap,
   fetchRoute,
   initializeMap,
+  removeEndMarker,
   removeStartMarker,
 } from "@/services/mapService";
 import type {
@@ -32,6 +34,9 @@ export default function useMapRoute({
   const routeLayersRef = useRef<Record<string, GeoJSON>>({});
   const summariesRef = useRef<Record<string, RouteSummaryData>>({});
   const clickHandlerCleanupRef = useRef<(() => void) | null>(null);
+  const endClickHandlerCleanupRef = useRef<(() => void) | null>(null);
+  const isStartClickModeRef = useRef<boolean>(false);
+  const isEndClickModeRef = useRef<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<RouteSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -208,9 +213,12 @@ export default function useMapRoute({
   // Map cleanup only when the component is unmounted
   useEffect(() => {
     return () => {
-      // Clean up click handler
+      // Clean up click handlers
       if (clickHandlerCleanupRef.current) {
         clickHandlerCleanupRef.current();
+      }
+      if (endClickHandlerCleanupRef.current) {
+        endClickHandlerCleanupRef.current();
       }
 
       if (mapRef.current) {
@@ -246,18 +254,21 @@ export default function useMapRoute({
     (onLocationSelect: (lat: number, lng: number) => void) => {
       if (!mapRef.current) return;
 
-      // Clean up any existing click handler
+      // Clean up any existing start click handler
       if (clickHandlerCleanupRef.current) {
         clickHandlerCleanupRef.current();
       }
 
-      // Add new click handler
+      // Set click mode to start
       clickHandlerCleanupRef.current = addClickHandler(
         mapRef.current,
-        onLocationSelect
+        onLocationSelect,
+        "start"
       );
 
-      // Change cursor to indicate click mode with optimized styles
+      isStartClickModeRef.current = true;
+
+      // Update cursor
       const container = mapRef.current.getContainer();
       if (container) {
         container.style.cursor = "crosshair";
@@ -276,17 +287,74 @@ export default function useMapRoute({
       clickHandlerCleanupRef.current = null;
     }
 
-    // Reset cursor with transition
-    const container = mapRef.current.getContainer();
-    if (container) {
-      container.style.cursor = "";
-      container.style.transition = "cursor 0.2s ease";
+    isStartClickModeRef.current = false;
+
+    // Reset cursor only if end mode is not active
+    if (!isEndClickModeRef.current) {
+      const container = mapRef.current.getContainer();
+      if (container) {
+        container.style.cursor = "";
+        container.style.transition = "cursor 0.2s ease";
+      }
     }
   }, []);
 
   const clearStartMarker = useCallback(() => {
     if (!mapRef.current) return;
     removeStartMarker(mapRef.current);
+  }, []);
+
+  const enableMapClickForEnd = useCallback(
+    (onLocationSelect: (lat: number, lng: number) => void) => {
+      if (!mapRef.current) return;
+
+      // Clean up any existing end click handler
+      if (endClickHandlerCleanupRef.current) {
+        endClickHandlerCleanupRef.current();
+      }
+
+      // Set click mode to end
+      endClickHandlerCleanupRef.current = addClickHandlerForEnd(
+        mapRef.current,
+        onLocationSelect
+      );
+
+      isEndClickModeRef.current = true;
+
+      // Update cursor
+      const container = mapRef.current.getContainer();
+      if (container) {
+        container.style.cursor = "crosshair";
+        container.style.transition = "cursor 0.2s ease";
+      }
+    },
+    []
+  );
+
+  const disableMapClickForEnd = useCallback(() => {
+    if (!mapRef.current) return;
+
+    // Clean up click handler
+    if (endClickHandlerCleanupRef.current) {
+      endClickHandlerCleanupRef.current();
+      endClickHandlerCleanupRef.current = null;
+    }
+
+    isEndClickModeRef.current = false;
+
+    // Reset cursor only if start mode is not active
+    if (!isStartClickModeRef.current) {
+      const container = mapRef.current.getContainer();
+      if (container) {
+        container.style.cursor = "";
+        container.style.transition = "cursor 0.2s ease";
+      }
+    }
+  }, []);
+
+  const clearEndMarker = useCallback(() => {
+    if (!mapRef.current) return;
+    removeEndMarker(mapRef.current);
   }, []);
 
   return {
@@ -299,5 +367,8 @@ export default function useMapRoute({
     enableMapClickForStart,
     disableMapClickForStart,
     clearStartMarker,
+    enableMapClickForEnd,
+    disableMapClickForEnd,
+    clearEndMarker,
   };
 }

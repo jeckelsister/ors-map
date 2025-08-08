@@ -20,18 +20,21 @@ export const initializeMap = (
   return map;
 };
 
-// Marker for the selected start point - use a WeakMap for better memory management
+// Markers for the selected start and end points - use WeakMaps for better memory management
 const startMarkers = new WeakMap<L.Map, L.Marker>();
+const endMarkers = new WeakMap<L.Map, L.Marker>();
 
 // Optimized icon creation with cached styles
-const createMarkerIcon = (): L.DivIcon => {
+const createMarkerIcon = (isEndPoint: boolean = false): L.DivIcon => {
+  const color = isEndPoint ? "#ef4444" : "#10b981"; // Red for end, green for start
+
   return L.divIcon({
-    className: "custom-start-marker",
+    className: isEndPoint ? "custom-end-marker" : "custom-start-marker",
     html: `
       <div class="marker-container">
-        <div class="marker-pulse"></div>
-        <div class="marker-pin"></div>
-        <div class="marker-pointer"></div>
+        <div class="marker-pulse" style="background-color: ${color}33;"></div>
+        <div class="marker-pin" style="background-color: ${color};"></div>
+        <div class="marker-pointer" style="border-top-color: ${color};"></div>
       </div>
       <style>
         .marker-container {
@@ -43,7 +46,6 @@ const createMarkerIcon = (): L.DivIcon => {
           position: absolute;
           width: 30px;
           height: 30px;
-          background-color: rgba(16, 185, 129, 0.3);
           border-radius: 50%;
           animation: pulse 2s infinite;
           top: 0;
@@ -53,7 +55,6 @@ const createMarkerIcon = (): L.DivIcon => {
           position: absolute;
           width: 16px;
           height: 16px;
-          background-color: #10b981;
           border: 3px solid white;
           border-radius: 50%;
           box-shadow: 0 2px 8px rgba(0,0,0,0.4);
@@ -68,7 +69,7 @@ const createMarkerIcon = (): L.DivIcon => {
           height: 0;
           border-left: 6px solid transparent;
           border-right: 6px solid transparent;
-          border-top: 12px solid #10b981;
+          border-top: 12px solid;
           top: 22px;
           left: 50%;
           transform: translateX(-50%);
@@ -101,7 +102,7 @@ export const createStartMarker = (
 
   // Create marker with optimized icon
   const marker = L.marker([lat, lng], {
-    icon: createMarkerIcon(),
+    icon: createMarkerIcon(false),
     riseOnHover: true,
     riseOffset: 250,
   }).addTo(map);
@@ -130,35 +131,120 @@ export const createStartMarker = (
   return marker;
 };
 
+// Create a persistent end marker (not removed automatically)
+export const createEndMarker = (
+  map: L.Map,
+  lat: number,
+  lng: number
+): L.Marker => {
+  // Remove existing marker for this map if any
+  const existingMarker = endMarkers.get(map);
+  if (existingMarker) {
+    map.removeLayer(existingMarker);
+  }
+
+  // Create marker with optimized icon
+  const marker = L.marker([lat, lng], {
+    icon: createMarkerIcon(true),
+    riseOnHover: true,
+    riseOffset: 250,
+  }).addTo(map);
+
+  // Store the marker for this map
+  endMarkers.set(map, marker);
+
+  // Add optimized popup
+  marker.bindPopup(
+    `<div style="text-align: center; font-family: system-ui, -apple-system, sans-serif; font-size: 14px;">
+      <strong style="color: #ef4444;">🏁 Point d'arrivée</strong><br>
+      <small style="color: #6b7280;">
+        <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+        <strong>Lng:</strong> ${lng.toFixed(6)}
+      </small>
+    </div>`,
+    {
+      closeButton: true,
+      autoClose: false,
+      closeOnClick: false,
+      maxWidth: 200,
+      className: "custom-popup",
+    }
+  );
+
+  return marker;
+};
+
+// Click mode management for handling different marker types
+interface ClickMode {
+  type: "start" | "end" | null;
+  onLocationSelect: ((lat: number, lng: number) => void) | null;
+}
+
+const clickModes = new WeakMap<L.Map, ClickMode>();
+
+export const setMapClickMode = (
+  map: L.Map,
+  type: "start" | "end" | null,
+  onLocationSelect?: (lat: number, lng: number) => void
+): (() => void) => {
+  // Get or create click mode for this map
+  let clickMode = clickModes.get(map);
+  if (!clickMode) {
+    clickMode = { type: null, onLocationSelect: null };
+    clickModes.set(map, clickMode);
+
+    // Add the unified click handler only once
+    const handleClick = (e: L.LeafletMouseEvent) => {
+      const currentMode = clickModes.get(map);
+      if (!currentMode || !currentMode.type || !currentMode.onLocationSelect)
+        return;
+
+      const { lat, lng } = e.latlng;
+
+      // Create persistent marker based on current mode
+      const marker =
+        currentMode.type === "start"
+          ? createStartMarker(map, lat, lng)
+          : createEndMarker(map, lat, lng);
+
+      // Open popup with slight delay for better UX
+      requestAnimationFrame(() => {
+        marker.openPopup();
+      });
+
+      currentMode.onLocationSelect(lat, lng);
+    };
+
+    map.on("click", handleClick);
+  }
+
+  // Update the mode
+  clickMode.type = type;
+  clickMode.onLocationSelect = onLocationSelect || null;
+
+  // Return cleanup function
+  return () => {
+    const currentMode = clickModes.get(map);
+    if (currentMode) {
+      currentMode.type = null;
+      currentMode.onLocationSelect = null;
+    }
+  };
+};
+
 export const addClickHandler = (
+  map: L.Map,
+  onLocationSelect: (lat: number, lng: number) => void,
+  type: "start" | "end" = "start"
+): (() => void) => {
+  return setMapClickMode(map, type, onLocationSelect);
+};
+
+export const addClickHandlerForEnd = (
   map: L.Map,
   onLocationSelect: (lat: number, lng: number) => void
 ): (() => void) => {
-  const handleClick = (e: L.LeafletMouseEvent) => {
-    const { lat, lng } = e.latlng;
-
-    // Create persistent marker
-    const marker = createStartMarker(map, lat, lng);
-
-    // Open popup with slight delay for better UX
-    requestAnimationFrame(() => {
-      marker.openPopup();
-    });
-
-    onLocationSelect(lat, lng);
-  };
-
-  map.on("click", handleClick);
-
-  // Return optimized cleanup function
-  return () => {
-    map.off("click", handleClick);
-    const marker = startMarkers.get(map);
-    if (marker) {
-      map.removeLayer(marker);
-      startMarkers.delete(map);
-    }
-  };
+  return setMapClickMode(map, "end", onLocationSelect);
 };
 
 export const removeStartMarker = (map: L.Map): void => {
@@ -166,6 +252,14 @@ export const removeStartMarker = (map: L.Map): void => {
   if (marker) {
     map.removeLayer(marker);
     startMarkers.delete(map);
+  }
+};
+
+export const removeEndMarker = (map: L.Map): void => {
+  const marker = endMarkers.get(map);
+  if (marker) {
+    map.removeLayer(marker);
+    endMarkers.delete(map);
   }
 };
 
