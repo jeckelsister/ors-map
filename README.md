@@ -2,6 +2,10 @@
 
 Application React utilisant l'API OpenRouteService pour calculer et afficher des itinéraires sur une carte interactive.
 
+## 🌐 Demo en ligne
+
+**Accédez à l'application :** [https://jeckelsister.github.io/ors-map/](https://jeckelsister.github.io/ors-map/)
+
 ## ✨ Fonctionnalités
 
 - 🗺️ **Carte interactive** avec Leaflet
@@ -113,6 +117,22 @@ VITE_ORS_API_KEY=votre_clé_api_openrouteservice
 - `npm run test:run` - Tests une fois
 - `npm run test:ui` - Interface graphique des tests
 - `npm run test:coverage` - Rapport de couverture
+- `npm run deploy` - Déployer sur GitHub Pages
+
+## 🚀 Déploiement
+
+L'application est automatiquement déployée sur GitHub Pages à chaque push sur la branche `main`.
+
+### Déploiement manuel
+
+```bash
+# Build et déploiement
+npm run deploy
+```
+
+### URL de production
+
+L'application est accessible à : [https://jeckelsister.github.io/ors-map/](https://jeckelsister.github.io/ors-map/)
 
 ## 🤝 Contribution
 
