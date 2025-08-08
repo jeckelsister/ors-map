@@ -15,7 +15,7 @@ const SummaryDisplay = memo<SummaryDisplayProps>(({ summary, error }) => {
 
   return (
     <div className="mt-2 text-gray-800 font-medium">
-      <div>Distance : {summary.distance} km</div>
+      <div>Distance : {summary.distance}</div>
       <div>Durée estimée : {summary.duration}</div>
       <div>Dénivelé + : {summary.ascent ?? "N/A"} m</div>
       <div>Dénivelé - : {summary.descent ?? "N/A"} m</div>

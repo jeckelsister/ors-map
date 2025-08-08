@@ -164,7 +164,7 @@ const LocationForm = ({
       const location: Location = {
         lat: Number(suggestion.lat),
         lng: Number(suggestion.lon),
-        name: suggestion.display_name
+        name: suggestion.display_name,
       };
       createStartMarkerFromLocation(location);
     },
@@ -228,7 +228,7 @@ const LocationForm = ({
       const location: Location = {
         lat: Number(suggestion.lat),
         lng: Number(suggestion.lon),
-        name: suggestion.display_name
+        name: suggestion.display_name,
       };
       createEndMarkerFromLocation(location);
     },

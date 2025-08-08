@@ -1,15 +1,15 @@
 import {
   addClickHandler,
   addClickHandlerForEnd,
+  addEndMarker,
   addRouteToMap,
   addStartMarker,
-  addEndMarker,
   calculateElevation,
   cleanupMap,
   fetchRoute,
   initializeMap,
-  removeStartMarker,
   removeEndMarker,
+  removeStartMarker,
 } from "@/services/mapService";
 import type {
   Location,
@@ -54,10 +54,32 @@ export default function useMapRoute({
     async (feature: any): Promise<RouteSummaryData> => {
       const { summary: routeSummary, ascent, descent } = feature.properties;
 
+      // Convert distance: show in meters if < 1000m, otherwise in km
+      const distanceInMeters = routeSummary.distance;
+      let distanceText = "";
+      if (distanceInMeters < 1000) {
+        distanceText = `${Math.round(distanceInMeters)} m`;
+      } else {
+        const distanceKm = (distanceInMeters / 1000).toFixed(2);
+        distanceText = `${distanceKm} km`;
+      }
+
+      // Convert duration from seconds to human readable format
+      const durationSeconds = routeSummary.duration;
+      const hours = Math.floor(durationSeconds / 3600);
+      const minutes = Math.floor((durationSeconds % 3600) / 60);
+
+      let durationText = "";
+      if (hours > 0) {
+        durationText = `${hours}h ${minutes}min`;
+      } else {
+        durationText = `${minutes}min`;
+      }
+
       if (typeof ascent === "number" && typeof descent === "number") {
         return {
-          duration: routeSummary.duration,
-          distance: routeSummary.distance,
+          duration: durationText,
+          distance: distanceText,
           ascent,
           descent,
         };
@@ -68,15 +90,15 @@ export default function useMapRoute({
           feature.geometry.coordinates
         );
         return {
-          duration: routeSummary.duration,
-          distance: routeSummary.distance,
+          duration: durationText,
+          distance: distanceText,
           ...elevationData,
         };
       } catch (error) {
         console.warn("Erreur lors du calcul de l'élévation :", error);
         return {
-          duration: routeSummary.duration,
-          distance: routeSummary.distance,
+          duration: durationText,
+          distance: distanceText,
           ascent: null,
           descent: null,
         };
