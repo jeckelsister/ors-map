@@ -1,6 +1,6 @@
 import type { Location, LocationSuggestion } from "@/types/profile";
 import Button from "@/ui/Button";
-import React, { memo, useCallback, useEffect, useState, useMemo } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import AutocompleteInput from "./AutocompleteInput";
 
 interface LocationFormProps {
