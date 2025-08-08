@@ -24,16 +24,17 @@ describe('useGeolocation', () => {
   });
 
   it('returns isSupported as false when geolocation is not available', () => {
-    // Remove geolocation from navigator
-    const originalGeolocation = global.navigator.geolocation;
+    // Mock navigator without geolocation
+    const originalNavigator = global.navigator;
+    global.navigator = { ...originalNavigator };
     delete global.navigator.geolocation;
 
     const { result } = renderHook(() => useGeolocation());
 
     expect(result.current.isSupported).toBe(false);
 
-    // Restore geolocation
-    global.navigator.geolocation = originalGeolocation;
+    // Restore navigator
+    global.navigator = originalNavigator;
   });
 
   it('calls onSuccess with location when geolocation succeeds', () => {
@@ -63,7 +64,8 @@ describe('useGeolocation', () => {
   });
 
   it('calls onError when geolocation is not supported', () => {
-    const originalGeolocation = global.navigator.geolocation;
+    const originalNavigator = global.navigator;
+    global.navigator = { ...originalNavigator };
     delete global.navigator.geolocation;
 
     const { result } = renderHook(() => useGeolocation());
@@ -79,8 +81,8 @@ describe('useGeolocation', () => {
     );
     expect(onSuccess).not.toHaveBeenCalled();
 
-    // Restore geolocation
-    global.navigator.geolocation = originalGeolocation;
+    // Restore navigator
+    global.navigator = originalNavigator;
   });
 
   it('calls onError with permission denied message', () => {
