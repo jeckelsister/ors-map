@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import type { LocationSuggestion, Location } from "@/types/profile";
+import { useEffect, useState } from 'react';
+import type { LocationSuggestion, Location } from '@/types/profile';
 
-const fetchSuggestions = async (query: string): Promise<LocationSuggestion[]> => {
+const fetchSuggestions = async (
+  query: string
+): Promise<LocationSuggestion[]> => {
   if (!query) return [];
   const res = await fetch(
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -29,10 +31,14 @@ interface UseAutocompleteReturn {
 }
 
 export default function useAutocomplete(): UseAutocompleteReturn {
-  const [startQuery, setStartQuery] = useState<string>("");
-  const [endQuery, setEndQuery] = useState<string>("");
-  const [startSuggestions, setStartSuggestions] = useState<LocationSuggestion[]>([]);
-  const [endSuggestions, setEndSuggestions] = useState<LocationSuggestion[]>([]);
+  const [startQuery, setStartQuery] = useState<string>('');
+  const [endQuery, setEndQuery] = useState<string>('');
+  const [startSuggestions, setStartSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
+  const [endSuggestions, setEndSuggestions] = useState<LocationSuggestion[]>(
+    []
+  );
   const [traceStart, setTraceStart] = useState<Location | null>(null);
   const [traceEnd, setTraceEnd] = useState<Location | null>(null);
 
@@ -54,7 +60,7 @@ export default function useAutocomplete(): UseAutocompleteReturn {
     setTraceStart({
       lat: Number(s.lat),
       lng: Number(s.lon),
-      name: s.display_name
+      name: s.display_name,
     });
     setStartQuery(s.display_name);
   };
@@ -63,7 +69,7 @@ export default function useAutocomplete(): UseAutocompleteReturn {
     setTraceEnd({
       lat: Number(s.lat),
       lng: Number(s.lon),
-      name: s.display_name
+      name: s.display_name,
     });
     setEndQuery(s.display_name);
   };

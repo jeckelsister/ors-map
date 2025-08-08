@@ -1,17 +1,19 @@
-import useAutocomplete from "@/hooks/useAutocomplete";
-import useMapRoute from "@/hooks/useMapRoute";
-import type { LocationSuggestion } from "@/types/profile";
-import "leaflet/dist/leaflet.css";
-import React, { useCallback, useEffect, useState } from "react";
-import LocationForm from "./LocationForm";
-import LocationSearchBox from "./LocationSearchBox";
-import SummaryDisplay from "./SummaryDisplay";
-import TransportModeSelector from "./TransportModeSelector";
+import useAutocomplete from '@/hooks/useAutocomplete';
+import useMapRoute from '@/hooks/useMapRoute';
+import type { LocationSuggestion } from '@/types/profile';
+import 'leaflet/dist/leaflet.css';
+import React, { useCallback, useEffect, useState } from 'react';
+import LocationForm from './LocationForm';
+import LocationSearchBox from './LocationSearchBox';
+import SummaryDisplay from './SummaryDisplay';
+import TransportModeSelector from './TransportModeSelector';
 
 const Map = (): React.JSX.Element => {
-  const [profile, setProfile] = useState<string>("foot-hiking");
-  const [focusQuery, setFocusQuery] = useState<string>("");
-  const [focusSuggestions, setFocusSuggestions] = useState<any[]>([]);
+  const [profile, setProfile] = useState<string>('foot-hiking');
+  const [focusQuery, setFocusQuery] = useState<string>('');
+  const [focusSuggestions, setFocusSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
   const [showTrace, setShowTrace] = useState<boolean>(false);
 
   const autocompleteProps = useAutocomplete();

@@ -1,7 +1,7 @@
-import { memo, useCallback } from "react";
-import { FaSearchLocation } from "react-icons/fa";
-import Button from "../ui/Button";
-import type { LocationSuggestion } from "@/types/profile";
+import { memo, useCallback } from 'react';
+import { FaSearchLocation } from 'react-icons/fa';
+import Button from '../ui/Button';
+import type { LocationSuggestion } from '@/types/profile';
 
 interface LocationSearchBoxProps {
   query: string;
@@ -19,7 +19,7 @@ const LocationSearchBox = memo<LocationSearchBoxProps>(
     suggestions,
     onSuggestionSelect,
     onSearchClick,
-    placeholder = "Rechercher un lieu...",
+    placeholder = 'Rechercher un lieu...',
   }) => {
     const handleSearchClick = useCallback(async () => {
       if (query.length < 3) return;
@@ -35,7 +35,7 @@ const LocationSearchBox = memo<LocationSearchBoxProps>(
             className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-150 text-black"
             placeholder={placeholder}
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+            onChange={e => onQueryChange(e.target.value)}
             aria-label="Recherche de lieu"
           />
           <Button
@@ -54,7 +54,7 @@ const LocationSearchBox = memo<LocationSearchBoxProps>(
             role="listbox"
             aria-label="Suggestions de lieux"
           >
-            {suggestions.map((s) => (
+            {suggestions.map(s => (
               <li
                 key={`${s.place_id}-${s.display_name}`}
                 className="px-3 py-2 cursor-pointer hover:bg-blue-100"
@@ -71,6 +71,6 @@ const LocationSearchBox = memo<LocationSearchBoxProps>(
   }
 );
 
-LocationSearchBox.displayName = "LocationSearchBox";
+LocationSearchBox.displayName = 'LocationSearchBox';
 
 export default LocationSearchBox;

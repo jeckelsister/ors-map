@@ -1,6 +1,6 @@
-import { memo } from "react";
-import { TRANSPORT_MODES } from "@/constants/transportModes";
-import Button from "@/ui/Button";
+import { memo } from 'react';
+import { TRANSPORT_MODES } from '@/constants/transportModes';
+import Button from '@/ui/Button';
 
 interface TransportModeSelectorProps {
   activeRoutes?: string[];
@@ -23,9 +23,9 @@ const TransportModeSelector = memo<TransportModeSelectorProps>(
             onClick={() => onProfileChange(id)}
             title={label}
             style={{
-              backgroundColor: isActive ? color : "white",
+              backgroundColor: isActive ? color : 'white',
               borderColor: color,
-              color: isActive ? "white" : color,
+              color: isActive ? 'white' : color,
             }}
           >
             <Icon className="h-5 w-5" />
@@ -37,6 +37,6 @@ const TransportModeSelector = memo<TransportModeSelectorProps>(
   )
 );
 
-TransportModeSelector.displayName = "TransportModeSelector";
+TransportModeSelector.displayName = 'TransportModeSelector';
 
 export default TransportModeSelector;

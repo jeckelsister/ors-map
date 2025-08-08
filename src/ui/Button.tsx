@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   className?: string;
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function Button({
   children,
-  className = "",
-  type = "button",
+  className = '',
+  type = 'button',
   onClick,
   ...props
 }: ButtonProps): React.JSX.Element {
@@ -17,7 +17,7 @@ export default function Button({
     <button
       type={type}
       className={
-        "px-3 py-2 rounded-lg border font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 " +
+        'px-3 py-2 rounded-lg border font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ' +
         className
       }
       onClick={onClick}

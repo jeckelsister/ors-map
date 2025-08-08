@@ -1,6 +1,6 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import Logo from "./Logo";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import Logo from './Logo';
 
 export default function Navigation(): React.JSX.Element {
   const location = useLocation();
@@ -24,9 +24,9 @@ export default function Navigation(): React.JSX.Element {
             <Link
               to="/"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive("/")
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-gray-900"
+                isActive('/')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Home
@@ -34,9 +34,9 @@ export default function Navigation(): React.JSX.Element {
             <Link
               to="/map"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive("/map")
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-gray-900"
+                isActive('/map')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Map
@@ -44,9 +44,9 @@ export default function Navigation(): React.JSX.Element {
             <Link
               to="/about"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive("/about")
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-gray-900"
+                isActive('/about')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               About

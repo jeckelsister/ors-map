@@ -1,3 +1,5 @@
+import type { Map as LeafletMap } from 'leaflet';
+
 // Transport mode profiles for routing
 export interface TransportMode {
   id: string;
@@ -8,6 +10,7 @@ export interface TransportMode {
 
 // Route response from API
 export interface RouteResponse {
+  type: 'FeatureCollection';
   features: RouteFeature[];
   metadata?: {
     attribution?: string;
@@ -17,7 +20,7 @@ export interface RouteResponse {
 }
 
 export interface RouteFeature {
-  type: "Feature";
+  type: 'Feature';
   properties: RouteProperties;
   geometry: RouteGeometry;
 }
@@ -50,7 +53,7 @@ export interface RouteSummary {
 
 export interface RouteGeometry {
   coordinates: [number, number][];
-  type: "LineString";
+  type: 'LineString';
 }
 
 // Location interfaces
@@ -101,7 +104,7 @@ export interface ElevationResponse {
 
 // Hook return types
 export interface UseMapRouteReturn {
-  mapRef: React.RefObject<any>; // Leaflet Map reference
+  mapRef: React.RefObject<LeafletMap | null>; // Properly typed Leaflet Map reference
   summary: RouteSummaryData | null;
   isLoading: boolean;
   error: string | null;

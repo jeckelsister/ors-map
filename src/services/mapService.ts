@@ -1,11 +1,49 @@
-import { TRANSPORT_MODES } from "@/constants/transportModes";
-import type { RouteResponse } from "@/types/profile";
-import axios from "axios";
-import L from "leaflet";
+import { TRANSPORT_MODES } from '@/constants/transportModes';
+import type { RouteResponse } from '@/types/profile';
+import axios, { AxiosRequestConfig } from 'axios';
+import L from 'leaflet';
 
-const MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const ORS_API_URL = "https://api.openrouteservice.org/v2/directions";
-const ELEVATION_API_URL = "https://api.open-elevation.com/api/v1/lookup";
+const MAP_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ORS_API_URL = 'https://api.openrouteservice.org/v2/directions';
+const ELEVATION_API_URL = 'https://api.open-elevation.com/api/v1/lookup';
+
+// Extended axios config for retry logic
+interface RetryConfig extends AxiosRequestConfig {
+  retries?: number;
+  retryDelay?: number;
+}
+
+// Error handling and retry logic
+const apiClient = axios.create({
+  timeout: 10000, // 10 seconds timeout
+});
+
+// Add interceptor for error handling and retries
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config as RetryConfig;
+
+    if (!config || config.retries === undefined) {
+      config.retries = 3;
+    }
+
+    if (config.retries <= 0) {
+      return Promise.reject(error);
+    }
+
+    config.retries -= 1;
+
+    const delayRetryRequest = new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, config.retryDelay || 1000);
+    });
+
+    await delayRetryRequest;
+    return apiClient(config);
+  }
+);
 
 export const initializeMap = (
   elementId: string,
@@ -14,9 +52,9 @@ export const initializeMap = (
 ): L.Map => {
   const map = L.map(elementId, { zoomControl: false }).setView(center, zoom);
   L.tileLayer(MAP_TILE_URL, {
-    attribution: "&copy; OpenStreetMap contributors",
+    attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
-  L.control.zoom({ position: "topright" }).addTo(map);
+  L.control.zoom({ position: 'topright' }).addTo(map);
   return map;
 };
 
@@ -26,10 +64,10 @@ const endMarkers = new WeakMap<L.Map, L.Marker>();
 
 // Optimized icon creation with cached styles
 const createMarkerIcon = (isEndPoint: boolean = false): L.DivIcon => {
-  const color = isEndPoint ? "#ef4444" : "#10b981"; // Red for end, green for start
+  const color = isEndPoint ? '#ef4444' : '#10b981'; // Red for end, green for start
 
   return L.divIcon({
-    className: isEndPoint ? "custom-end-marker" : "custom-start-marker",
+    className: isEndPoint ? 'custom-end-marker' : 'custom-start-marker',
     html: `
       <div class="marker-container">
         <div class="marker-pulse" style="background-color: ${color}33;"></div>
@@ -124,7 +162,7 @@ export const createStartMarker = (
       autoClose: false,
       closeOnClick: false,
       maxWidth: 200,
-      className: "custom-popup",
+      className: 'custom-popup',
     }
   );
 
@@ -167,7 +205,7 @@ export const createEndMarker = (
       autoClose: false,
       closeOnClick: false,
       maxWidth: 200,
-      className: "custom-popup",
+      className: 'custom-popup',
     }
   );
 
@@ -176,7 +214,7 @@ export const createEndMarker = (
 
 // Click mode management for handling different marker types
 interface ClickMode {
-  type: "start" | "end" | null;
+  type: 'start' | 'end' | null;
   onLocationSelect: ((lat: number, lng: number) => void) | null;
 }
 
@@ -184,7 +222,7 @@ const clickModes = new WeakMap<L.Map, ClickMode>();
 
 export const setMapClickMode = (
   map: L.Map,
-  type: "start" | "end" | null,
+  type: 'start' | 'end' | null,
   onLocationSelect?: (lat: number, lng: number) => void
 ): (() => void) => {
   // Get or create click mode for this map
@@ -203,7 +241,7 @@ export const setMapClickMode = (
 
       // Create persistent marker based on current mode
       const marker =
-        currentMode.type === "start"
+        currentMode.type === 'start'
           ? createStartMarker(map, lat, lng)
           : createEndMarker(map, lat, lng);
 
@@ -215,7 +253,7 @@ export const setMapClickMode = (
       currentMode.onLocationSelect(lat, lng);
     };
 
-    map.on("click", handleClick);
+    map.on('click', handleClick);
   }
 
   // Update the mode
@@ -235,7 +273,7 @@ export const setMapClickMode = (
 export const addClickHandler = (
   map: L.Map,
   onLocationSelect: (lat: number, lng: number) => void,
-  type: "start" | "end" = "start"
+  type: 'start' | 'end' = 'start'
 ): (() => void) => {
   return setMapClickMode(map, type, onLocationSelect);
 };
@@ -244,7 +282,7 @@ export const addClickHandlerForEnd = (
   map: L.Map,
   onLocationSelect: (lat: number, lng: number) => void
 ): (() => void) => {
-  return setMapClickMode(map, "end", onLocationSelect);
+  return setMapClickMode(map, 'end', onLocationSelect);
 };
 
 export const removeStartMarker = (map: L.Map): void => {
@@ -288,6 +326,9 @@ export const cleanupMap = (
   try {
     // If a map instance exists, remove it properly
     if (mapInstance) {
+      // Clear all Leaflet references safely
+      const container = mapInstance.getContainer();
+      container.style.removeProperty('cursor');
       mapInstance.remove();
     }
 
@@ -295,8 +336,10 @@ export const cleanupMap = (
     const mapContainer = document.getElementById(elementId);
     if (mapContainer) {
       // Remove all Leaflet references
-      (mapContainer as any)._leaflet_id = undefined;
-      (mapContainer as any)._leaflet = undefined;
+      (mapContainer as HTMLElement & { _leaflet_id?: string })._leaflet_id =
+        undefined;
+      (mapContainer as HTMLElement & { _leaflet?: unknown })._leaflet =
+        undefined;
 
       // Clear the container of any residual content
       while (mapContainer.firstChild) {
@@ -304,7 +347,7 @@ export const cleanupMap = (
       }
     }
   } catch (error) {
-    console.error("Error during map cleanup:", error);
+    console.error('Error during map cleanup:', error);
   }
 };
 
@@ -314,23 +357,49 @@ export const fetchRoute = async (
   profile: string,
   apiKey: string
 ): Promise<RouteResponse> => {
-  const response = await axios.post(
-    `${ORS_API_URL}/${profile}/geojson`,
-    {
-      coordinates: [
-        [start[1], start[0]],
-        [end[1], end[0]],
-      ],
-      radiuses: [500000, 500000],
-    },
-    {
-      headers: {
-        Authorization: apiKey,
-        "Content-Type": "application/json",
+  try {
+    const response = await apiClient.post(
+      `${ORS_API_URL}/${profile}/geojson`,
+      {
+        coordinates: [
+          [start[1], start[0]],
+          [end[1], end[0]],
+        ],
+        radiuses: [500000, 500000],
       },
+      {
+        headers: {
+          Authorization: apiKey,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Enhanced error handling
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const message = error.response?.data?.error?.message || error.message;
+
+      if (status === 401) {
+        throw new Error(
+          'Invalid API key. Please check your OpenRouteService API key.'
+        );
+      } else if (status === 403) {
+        throw new Error('API access denied. Check your API key permissions.');
+      } else if (status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      } else if (status === 404) {
+        throw new Error('Route not found. Try different locations.');
+      } else if (status && status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      } else {
+        throw new Error(`Route calculation failed: ${message}`);
+      }
     }
-  );
-  return response.data;
+
+    throw new Error('Network error. Please check your internet connection.');
+  }
 };
 
 export const calculateElevation = async (
@@ -347,8 +416,8 @@ export const calculateElevation = async (
   }
 
   const response = await fetch(ELEVATION_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       locations: coords.map(([lng, lat]: [number, number]) => ({
         latitude: lat,
@@ -358,7 +427,9 @@ export const calculateElevation = async (
   });
 
   const data = await response.json();
-  const elevations = data.results.map((pt: any) => pt.elevation);
+  const elevations = data.results.map(
+    (pt: { elevation: number }) => pt.elevation
+  );
 
   let ascent = 0,
     descent = 0;
@@ -376,7 +447,7 @@ export const calculateElevation = async (
 
 export const addRouteToMap = (
   map: L.Map,
-  geojson: any,
+  geojson: GeoJSON.FeatureCollection | GeoJSON.Feature,
   profile: string
 ): L.GeoJSON | null => {
   if (!map || !map.addLayer) {
@@ -385,8 +456,8 @@ export const addRouteToMap = (
   }
 
   // Trouver la couleur correspondant au profil
-  const transportMode = TRANSPORT_MODES.find((mode) => mode.id === profile);
-  const color = transportMode?.color || "#2563eb"; // Default blue if profile not found
+  const transportMode = TRANSPORT_MODES.find(mode => mode.id === profile);
+  const color = transportMode?.color || '#2563eb'; // Default blue if profile not found
 
   try {
     const layer = L.geoJSON(geojson, {
@@ -394,8 +465,8 @@ export const addRouteToMap = (
         color: color,
         weight: 4,
         opacity: 0.8,
-        lineCap: "round",
-        lineJoin: "round",
+        lineCap: 'round',
+        lineJoin: 'round',
       },
     });
     return layer.addTo(map);

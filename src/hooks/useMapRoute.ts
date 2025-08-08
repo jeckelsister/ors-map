@@ -10,14 +10,14 @@ import {
   initializeMap,
   removeEndMarker,
   removeStartMarker,
-} from "@/services/mapService";
+} from '@/services/mapService';
 import type {
   Location,
   RouteSummaryData,
   UseMapRouteReturn,
-} from "@/types/profile";
-import type { GeoJSON, Map as LeafletMap } from "leaflet";
-import { useCallback, useEffect, useRef, useState } from "react";
+} from '@/types/profile';
+import type { GeoJSON, Map as LeafletMap } from 'leaflet';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseMapRouteProps {
   traceStart: Location | null;
@@ -30,7 +30,7 @@ export default function useMapRoute({
   traceStart,
   traceEnd,
   showTrace,
-  profile = "foot-hiking",
+  profile = 'foot-hiking',
 }: UseMapRouteProps): UseMapRouteReturn {
   const mapRef = useRef<LeafletMap | null>(null);
   const routeLayersRef = useRef<Record<string, GeoJSON>>({});
@@ -51,12 +51,19 @@ export default function useMapRoute({
   );
 
   const processSummaryData = useCallback(
-    async (feature: any): Promise<RouteSummaryData> => {
+    async (feature: {
+      properties: {
+        summary: { distance: number; duration: number };
+        ascent?: number;
+        descent?: number;
+      };
+      geometry: { coordinates: [number, number][] };
+    }): Promise<RouteSummaryData> => {
       const { summary: routeSummary, ascent, descent } = feature.properties;
 
       // Convert distance: show in meters if < 1000m, otherwise in km
       const distanceInMeters = routeSummary.distance;
-      let distanceText = "";
+      let distanceText = '';
       if (distanceInMeters < 1000) {
         distanceText = `${Math.round(distanceInMeters)} m`;
       } else {
@@ -69,14 +76,14 @@ export default function useMapRoute({
       const hours = Math.floor(durationSeconds / 3600);
       const minutes = Math.floor((durationSeconds % 3600) / 60);
 
-      let durationText = "";
+      let durationText = '';
       if (hours > 0) {
         durationText = `${hours}h ${minutes}min`;
       } else {
         durationText = `${minutes}min`;
       }
 
-      if (typeof ascent === "number" && typeof descent === "number") {
+      if (typeof ascent === 'number' && typeof descent === 'number') {
         return {
           duration: durationText,
           distance: distanceText,
@@ -112,7 +119,7 @@ export default function useMapRoute({
     const initMap = () => {
       if (!mapRef.current) {
         const center: [number, number] = [46.603354, 1.888334]; // Center of France
-        const map = initializeMap("map", center);
+        const map = initializeMap('map', center);
         if (map) {
           mapRef.current = map;
         }
@@ -120,13 +127,13 @@ export default function useMapRoute({
     };
 
     // Ensure map container exists
-    const mapContainer = document.getElementById("map");
+    const mapContainer = document.getElementById('map');
     if (mapContainer) {
       initMap();
     } else {
       // If container doesn't exist yet, wait for it to be created
       const observer = new MutationObserver((_, obs) => {
-        const container = document.getElementById("map");
+        const container = document.getElementById('map');
         if (container) {
           initMap();
           obs.disconnect();
@@ -175,7 +182,7 @@ export default function useMapRoute({
         );
 
         if (!routeData?.features?.length) {
-          throw new Error("No route found between these two points.");
+          throw new Error('No route found between these two points.');
         }
 
         // Data processing and display
@@ -197,9 +204,9 @@ export default function useMapRoute({
         setError(
           err instanceof Error
             ? err.message
-            : "Error while retrieving the route."
+            : 'Error while retrieving the route.'
         );
-        console.error("Route processing error:", err);
+        console.error('Route processing error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -223,7 +230,7 @@ export default function useMapRoute({
   useEffect(() => {
     if (!showTrace) {
       // Clean only the traces, not the map itself
-      Object.values(routeLayersRef.current).forEach((layer) => {
+      Object.values(routeLayersRef.current).forEach(layer => {
         if (layer && layer.remove) {
           layer.remove();
         }
@@ -246,7 +253,7 @@ export default function useMapRoute({
       }
 
       if (mapRef.current) {
-        cleanupMap(mapRef.current, "map");
+        cleanupMap(mapRef.current, 'map');
         mapRef.current = null;
         routeLayersRef.current = {};
       }
@@ -287,7 +294,7 @@ export default function useMapRoute({
       clickHandlerCleanupRef.current = addClickHandler(
         mapRef.current,
         onLocationSelect,
-        "start"
+        'start'
       );
 
       isStartClickModeRef.current = true;
@@ -295,8 +302,8 @@ export default function useMapRoute({
       // Update cursor
       const container = mapRef.current.getContainer();
       if (container) {
-        container.style.cursor = "crosshair";
-        container.style.transition = "cursor 0.2s ease";
+        container.style.cursor = 'crosshair';
+        container.style.transition = 'cursor 0.2s ease';
       }
     },
     []
@@ -317,8 +324,8 @@ export default function useMapRoute({
     if (!isEndClickModeRef.current) {
       const container = mapRef.current.getContainer();
       if (container) {
-        container.style.cursor = "";
-        container.style.transition = "cursor 0.2s ease";
+        container.style.cursor = '';
+        container.style.transition = 'cursor 0.2s ease';
       }
     }
   }, []);
@@ -348,8 +355,8 @@ export default function useMapRoute({
       // Update cursor
       const container = mapRef.current.getContainer();
       if (container) {
-        container.style.cursor = "crosshair";
-        container.style.transition = "cursor 0.2s ease";
+        container.style.cursor = 'crosshair';
+        container.style.transition = 'cursor 0.2s ease';
       }
     },
     []
@@ -370,8 +377,8 @@ export default function useMapRoute({
     if (!isStartClickModeRef.current) {
       const container = mapRef.current.getContainer();
       if (container) {
-        container.style.cursor = "";
-        container.style.transition = "cursor 0.2s ease";
+        container.style.cursor = '';
+        container.style.transition = 'cursor 0.2s ease';
       }
     }
   }, []);

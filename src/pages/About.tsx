@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Navigation from "../components/Navigation";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import Navigation from '../components/Navigation';
 
 export default function About(): React.JSX.Element {
   return (
@@ -51,13 +51,13 @@ export default function About(): React.JSX.Element {
               Getting Started
             </h2>
             <p className="mb-4">
-              Ready to start planning your routes? Head over to the{" "}
+              Ready to start planning your routes? Head over to the{' '}
               <Link
                 to="/map"
                 className="text-blue-600 hover:text-blue-800 underline"
               >
                 map page
-              </Link>{" "}
+              </Link>{' '}
               and begin exploring the features.
             </p>
 

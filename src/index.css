@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Optimized styles for map markers and popups */
 .custom-popup .leaflet-popup-content-wrapper {

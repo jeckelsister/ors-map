@@ -1,22 +1,22 @@
-import axios from "axios";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { calculateElevation, fetchRoute } from "../../src/services/mapService";
+import axios from 'axios';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { calculateElevation, fetchRoute } from '../../src/services/mapService';
 
 // Mock d'axios
-vi.mock("axios");
+vi.mock('axios');
 const mockedAxios = vi.mocked(axios);
 
 // Mock for the elevation API fetch
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 
-describe("mapService", () => {
+describe('mapService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("fetchRoute", () => {
-    it("should fetch route data successfully", async () => {
+  describe('fetchRoute', () => {
+    it('should fetch route data successfully', async () => {
       const mockRouteData = {
         features: [
           {
@@ -41,12 +41,12 @@ describe("mapService", () => {
       const result = await fetchRoute(
         [48.8566, 2.3522], // Paris
         [45.764, 4.8357], // Lyon
-        "foot-hiking",
-        "test-api-key"
+        'foot-hiking',
+        'test-api-key'
       );
 
       expect(mockedAxios.post).toHaveBeenCalledWith(
-        "https://api.openrouteservice.org/v2/directions/foot-hiking/geojson",
+        'https://api.openrouteservice.org/v2/directions/foot-hiking/geojson',
         {
           coordinates: [
             [2.3522, 48.8566],
@@ -56,8 +56,8 @@ describe("mapService", () => {
         },
         {
           headers: {
-            Authorization: "test-api-key",
-            "Content-Type": "application/json",
+            Authorization: 'test-api-key',
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -65,22 +65,22 @@ describe("mapService", () => {
       expect(result).toEqual(mockRouteData);
     });
 
-    it("should handle API errors", async () => {
-      mockedAxios.post.mockRejectedValueOnce(new Error("API Error"));
+    it('should handle API errors', async () => {
+      mockedAxios.post.mockRejectedValueOnce(new Error('API Error'));
 
       await expect(
         fetchRoute(
           [48.8566, 2.3522],
           [45.764, 4.8357],
-          "foot-hiking",
-          "test-api-key"
+          'foot-hiking',
+          'test-api-key'
         )
-      ).rejects.toThrow("API Error");
+      ).rejects.toThrow('API Error');
     });
   });
 
-  describe("calculateElevation", () => {
-    it("should calculate elevation data", async () => {
+  describe('calculateElevation', () => {
+    it('should calculate elevation data', async () => {
       const mockElevationData = {
         results: [
           { elevation: 100 },
@@ -109,10 +109,10 @@ describe("mapService", () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://api.open-elevation.com/api/v1/lookup",
+        'https://api.open-elevation.com/api/v1/lookup',
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             locations: coordinates.map(([lng, lat]) => ({
               latitude: lat,
@@ -123,7 +123,7 @@ describe("mapService", () => {
       );
     });
 
-    it("should limit coordinates to 100 points", async () => {
+    it('should limit coordinates to 100 points', async () => {
       // Create more than 100 coordinates
       const coordinates = Array.from({ length: 150 }, (_, i) => [
         2.3522 + i * 0.001,

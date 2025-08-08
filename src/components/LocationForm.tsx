@@ -1,7 +1,7 @@
-import type { Location, LocationSuggestion } from "@/types/profile";
-import Button from "@/ui/Button";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import AutocompleteInput from "./AutocompleteInput";
+import type { Location, LocationSuggestion } from '@/types/profile';
+import Button from '@/ui/Button';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import AutocompleteInput from './AutocompleteInput';
 
 interface LocationFormProps {
   startQuery: string;
@@ -82,21 +82,21 @@ const LocationForm = ({
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      pos => {
         const { latitude, longitude } = pos.coords;
         const coordString = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
         setStartQuery(coordString);
         const location: Location = {
           lat: latitude,
           lng: longitude,
-          name: "Ma position",
+          name: 'Ma position',
         };
         setTraceStart(location);
         // Create marker for geolocation
         createStartMarkerFromLocation(location);
       },
-      (err) => {
-        console.error("Geolocation error:", err);
+      err => {
+        console.error('Geolocation error:', err);
         alert("Impossible d'obtenir la position : " + err.message);
       },
       {
@@ -125,7 +125,7 @@ const LocationForm = ({
         setTraceStart({
           lat,
           lng,
-          name: "Point sélectionné sur la carte",
+          name: 'Point sélectionné sur la carte',
         });
         // Auto-disable after selection
         setIsMapClickMode(false);
@@ -149,7 +149,7 @@ const LocationForm = ({
       const newValue = e.target.value;
       setStartQuery(newValue);
       // Only clear the marker if the field is completely emptied
-      if (newValue.trim() === "") {
+      if (newValue.trim() === '') {
         clearStartMarker();
       }
     },
@@ -213,7 +213,7 @@ const LocationForm = ({
       const newValue = e.target.value;
       setEndQuery(newValue);
       // Only clear the marker if the field is completely emptied
-      if (newValue.trim() === "") {
+      if (newValue.trim() === '') {
         clearEndMarker();
       }
     },
@@ -265,7 +265,7 @@ const LocationForm = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className={`h-5 w-5 transition-all duration-200 ${
-          isMapClickMode ? "animate-pulse" : ""
+          isMapClickMode ? 'animate-pulse' : ''
         }`}
         fill="none"
         viewBox="0 0 24 24"
@@ -292,7 +292,7 @@ const LocationForm = ({
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className={`h-5 w-5 transition-all duration-200 ${
-          isEndMapClickMode ? "animate-pulse" : ""
+          isEndMapClickMode ? 'animate-pulse' : ''
         }`}
         fill="none"
         viewBox="0 0 24 24"
@@ -348,19 +348,19 @@ const LocationForm = ({
           type="button"
           className={`ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 ${
             isMapClickMode
-              ? "border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200"
-              : "border-gray-400 bg-white text-gray-600 hover:bg-gray-50"
+              ? 'border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200'
+              : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
           } hover:shadow-md`}
           title={
             isMapClickMode
-              ? "Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver"
-              : "Activer le mode de sélection par clic sur la carte"
+              ? 'Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver'
+              : 'Activer le mode de sélection par clic sur la carte'
           }
           onClick={handleMapClickMode}
         >
           {MapPinIcon}
           <span className="hidden sm:inline">
-            {isMapClickMode ? ActiveIndicator : "Clic carte"}
+            {isMapClickMode ? ActiveIndicator : 'Clic carte'}
           </span>
         </Button>
       </div>
@@ -377,8 +377,8 @@ const LocationForm = ({
           type="button"
           className={`ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 ${
             isEndMapClickMode
-              ? "border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200"
-              : "border-gray-400 bg-white text-gray-600 hover:bg-gray-50"
+              ? 'border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200'
+              : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
           } hover:shadow-md`}
           title={
             isEndMapClickMode
@@ -389,7 +389,7 @@ const LocationForm = ({
         >
           {EndMapPinIcon}
           <span className="hidden sm:inline">
-            {isEndMapClickMode ? ActiveIndicator : "Clic carte"}
+            {isEndMapClickMode ? ActiveIndicator : 'Clic carte'}
           </span>
         </Button>
       </div>

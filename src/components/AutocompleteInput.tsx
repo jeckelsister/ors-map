@@ -1,7 +1,7 @@
-import React from "react";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import type { LocationSuggestion } from "@/types/profile";
+import React from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import type { LocationSuggestion } from '@/types/profile';
 
 interface AutocompleteInputProps {
   label: string;
@@ -23,7 +23,7 @@ const AutocompleteInput = ({
   onChange,
   suggestions,
   onSuggestionClick,
-  placeholder = "Nom du lieu",
+  placeholder = 'Nom du lieu',
 }: AutocompleteInputProps): React.JSX.Element => (
   <Autocomplete<LocationSuggestionWithKey, false, false, true>
     freeSolo
@@ -31,8 +31,8 @@ const AutocompleteInput = ({
       ...s,
       _uniqueKey: `${s.place_id || s.display_name}-${i}`,
     }))}
-    getOptionLabel={(option) =>
-      typeof option === "string" ? option : option.display_name || ""
+    getOptionLabel={option =>
+      typeof option === 'string' ? option : option.display_name || ''
     }
     inputValue={value}
     onInputChange={(_, newInputValue) =>
@@ -41,7 +41,7 @@ const AutocompleteInput = ({
       } as React.ChangeEvent<HTMLInputElement>)
     }
     onChange={(_, newValue) => {
-      if (newValue && typeof newValue !== "string") {
+      if (newValue && typeof newValue !== 'string') {
         onSuggestionClick(newValue);
       }
     }}
@@ -50,17 +50,17 @@ const AutocompleteInput = ({
         {option.display_name}
       </li>
     )}
-    renderInput={(params) => (
+    renderInput={params => (
       <TextField
         {...params}
         label={label}
         placeholder={placeholder}
         variant="outlined"
         className="mb-4"
-        InputLabelProps={{ className: "text-black" }}
+        InputLabelProps={{ className: 'text-black' }}
         InputProps={{
           ...params.InputProps,
-          className: "text-black",
+          className: 'text-black',
         }}
       />
     )}
