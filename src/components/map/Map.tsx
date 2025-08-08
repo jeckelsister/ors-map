@@ -1,5 +1,5 @@
-import useAutocomplete from '@/hooks/useAutocomplete';
-import useMapRoute from '@/hooks/useMapRoute';
+import useAutocomplete from '@/hooks/map/useAutocomplete';
+import useMapRoute from '@/hooks/map/useMapRoute';
 import type { LocationSuggestion } from '@/types/profile';
 import 'leaflet/dist/leaflet.css';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';

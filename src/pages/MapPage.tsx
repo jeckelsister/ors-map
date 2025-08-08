@@ -1,6 +1,6 @@
 import React from 'react';
-import Map from '../components/Map';
-import Navigation from '../components/Navigation';
+import Map from '../components/map/Map';
+import Navigation from '../components/shared/Navigation';
 
 export default function MapPage(): React.JSX.Element {
   return (

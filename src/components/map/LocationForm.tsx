@@ -1,12 +1,12 @@
-import useGeolocation from '@/hooks/useGeolocation';
+import useGeolocation from '@/hooks/shared/useGeolocation';
 import type { Location, LocationSuggestion } from '@/types/profile';
 import Button from '@/ui/Button';
 import { formatCoordinates } from '@/utils/routeUtils';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import IconButton from '../shared/ui/IconButton';
+import { GeolocationIcon, MapPinIcon } from '../shared/ui/Icons';
+import StatusIndicator from '../shared/ui/StatusIndicator';
 import AutocompleteInput from './AutocompleteInput';
-import IconButton from './ui/IconButton';
-import { GeolocationIcon, MapPinIcon } from './ui/Icons';
-import StatusIndicator from './ui/StatusIndicator';
 
 interface LocationFormProps {
   startQuery: string;

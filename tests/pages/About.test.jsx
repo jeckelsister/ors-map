@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import About from '../../src/pages/About';
 
 // Helper function to render components with router
@@ -12,7 +12,7 @@ describe('About Page', () => {
   test('renders about heading', () => {
     renderWithRouter(<About />);
 
-    expect(screen.getByText('About ORS Map')).toBeInTheDocument();
+    expect(screen.getByText('About WayMaker')).toBeInTheDocument();
   });
 
   test('renders feature list', () => {

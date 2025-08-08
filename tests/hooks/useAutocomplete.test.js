@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import useAutocomplete from '../../src/hooks/useAutocomplete';
+import useAutocomplete from '../../src/hooks/map/useAutocomplete';
 
 // Mock de fetch
 const mockFetch = vi.fn();
@@ -77,7 +77,11 @@ describe('useAutocomplete', () => {
       result.current.handleStartSuggestion(suggestion);
     });
 
-    expect(result.current.traceStart).toEqual([48.8566, 2.3522]);
+    expect(result.current.traceStart).toEqual({
+      lat: 48.8566,
+      lng: 2.3522,
+      name: 'Paris, France',
+    });
     expect(result.current.startQuery).toBe('Paris, France');
     expect(result.current.startSuggestions).toEqual([]);
   });
@@ -95,7 +99,11 @@ describe('useAutocomplete', () => {
       result.current.handleEndSuggestion(suggestion);
     });
 
-    expect(result.current.traceEnd).toEqual([45.764, 4.8357]);
+    expect(result.current.traceEnd).toEqual({
+      lat: 45.764,
+      lng: 4.8357,
+      name: 'Lyon, France',
+    });
     expect(result.current.endQuery).toBe('Lyon, France');
     expect(result.current.endSuggestions).toEqual([]);
   });

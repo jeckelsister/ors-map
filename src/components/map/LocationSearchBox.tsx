@@ -1,7 +1,7 @@
+import type { LocationSuggestion } from '@/types/profile';
+import Button from '@/ui/Button';
 import { memo, useCallback } from 'react';
 import { FaSearchLocation } from 'react-icons/fa';
-import Button from '../ui/Button';
-import type { LocationSuggestion } from '@/types/profile';
 
 interface LocationSearchBoxProps {
   query: string;

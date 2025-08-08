@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
-import { describe, test, expect } from 'vitest';
-import Navigation from '../../src/components/Navigation';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, test } from 'vitest';
+import Navigation from '../../src/components/shared/Navigation';
 
 // Helper function to render components with router
 const renderWithRouter = (component, initialEntries = ['/']) => {
@@ -14,7 +14,7 @@ describe('Navigation Component', () => {
   test('renders all navigation links', () => {
     renderWithRouter(<Navigation />);
 
-    expect(screen.getByText('ORS Map')).toBeInTheDocument();
+    expect(screen.getByText('WayMaker')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Map' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe('Navigation Component', () => {
   test('navigation links have correct href attributes', () => {
     renderWithRouter(<Navigation />);
 
-    expect(screen.getByRole('link', { name: 'ORS Map' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /WayMaker/ })).toHaveAttribute(
       'href',
       '/'
     );

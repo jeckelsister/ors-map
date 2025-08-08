@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import Toast from '../components/Toast';
+import Toast from '../../components/shared/Toast';
 
 interface ToastItem {
   id: string;

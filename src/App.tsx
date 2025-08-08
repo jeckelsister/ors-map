@@ -1,8 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import ErrorBoundary from './components/ErrorBoundary';
-import OfflineIndicator from './components/OfflineIndicator';
-import { ToastProvider } from './hooks/useToast';
+import ErrorBoundary from './components/shared/ErrorBoundary';
+import OfflineIndicator from './components/shared/OfflineIndicator';
+import { ToastProvider } from './hooks/shared/useToast';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'));
