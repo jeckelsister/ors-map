@@ -1,0 +1,290 @@
+import React, { useRef, useState } from 'react';
+import ElevationProfile from '../components/hiking/ElevationProfile';
+import GPXExportControls from '../components/hiking/GPXExportControls';
+import HikingMap from '../components/hiking/HikingMap';
+import HikingProfileSelector from '../components/hiking/HikingProfileSelector';
+import POIDisplayControls from '../components/hiking/POIDisplayControls';
+import RouteStagesPlanner from '../components/hiking/RouteStagesPlanner';
+import Navigation from '../components/shared/Navigation';
+import useHikingRoute from '../hooks/hiking/useHikingRoute';
+import { useToast } from '../hooks/shared/useToast';
+import type { HikingProfile, Refuge, WaterPoint } from '../types/hiking';
+
+export default function HikingPlannerPage(): React.JSX.Element {
+  const { showToast } = useToast();
+  const hasShownInitialToast = useRef(false);
+
+  // Show map integration notification on mount (only once)
+  React.useEffect(() => {
+    if (hasShownInitialToast.current) return;
+
+    hasShownInitialToast.current = true;
+    const ignApiKey = import.meta.env.VITE_IGN_API_KEY;
+    if (ignApiKey) {
+      showToast(
+        '✅ Cartes France optimisées : OSM France + IGN disponibles !',
+        'success'
+      );
+    } else {
+      showToast(
+        '✅ Cartes OSM France activées avec sentiers GR/GRP pour la randonnée !',
+        'success'
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // showToast est stable grâce à useCallback dans useToast
+
+  const {
+    // Route planning
+    hikingProfile,
+    setHikingProfile,
+    waypoints,
+    setWaypoints,
+    isLoop,
+    setIsLoop,
+    stageCount,
+    setStageCount,
+
+    // Route data
+    currentRoute,
+    refuges,
+    waterPoints,
+
+    // UI state
+    isLoading,
+    showRefuges,
+    setShowRefuges,
+    showWaterPoints,
+    setShowWaterPoints,
+
+    // Actions
+    createRoute,
+    resetAll,
+  } = useHikingRoute({
+    onError: error => showToast(error, 'error'),
+    onSuccess: route =>
+      showToast(
+        `Itinéraire créé: ${route.totalDistance.toFixed(1)}km`,
+        'success'
+      ),
+  });
+
+  const [selectedTab, setSelectedTab] = useState<
+    'planning' | 'profile' | 'export' | 'poi'
+  >('planning');
+
+  const handleProfileChange = (profile: HikingProfile) => {
+    setHikingProfile(profile);
+  };
+
+  const handleRefugeSelect = (refuge: Refuge) => {
+    showToast(`Refuge: ${refuge.name} (${refuge.type})`, 'info');
+  };
+
+  const handleWaterPointSelect = (waterPoint: WaterPoint) => {
+    showToast(
+      `Point d'eau: ${waterPoint.name} (${waterPoint.quality})`,
+      'info'
+    );
+  };
+
+  const handleGPXExport = (gpxContent: string, filename: string) => {
+    // Custom export handler
+    const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showToast('Fichier GPX téléchargé avec succès!', 'success');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navigation />
+
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Planificateur de randonnée
+          </h1>
+          <p className="text-gray-600">
+            Créez des itinéraires multi-étapes avec profil altimétrique et
+            export GPX
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Control Panel */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Tab Navigation */}
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                {[
+                  { id: 'planning', label: 'Planning', icon: '🗺️' },
+                  { id: 'profile', label: 'Profil', icon: '⛰️' },
+                  { id: 'poi', label: 'POI', icon: '📍' },
+                  { id: 'export', label: 'Export', icon: '📁' },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedTab(tab.id as typeof selectedTab)}
+                    className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                      selectedTab === tab.id
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="bg-white rounded-lg p-4 shadow-sm">
+              {selectedTab === 'planning' && (
+                <div className="space-y-4">
+                  <HikingProfileSelector
+                    selectedProfile={hikingProfile?.id || null}
+                    onProfileChange={handleProfileChange}
+                  />
+
+                  <RouteStagesPlanner
+                    waypoints={waypoints}
+                    onWaypointsChange={setWaypoints}
+                    isLoop={isLoop}
+                    onLoopChange={setIsLoop}
+                    stageCount={stageCount}
+                    onStageCountChange={setStageCount}
+                  />
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={createRoute}
+                      disabled={isLoading || waypoints.length < 2}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isLoading ? 'Création...' : "Créer l'itinéraire"}
+                    </button>
+
+                    <button
+                      onClick={resetAll}
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedTab === 'profile' && (
+                <ElevationProfile route={currentRoute} showStages={true} />
+              )}
+
+              {selectedTab === 'poi' && (
+                <POIDisplayControls
+                  refuges={refuges}
+                  waterPoints={waterPoints}
+                  showRefuges={showRefuges}
+                  showWaterPoints={showWaterPoints}
+                  onToggleRefuges={setShowRefuges}
+                  onToggleWaterPoints={setShowWaterPoints}
+                  onRefugeSelect={handleRefugeSelect}
+                  onWaterPointSelect={handleWaterPointSelect}
+                />
+              )}
+
+              {selectedTab === 'export' && (
+                <GPXExportControls
+                  route={currentRoute}
+                  refuges={refuges}
+                  waterPoints={waterPoints}
+                  onExport={handleGPXExport}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Map and Results */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Hiking Map with IGN integration */}
+            <HikingMap
+              route={currentRoute}
+              refuges={refuges}
+              waterPoints={waterPoints}
+              showRefuges={showRefuges}
+              showWaterPoints={showWaterPoints}
+            />
+
+            {/* Route Summary */}
+            {currentRoute && (
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  Résumé de l'itinéraire
+                </h2>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {currentRoute.totalDistance.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-gray-600">km</div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      +{currentRoute.totalAscent}
+                    </div>
+                    <div className="text-sm text-gray-600">m</div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      -{currentRoute.totalDescent}
+                    </div>
+                    <div className="text-sm text-gray-600">m</div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {currentRoute.stages.length}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      étape{currentRoute.stages.length > 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stages Details */}
+                <div className="space-y-2">
+                  <h3 className="font-medium text-gray-700">
+                    Détail des étapes:
+                  </h3>
+                  {currentRoute.stages.map(stage => (
+                    <div
+                      key={stage.id}
+                      className="flex justify-between items-center p-2 bg-gray-50 rounded"
+                    >
+                      <span className="font-medium text-sm">{stage.name}</span>
+                      <div className="flex gap-4 text-xs text-gray-600">
+                        <span>{stage.distance.toFixed(1)}km</span>
+                        <span>+{stage.ascent}m</span>
+                        <span>-{stage.descent}m</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

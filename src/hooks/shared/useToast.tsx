@@ -1,4 +1,11 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 import Toast from '../../components/shared/Toast';
 
 interface ToastItem {
@@ -34,23 +41,29 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const showToast = (
-    message: string,
-    type: ToastItem['type'],
-    duration?: number
-  ) => {
-    const id = Date.now().toString();
-    const newToast: ToastItem = { id, message, type, duration };
+  const showToast = useCallback(
+    (message: string, type: ToastItem['type'], duration?: number) => {
+      const id = Date.now().toString();
+      const newToast: ToastItem = { id, message, type, duration };
 
-    setToasts(prev => [...prev, newToast]);
-  };
+      setToasts(prev => [...prev, newToast]);
+    },
+    []
+  );
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      showToast,
+    }),
+    [showToast]
+  );
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className="fixed top-4 right-4 space-y-2 z-50">
         {toasts.map(toast => (

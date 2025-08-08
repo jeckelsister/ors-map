@@ -7,6 +7,7 @@ import { ToastProvider } from './hooks/shared/useToast';
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'));
 const MapPage = lazy(() => import('./pages/MapPage'));
+const HikingPlannerPage = lazy(() => import('./pages/HikingPlannerPage'));
 const About = lazy(() => import('./pages/About'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -27,6 +28,7 @@ export default function App(): React.JSX.Element {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/map" element={<MapPage />} />
+              <Route path="/hiking" element={<HikingPlannerPage />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -42,6 +42,16 @@ export default function Navigation(): React.JSX.Element {
               Map
             </Link>
             <Link
+              to="/hiking"
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('/hiking')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              🥾 Randonnée
+            </Link>
+            <Link
               to="/about"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive('/about')

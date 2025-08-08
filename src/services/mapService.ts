@@ -3,9 +3,55 @@ import type { RouteResponse } from '@/types/profile';
 import axios, { AxiosRequestConfig } from 'axios';
 import L from 'leaflet';
 
-const MAP_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const ORS_API_URL = 'https://api.openrouteservice.org/v2/directions';
 const ELEVATION_API_URL = 'https://api.open-elevation.com/api/v1/lookup';
+
+// IGN API configuration
+const IGN_API_KEY = import.meta.env.VITE_IGN_API_KEY;
+
+// Map tile layer configurations - Updated IGN URLs with working alternatives
+export const MAP_LAYERS = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    name: 'OpenStreetMap',
+  },
+  osmFrance: {
+    url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors',
+    name: 'OpenStreetMap France',
+  },
+  cartoPositron: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    name: 'Carto Light',
+  },
+  ignPlan: {
+    url: IGN_API_KEY
+      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
+      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
+    attribution: '© IGN-France',
+    name: 'Plan IGN',
+  },
+  ignTopo: {
+    url: IGN_API_KEY
+      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
+      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
+    attribution: '© IGN-France',
+    name: 'Cartes topographiques IGN',
+  },
+  ignSatellite: {
+    url: IGN_API_KEY
+      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
+      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
+    attribution: '© IGN-France',
+    name: 'Satellite IGN',
+  },
+};
+
+// Current active layer tracking
+const activeBaseLayers = new WeakMap<L.Map, L.TileLayer>();
 
 // Extended axios config for retry logic
 interface RetryConfig extends AxiosRequestConfig {
@@ -48,14 +94,91 @@ apiClient.interceptors.response.use(
 export const initializeMap = (
   elementId: string,
   center: [number, number],
-  zoom: number = 13
+  zoom: number = 13,
+  initialLayer: keyof typeof MAP_LAYERS = 'osm'
 ): L.Map => {
   const map = L.map(elementId, { zoomControl: false }).setView(center, zoom);
-  L.tileLayer(MAP_TILE_URL, {
-    attribution: '&copy; OpenStreetMap contributors',
+
+  // Add the initial base layer
+  const layerConfig = MAP_LAYERS[initialLayer];
+  const tileLayer = L.tileLayer(layerConfig.url, {
+    attribution: layerConfig.attribution,
+    maxZoom: 18,
   }).addTo(map);
+
+  // Store the active layer
+  activeBaseLayers.set(map, tileLayer);
+
+  // Add zoom control
   L.control.zoom({ position: 'topright' }).addTo(map);
+
   return map;
+};
+
+/**
+ * Change the base layer of the map
+ */
+export const changeMapLayer = (
+  map: L.Map,
+  layerType: keyof typeof MAP_LAYERS
+): void => {
+  // Remove current base layer
+  const currentLayer = activeBaseLayers.get(map);
+  if (currentLayer) {
+    map.removeLayer(currentLayer);
+  }
+
+  // Add new base layer
+  const layerConfig = MAP_LAYERS[layerType];
+  const newLayer = L.tileLayer(layerConfig.url, {
+    attribution: layerConfig.attribution,
+    maxZoom: 18,
+  }).addTo(map);
+
+  // Update stored layer
+  activeBaseLayers.set(map, newLayer);
+};
+
+/**
+ * Get available map layers for the layer selector
+ */
+export const getAvailableMapLayers = (): Array<{
+  key: keyof typeof MAP_LAYERS;
+  name: string;
+  available: boolean;
+}> => {
+  return [
+    {
+      key: 'osm',
+      name: MAP_LAYERS.osm.name,
+      available: true,
+    },
+    {
+      key: 'osmFrance',
+      name: MAP_LAYERS.osmFrance.name,
+      available: true,
+    },
+    {
+      key: 'cartoPositron',
+      name: MAP_LAYERS.cartoPositron.name,
+      available: true,
+    },
+    {
+      key: 'ignPlan',
+      name: MAP_LAYERS.ignPlan.name,
+      available: !!IGN_API_KEY,
+    },
+    {
+      key: 'ignTopo',
+      name: MAP_LAYERS.ignTopo.name,
+      available: !!IGN_API_KEY,
+    },
+    {
+      key: 'ignSatellite',
+      name: MAP_LAYERS.ignSatellite.name,
+      available: !!IGN_API_KEY,
+    },
+  ];
 };
 
 // Markers for the selected start and end points - use WeakMaps for better memory management

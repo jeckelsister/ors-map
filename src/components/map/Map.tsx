@@ -1,10 +1,13 @@
 import useAutocomplete from '@/hooks/map/useAutocomplete';
 import useMapRoute from '@/hooks/map/useMapRoute';
+import { MAP_LAYERS } from '@/services/mapService';
 import type { LocationSuggestion } from '@/types/profile';
 import 'leaflet/dist/leaflet.css';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import IGNInfoBadge from './IGNInfoBadge';
 import LocationForm from './LocationForm';
 import LocationSearchBox from './LocationSearchBox';
+import MapLayerSelector from './MapLayerSelector';
 import SummaryDisplay from './SummaryDisplay';
 import TransportModeSelector from './TransportModeSelector';
 
@@ -23,6 +26,9 @@ const Map = (): React.JSX.Element => {
     LocationSuggestion[]
   >([]);
   const [showTrace, setShowTrace] = useState<boolean>(false);
+  const [currentMapLayer, setCurrentMapLayer] =
+    useState<keyof typeof MAP_LAYERS>('osmFrance');
+  const [showLayerSelector, setShowLayerSelector] = useState<boolean>(false);
 
   const autocompleteProps = useAutocomplete();
 
@@ -33,12 +39,14 @@ const Map = (): React.JSX.Element => {
       traceEnd: autocompleteProps.traceEnd,
       showTrace,
       profile,
+      initialMapLayer: currentMapLayer,
     }),
     [
       autocompleteProps.traceStart,
       autocompleteProps.traceEnd,
       showTrace,
       profile,
+      currentMapLayer,
     ]
   );
 
@@ -145,6 +153,11 @@ const Map = (): React.JSX.Element => {
     });
   }, []);
 
+  // Handler for map layer changes
+  const handleMapLayerChange = useCallback((layer: keyof typeof MAP_LAYERS) => {
+    setCurrentMapLayer(layer);
+  }, []);
+
   // Memoized form props to prevent unnecessary re-renders
   const locationFormProps = useMemo(
     () => ({
@@ -197,8 +210,44 @@ const Map = (): React.JSX.Element => {
         {isLoading && <LoadingIndicator />}
       </div>
 
+      {/* Map Layer Selector Toggle */}
+      <div className="absolute top-6 right-6 z-10">
+        <button
+          onClick={() => setShowLayerSelector(!showLayerSelector)}
+          className="bg-white hover:bg-gray-50 border border-gray-300 rounded-lg p-2 shadow-lg transition-colors"
+          title="Changer le fond de carte"
+        >
+          <svg
+            className="w-5 h-5 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+            />
+          </svg>
+        </button>
+
+        {showLayerSelector && (
+          <div className="absolute top-12 right-0 min-w-[280px]">
+            <MapLayerSelector
+              map={mapRef?.current || null}
+              currentLayer={currentMapLayer}
+              onLayerChange={handleMapLayerChange}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Map Container */}
       <div id="map" className="h-screen w-screen z-0" />
+
+      {/* IGN Info Badge */}
+      <IGNInfoBadge />
     </div>
   );
 };

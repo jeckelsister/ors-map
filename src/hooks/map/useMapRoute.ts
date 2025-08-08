@@ -8,6 +8,7 @@ import {
   cleanupMap,
   fetchRoute,
   initializeMap,
+  MAP_LAYERS,
   removeEndMarker,
   removeStartMarker,
 } from '@/services/mapService';
@@ -30,6 +31,7 @@ interface UseMapRouteProps {
   traceEnd: Location | null;
   showTrace: boolean;
   profile?: string;
+  initialMapLayer?: keyof typeof MAP_LAYERS;
 }
 
 export default function useMapRoute({
@@ -37,6 +39,7 @@ export default function useMapRoute({
   traceEnd,
   showTrace,
   profile = 'foot-hiking',
+  initialMapLayer = 'osmFrance',
 }: UseMapRouteProps): UseMapRouteReturn {
   // Refs for performance - avoid re-renders
   const mapRef = useRef<LeafletMap | null>(null);
@@ -109,7 +112,7 @@ export default function useMapRoute({
     const initMap = () => {
       if (!mapRef.current) {
         const center: [number, number] = [46.603354, 1.888334]; // Center of France
-        const map = initializeMap('map', center);
+        const map = initializeMap('map', center, 13, initialMapLayer);
         if (map) {
           mapRef.current = map;
         }
@@ -137,7 +140,7 @@ export default function useMapRoute({
 
       return () => observer.disconnect();
     }
-  }, []);
+  }, [initialMapLayer]);
 
   // Optimized route calculation effect with abort controller
   useEffect(() => {
