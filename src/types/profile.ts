@@ -107,6 +107,11 @@ export interface UseMapRouteReturn {
   error: string | null;
   removeRoute: (profile: string) => void;
   getActiveRoutes: () => string[];
+  enableMapClickForStart: (
+    onLocationSelect: (lat: number, lng: number) => void
+  ) => void;
+  disableMapClickForStart: () => void;
+  clearStartMarker: () => void;
 }
 
 export interface UseAutocompleteReturn {

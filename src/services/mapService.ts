@@ -1,7 +1,7 @@
+import { TRANSPORT_MODES } from "@/constants/transportModes";
+import type { RouteResponse } from "@/types/profile";
 import axios from "axios";
 import L from "leaflet";
-import type { RouteResponse } from "@/types/profile";
-import { TRANSPORT_MODES } from "@/constants/transportModes";
 
 const MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const ORS_API_URL = "https://api.openrouteservice.org/v2/directions";
@@ -20,27 +20,180 @@ export const initializeMap = (
   return map;
 };
 
+// Marker for the selected start point - use a WeakMap for better memory management
+const startMarkers = new WeakMap<L.Map, L.Marker>();
+
+// Optimized icon creation with cached styles
+const createMarkerIcon = (): L.DivIcon => {
+  return L.divIcon({
+    className: "custom-start-marker",
+    html: `
+      <div class="marker-container">
+        <div class="marker-pulse"></div>
+        <div class="marker-pin"></div>
+        <div class="marker-pointer"></div>
+      </div>
+      <style>
+        .marker-container {
+          position: relative;
+          width: 30px;
+          height: 30px;
+        }
+        .marker-pulse {
+          position: absolute;
+          width: 30px;
+          height: 30px;
+          background-color: rgba(16, 185, 129, 0.3);
+          border-radius: 50%;
+          animation: pulse 2s infinite;
+          top: 0;
+          left: 0;
+        }
+        .marker-pin {
+          position: absolute;
+          width: 16px;
+          height: 16px;
+          background-color: #10b981;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 2;
+        }
+        .marker-pointer {
+          position: absolute;
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 12px solid #10b981;
+          top: 22px;
+          left: 50%;
+          transform: translateX(-50%);
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 0.7; }
+          50% { transform: scale(1.5); opacity: 0.3; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+      </style>
+    `,
+    iconSize: [30, 42],
+    iconAnchor: [15, 42],
+    popupAnchor: [0, -42],
+  });
+};
+
+// Create a persistent start marker (not removed automatically)
+export const createStartMarker = (
+  map: L.Map,
+  lat: number,
+  lng: number
+): L.Marker => {
+  // Remove existing marker for this map if any
+  const existingMarker = startMarkers.get(map);
+  if (existingMarker) {
+    map.removeLayer(existingMarker);
+  }
+
+  // Create marker with optimized icon
+  const marker = L.marker([lat, lng], {
+    icon: createMarkerIcon(),
+    riseOnHover: true,
+    riseOffset: 250,
+  }).addTo(map);
+
+  // Store the marker for this map
+  startMarkers.set(map, marker);
+
+  // Add optimized popup
+  marker.bindPopup(
+    `<div style="text-align: center; font-family: system-ui, -apple-system, sans-serif; font-size: 14px;">
+      <strong style="color: #10b981;">📍 Point de départ</strong><br>
+      <small style="color: #6b7280;">
+        <strong>Lat:</strong> ${lat.toFixed(6)}<br>
+        <strong>Lng:</strong> ${lng.toFixed(6)}
+      </small>
+    </div>`,
+    {
+      closeButton: true,
+      autoClose: false,
+      closeOnClick: false,
+      maxWidth: 200,
+      className: "custom-popup",
+    }
+  );
+
+  return marker;
+};
+
+export const addClickHandler = (
+  map: L.Map,
+  onLocationSelect: (lat: number, lng: number) => void
+): (() => void) => {
+  const handleClick = (e: L.LeafletMouseEvent) => {
+    const { lat, lng } = e.latlng;
+
+    // Create persistent marker
+    const marker = createStartMarker(map, lat, lng);
+
+    // Open popup with slight delay for better UX
+    requestAnimationFrame(() => {
+      marker.openPopup();
+    });
+
+    onLocationSelect(lat, lng);
+  };
+
+  map.on("click", handleClick);
+
+  // Return optimized cleanup function
+  return () => {
+    map.off("click", handleClick);
+    const marker = startMarkers.get(map);
+    if (marker) {
+      map.removeLayer(marker);
+      startMarkers.delete(map);
+    }
+  };
+};
+
+export const removeStartMarker = (map: L.Map): void => {
+  const marker = startMarkers.get(map);
+  if (marker) {
+    map.removeLayer(marker);
+    startMarkers.delete(map);
+  }
+};
+
+// Optimized map cleanup with better error handling
 export const cleanupMap = (
   mapInstance: L.Map | null,
   elementId: string
 ): void => {
-  // If a map instance exists, remove it properly
-  if (mapInstance) {
-    mapInstance.remove();
-    mapInstance = null;
-  }
-
-  // Complete container cleanup
-  const mapContainer = document.getElementById(elementId);
-  if (mapContainer) {
-    // Remove all Leaflet references
-    (mapContainer as any)._leaflet_id = undefined;
-    (mapContainer as any)._leaflet = undefined;
-
-    // Clear the container of any residual content
-    while (mapContainer.firstChild) {
-      mapContainer.removeChild(mapContainer.firstChild);
+  try {
+    // If a map instance exists, remove it properly
+    if (mapInstance) {
+      mapInstance.remove();
     }
+
+    // Complete container cleanup
+    const mapContainer = document.getElementById(elementId);
+    if (mapContainer) {
+      // Remove all Leaflet references
+      (mapContainer as any)._leaflet_id = undefined;
+      (mapContainer as any)._leaflet = undefined;
+
+      // Clear the container of any residual content
+      while (mapContainer.firstChild) {
+        mapContainer.removeChild(mapContainer.firstChild);
+      }
+    }
+  } catch (error) {
+    console.error("Error during map cleanup:", error);
   }
 };
 

@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  Location,
-  RouteSummaryData,
-  UseMapRouteReturn,
-} from "@/types/profile";
 import {
+  addClickHandler,
   addRouteToMap,
   calculateElevation,
   cleanupMap,
   fetchRoute,
   initializeMap,
+  removeStartMarker,
 } from "@/services/mapService";
-import type { Map as LeafletMap, GeoJSON } from "leaflet";
+import type {
+  Location,
+  RouteSummaryData,
+  UseMapRouteReturn,
+} from "@/types/profile";
+import type { GeoJSON, Map as LeafletMap } from "leaflet";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseMapRouteProps {
   traceStart: Location | null;
@@ -29,6 +31,7 @@ export default function useMapRoute({
   const mapRef = useRef<LeafletMap | null>(null);
   const routeLayersRef = useRef<Record<string, GeoJSON>>({});
   const summariesRef = useRef<Record<string, RouteSummaryData>>({});
+  const clickHandlerCleanupRef = useRef<(() => void) | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<RouteSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -205,6 +208,11 @@ export default function useMapRoute({
   // Map cleanup only when the component is unmounted
   useEffect(() => {
     return () => {
+      // Clean up click handler
+      if (clickHandlerCleanupRef.current) {
+        clickHandlerCleanupRef.current();
+      }
+
       if (mapRef.current) {
         cleanupMap(mapRef.current, "map");
         mapRef.current = null;
@@ -234,5 +242,62 @@ export default function useMapRoute({
     return Object.keys(routeLayersRef.current);
   }, []);
 
-  return { mapRef, error, summary, isLoading, removeRoute, getActiveRoutes };
+  const enableMapClickForStart = useCallback(
+    (onLocationSelect: (lat: number, lng: number) => void) => {
+      if (!mapRef.current) return;
+
+      // Clean up any existing click handler
+      if (clickHandlerCleanupRef.current) {
+        clickHandlerCleanupRef.current();
+      }
+
+      // Add new click handler
+      clickHandlerCleanupRef.current = addClickHandler(
+        mapRef.current,
+        onLocationSelect
+      );
+
+      // Change cursor to indicate click mode with optimized styles
+      const container = mapRef.current.getContainer();
+      if (container) {
+        container.style.cursor = "crosshair";
+        container.style.transition = "cursor 0.2s ease";
+      }
+    },
+    []
+  );
+
+  const disableMapClickForStart = useCallback(() => {
+    if (!mapRef.current) return;
+
+    // Clean up click handler
+    if (clickHandlerCleanupRef.current) {
+      clickHandlerCleanupRef.current();
+      clickHandlerCleanupRef.current = null;
+    }
+
+    // Reset cursor with transition
+    const container = mapRef.current.getContainer();
+    if (container) {
+      container.style.cursor = "";
+      container.style.transition = "cursor 0.2s ease";
+    }
+  }, []);
+
+  const clearStartMarker = useCallback(() => {
+    if (!mapRef.current) return;
+    removeStartMarker(mapRef.current);
+  }, []);
+
+  return {
+    mapRef,
+    error,
+    summary,
+    isLoading,
+    removeRoute,
+    getActiveRoutes,
+    enableMapClickForStart,
+    disableMapClickForStart,
+    clearStartMarker,
+  };
 }

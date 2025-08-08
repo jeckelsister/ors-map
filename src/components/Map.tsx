@@ -1,13 +1,12 @@
-import "leaflet/dist/leaflet.css";
-import React from "react";
-import { useCallback, useEffect, useState } from "react";
 import useAutocomplete from "@/hooks/useAutocomplete";
 import useMapRoute from "@/hooks/useMapRoute";
+import type { LocationSuggestion } from "@/types/profile";
+import "leaflet/dist/leaflet.css";
+import React, { useCallback, useEffect, useState } from "react";
 import LocationForm from "./LocationForm";
 import LocationSearchBox from "./LocationSearchBox";
 import SummaryDisplay from "./SummaryDisplay";
 import TransportModeSelector from "./TransportModeSelector";
-import type { LocationSuggestion } from "@/types/profile";
 
 const Map = (): React.JSX.Element => {
   const [profile, setProfile] = useState<string>("foot-hiking");
@@ -16,13 +15,22 @@ const Map = (): React.JSX.Element => {
   const [showTrace, setShowTrace] = useState<boolean>(false);
 
   const autocompleteProps = useAutocomplete();
-  const { mapRef, error, summary, isLoading, removeRoute, getActiveRoutes } =
-    useMapRoute({
-      traceStart: autocompleteProps.traceStart,
-      traceEnd: autocompleteProps.traceEnd,
-      showTrace,
-      profile
-    });
+  const {
+    mapRef,
+    error,
+    summary,
+    isLoading,
+    removeRoute,
+    getActiveRoutes,
+    enableMapClickForStart,
+    disableMapClickForStart,
+    clearStartMarker,
+  } = useMapRoute({
+    traceStart: autocompleteProps.traceStart,
+    traceEnd: autocompleteProps.traceEnd,
+    showTrace,
+    profile,
+  });
 
   const [activeRoutes, setActiveRoutes] = useState<string[]>([]);
 
@@ -100,6 +108,9 @@ const Map = (): React.JSX.Element => {
         <LocationForm
           {...autocompleteProps}
           onCreateTrace={handleCreateTrace}
+          enableMapClickForStart={enableMapClickForStart}
+          disableMapClickForStart={disableMapClickForStart}
+          clearStartMarker={clearStartMarker}
         />
 
         <SummaryDisplay summary={summary} error={error} />
