@@ -1,6 +1,6 @@
 import type { Location, LocationSuggestion } from "@/types/profile";
 import Button from "@/ui/Button";
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useEffect, useState, useMemo } from "react";
 import AutocompleteInput from "./AutocompleteInput";
 
 interface LocationFormProps {
@@ -40,10 +40,10 @@ const LocationForm = ({
   disableMapClickForStart,
   clearStartMarker,
 }: LocationFormProps): React.JSX.Element => {
-  const [isMapClickMode, setIsMapClickMode] = React.useState(false);
+  const [isMapClickMode, setIsMapClickMode] = useState(false);
 
   // Optimized cleanup on unmount with useEffect cleanup
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (isMapClickMode) {
         disableMapClickForStart();
@@ -130,7 +130,7 @@ const LocationForm = ({
   );
 
   // Optimized icons as constants to avoid re-creation
-  const GeolocationIcon = React.useMemo(
+  const GeolocationIcon = useMemo(
     () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -154,7 +154,7 @@ const LocationForm = ({
     []
   );
 
-  const MapPinIcon = React.useMemo(
+  const MapPinIcon = useMemo(
     () => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -181,7 +181,7 @@ const LocationForm = ({
     [isMapClickMode]
   );
 
-  const ActiveIndicator = React.useMemo(
+  const ActiveIndicator = useMemo(
     () => (
       <span className="flex items-center gap-1">
         <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
