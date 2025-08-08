@@ -6,47 +6,25 @@ import L from 'leaflet';
 const ORS_API_URL = 'https://api.openrouteservice.org/v2/directions';
 const ELEVATION_API_URL = 'https://api.open-elevation.com/api/v1/lookup';
 
-// IGN API configuration
-const IGN_API_KEY = import.meta.env.VITE_IGN_API_KEY;
-
-// Map tile layer configurations - Updated IGN URLs with working alternatives
+// Map tile layer configurations - 3 essential maps for hiking
 export const MAP_LAYERS = {
-  osm: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenStreetMap contributors',
-    name: 'OpenStreetMap',
-  },
   osmFrance: {
     url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
     attribution:
       '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors',
-    name: 'OpenStreetMap France',
+    name: 'OSM France (Rando)',
   },
-  cartoPositron: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-    name: 'Carto Light',
+  openTopoMap: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap contributors | &copy; OpenTopoMap (CC-BY-SA)',
+    name: 'OpenTopoMap',
   },
-  ignPlan: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Plan IGN',
-  },
-  ignTopo: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Cartes topographiques IGN',
-  },
-  ignSatellite: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Satellite IGN',
+  cyclOSM: {
+    url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors',
+    name: 'CyclOSM France',
   },
 };
 
@@ -95,7 +73,7 @@ export const initializeMap = (
   elementId: string,
   center: [number, number],
   zoom: number = 13,
-  initialLayer: keyof typeof MAP_LAYERS = 'osm'
+  initialLayer: keyof typeof MAP_LAYERS = 'osmFrance'
 ): L.Map => {
   const map = L.map(elementId, { zoomControl: false }).setView(center, zoom);
 
@@ -148,35 +126,21 @@ export const getAvailableMapLayers = (): Array<{
   available: boolean;
 }> => {
   return [
-    {
-      key: 'osm',
-      name: MAP_LAYERS.osm.name,
-      available: true,
-    },
+    // 🥇 CARTES ESSENTIELLES RANDONNÉE
     {
       key: 'osmFrance',
       name: MAP_LAYERS.osmFrance.name,
       available: true,
     },
     {
-      key: 'cartoPositron',
-      name: MAP_LAYERS.cartoPositron.name,
+      key: 'openTopoMap',
+      name: MAP_LAYERS.openTopoMap.name,
       available: true,
     },
     {
-      key: 'ignPlan',
-      name: MAP_LAYERS.ignPlan.name,
-      available: !!IGN_API_KEY,
-    },
-    {
-      key: 'ignTopo',
-      name: MAP_LAYERS.ignTopo.name,
-      available: !!IGN_API_KEY,
-    },
-    {
-      key: 'ignSatellite',
-      name: MAP_LAYERS.ignSatellite.name,
-      available: !!IGN_API_KEY,
+      key: 'cyclOSM',
+      name: MAP_LAYERS.cyclOSM.name,
+      available: true,
     },
   ];
 };

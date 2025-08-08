@@ -285,42 +285,51 @@ export default function HikingGuide(): React.JSX.Element {
           </div>
         </GuideStep>
 
-        <GuideStep step={6} title="Cartes IGN et visualisation">
+        <GuideStep step={6} title="Cartes spécialisées randonnée">
           <div className="space-y-3">
             <p className="text-gray-600">
-              Utilisez les cartes IGN France pour une précision topographique
-              exceptionnelle :
+              Utilisez les 3 cartes parfaites pour la randonnée en France :
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">
-                  🗺️ Cartes topographiques IGN
+                  🥇 OSM France
                 </h4>
                 <ul className="space-y-1 text-sm text-blue-700">
-                  <li>• Courbes de niveau détaillées</li>
-                  <li>• Sentiers officiels et non-officiels</li>
-                  <li>• Relief et végétation précis</li>
-                  <li>• Parfait pour la randonnée en France</li>
+                  <li>• Sentiers GR/GRP balisés</li>
+                  <li>• Refuges et points d'eau</li>
+                  <li>• LA référence randonnée</li>
+                  <li>• Communauté française active</li>
                 </ul>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">
-                  📸 Autres fonds de carte
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-purple-800 mb-2">
+                  🏔️ OpenTopoMap
                 </h4>
-                <ul className="space-y-1 text-sm text-green-700">
-                  <li>• Plan IGN : cartes routières détaillées</li>
-                  <li>• Satellite IGN : images aériennes</li>
-                  <li>• OpenStreetMap : cartes libres mondiales</li>
-                  <li>• Changement facile via l'icône couches</li>
+                <ul className="space-y-1 text-sm text-purple-700">
+                  <li>• Courbes de niveau précises</li>
+                  <li>• Style montagne suisse</li>
+                  <li>• Relief très détaillé</li>
+                  <li>• Parfait pour l'altitude</li>
+                </ul>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-orange-800 mb-2">
+                  🚴 CyclOSM
+                </h4>
+                <ul className="space-y-1 text-sm text-orange-700">
+                  <li>• Tous les sentiers balisés</li>
+                  <li>• Pistes cyclables et VTT</li>
+                  <li>• Chemins alternatifs</li>
+                  <li>• Multi-activités outdoor</li>
                 </ul>
               </div>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
-              <p className="text-sm text-yellow-700">
-                <strong>💡 Astuce :</strong> Les cartes IGN avec courbes de
-                niveau sont idéales pour analyser la difficulté du terrain et
-                planifier vos pauses. Cliquez sur l'icône couches en haut à
-                droite de la carte pour changer de fond.
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+              <p className="text-sm text-green-700">
+                <strong>✨ Avantage :</strong> Les 3 cartes sont gratuites et
+                complémentaires. OSM France pour les sentiers, OpenTopoMap pour
+                le relief, CyclOSM pour découvrir d'autres chemins !
               </p>
             </div>
           </div>
@@ -376,8 +385,8 @@ export default function HikingGuide(): React.JSX.Element {
               configuré)
             </li>
             <li>
-              • <strong>IGN Géoportail :</strong> Cartes françaises avec courbes
-              de niveau (✅ activé)
+              • <strong>Cartes randonnée :</strong> 3 fonds de carte spécialisés
+              (✅ activé)
             </li>
             <li>
               • <strong>Open-Elevation :</strong> Données d'altitude (✅

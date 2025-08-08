@@ -19,46 +19,8 @@ interface OverpassElement {
   tags: Record<string, string>;
 }
 
-interface OverpassResponse {
-  elements: OverpassElement[];
-}
-
-interface ElevationResponse {
-  results: Array<{
-    latitude: number;
-    longitude: number;
-    elevation: number;
-  }>;
-}
-
-const IGN_API_KEY = import.meta.env.VITE_IGN_API_KEY;
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
-
-// IGN Tile Layer URLs - Updated to current IGN API endpoints with fallback
-export const IGN_TILE_LAYERS = {
-  PLAN: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Plan IGN',
-  },
-  SATELLITE: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Satellite IGN',
-  },
-  TOPO: {
-    url: IGN_API_KEY
-      ? `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&apikey=${IGN_API_KEY}`
-      : `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`,
-    attribution: '© IGN-France',
-    name: 'Cartes IGN',
-  },
-};
 
 /**
  * Calculate elevation profile for a route

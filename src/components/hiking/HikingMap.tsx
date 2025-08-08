@@ -221,18 +221,38 @@ const HikingMap: React.FC<HikingMapProps> = ({
   };
 
   return (
-    <div
-      className={`relative bg-white rounded-lg shadow-sm overflow-hidden ${className}`}
-    >
+    <div className={`relative bg-white rounded-lg shadow-sm ${className}`}>
       {/* Map Layer Selector */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 left-4 z-[9999]" style={{ zIndex: 9999 }}>
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
-          className="bg-white hover:bg-gray-50 border border-gray-300 rounded-lg p-2 shadow-lg transition-colors"
-          title="Changer le fond de carte"
+          className={`
+            relative bg-white hover:bg-blue-50 border-2 rounded-xl p-3 shadow-xl
+            transition-all duration-200 group
+            ${showLayerSelector ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'}
+          `}
+          title="🗺️ Sélectionner les cartes de randonnée"
+          style={{ zIndex: 9999, position: 'relative' }}
         >
+          {/* Badge discret mais visible */}
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+
+          {/* Label au survol */}
+          <div
+            className="absolute -bottom-10 left-1/2 transform -translate-x-1/2
+                         bg-gray-900 text-white text-xs px-3 py-2 rounded-lg
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                         whitespace-nowrap z-50 pointer-events-none"
+          >
+            🗺️ OSM France • OpenTopoMap • CyclOSM
+          </div>
+
           <svg
-            className="w-5 h-5 text-gray-600"
+            className={`w-6 h-6 transition-colors ${
+              showLayerSelector
+                ? 'text-blue-600'
+                : 'text-gray-600 group-hover:text-blue-600'
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -247,7 +267,10 @@ const HikingMap: React.FC<HikingMapProps> = ({
         </button>
 
         {showLayerSelector && (
-          <div className="absolute top-12 right-0 min-w-[280px]">
+          <div
+            className="absolute top-16 left-0 min-w-[280px] z-[9999]"
+            style={{ zIndex: 9999 }}
+          >
             <MapLayerSelector
               map={mapRef.current}
               currentLayer={currentMapLayer}
@@ -282,7 +305,7 @@ const HikingMap: React.FC<HikingMapProps> = ({
       </div>
 
       {/* Map container */}
-      <div id="hiking-map" className="h-96 w-full" />
+      <div id="hiking-map" className="h-[600px] w-full" />
     </div>
   );
 };

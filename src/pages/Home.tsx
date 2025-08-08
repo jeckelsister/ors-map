@@ -62,10 +62,55 @@ export default function Home(): React.JSX.Element {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="text-purple-600 text-4xl mb-4">�</div>
+            <div className="text-purple-600 text-4xl mb-4">📱</div>
             <h3 className="text-lg font-semibold mb-2">Export GPX</h3>
             <p className="text-gray-600">
               Téléchargement compatible GPS et applications de randonnée
+            </p>
+          </div>
+        </div>
+
+        {/* Nouvelle section : Cartes de randonnée */}
+        <div className="mt-12 bg-gradient-to-r from-green-100 to-blue-100 rounded-xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+            🗺️ Nouvelles Cartes de Randonnée Premium
+          </h2>
+          <p className="text-gray-600 text-center mb-6">
+            Accédez aux meilleures cartes pour la randonnée en France
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+              <h4 className="font-semibold text-blue-800 mb-1">
+                🥇 OSM France
+              </h4>
+              <p className="text-sm text-gray-600">
+                GR/GRP + refuges + sources
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+              <h4 className="font-semibold text-purple-800 mb-1">
+                🏔️ OpenTopoMap
+              </h4>
+              <p className="text-sm text-gray-600">
+                Courbes niveau pro montagne
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
+              <h4 className="font-semibold text-orange-800 mb-1">🚴 CyclOSM</h4>
+              <p className="text-sm text-gray-600">VTT + sentiers balisés</p>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/hiking"
+              className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
+            >
+              🎯 Découvrir les cartes premium
+            </Link>
+            <p className="text-sm text-gray-600 mt-2">
+              Bouton avec point vert en haut à gauche de la carte
             </p>
           </div>
         </div>
@@ -116,7 +161,7 @@ export default function Home(): React.JSX.Element {
               <ul className="space-y-2 text-gray-600">
                 <li>• Export GPX compatible tous GPS</li>
                 <li>• Options configurables (POI, altitude, étapes)</li>
-                <li>• Cartes IGN françaises officielles</li>
+                <li>• 3 cartes spécialisées randonnée</li>
                 <li>• Courbes de niveau précises</li>
               </ul>
             </div>

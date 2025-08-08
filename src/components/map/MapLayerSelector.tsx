@@ -79,24 +79,19 @@ const MapLayerSelector: React.FC<MapLayerSelectorProps> = ({
               >
                 {layer.name}
               </div>
-              {!layer.available && layer.key.startsWith('ign') && (
-                <div className="text-xs text-gray-400 mt-1">
-                  Clé API IGN requise
-                </div>
-              )}
-              {layer.key === 'ignTopo' && layer.available && (
-                <div className="text-xs text-green-600 mt-1">
-                  ✓ Avec courbes de niveau
-                </div>
-              )}
               {layer.key === 'osmFrance' && (
                 <div className="text-xs text-blue-600 mt-1">
-                  ✓ Optimisé France + sentiers GR
+                  🥇 TOP Rando : GR/GRP + refuges + sources
                 </div>
               )}
-              {layer.key === 'cartoPositron' && (
-                <div className="text-xs text-gray-600 mt-1">
-                  ✓ Style épuré pour randonnée
+              {layer.key === 'openTopoMap' && (
+                <div className="text-xs text-purple-600 mt-1">
+                  🏔️ Style Suisse + courbes + relief
+                </div>
+              )}
+              {layer.key === 'cyclOSM' && (
+                <div className="text-xs text-orange-600 mt-1">
+                  🚴 Pistes cyclables + sentiers
                 </div>
               )}
             </div>
@@ -105,16 +100,25 @@ const MapLayerSelector: React.FC<MapLayerSelectorProps> = ({
       </div>
 
       {/* Information about map layers */}
-      <div className="mt-4 p-3 bg-blue-50 rounded-md">
-        <h4 className="text-xs font-semibold text-blue-800 mb-1">
-          🗺️ Cartes Optimisées France
+      <div className="mt-4 p-3 bg-green-50 rounded-md">
+        <h4 className="text-xs font-semibold text-green-800 mb-2">
+          🎯 3 Cartes Parfaites pour la Randonnée
         </h4>
-        <p className="text-xs text-blue-700">
-          <strong>OSM France</strong> : Excellent pour la randonnée avec
-          sentiers GR/GRP.
-          <strong>IGN</strong> : Cartes officielles (clé API requise).
-          <strong>Carto</strong> : Style épuré et moderne.
-        </p>
+        <div className="space-y-1 text-xs text-green-700">
+          <div>
+            <strong>🥇 OSM France</strong> : LA référence rando (GR/GRP +
+            refuges)
+          </div>
+          <div>
+            <strong>🏔️ OpenTopoMap</strong> : Relief et courbes de niveau pros
+          </div>
+          <div>
+            <strong>🚴 CyclOSM</strong> : VTT et tous sentiers balisés
+          </div>
+        </div>
+        <div className="mt-2 text-xs text-green-600">
+          ✨ Toutes gratuites, sans clé API requise
+        </div>
       </div>
     </div>
   );

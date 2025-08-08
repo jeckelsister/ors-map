@@ -4,7 +4,6 @@ import { MAP_LAYERS } from '@/services/mapService';
 import type { LocationSuggestion } from '@/types/profile';
 import 'leaflet/dist/leaflet.css';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import IGNInfoBadge from './IGNInfoBadge';
 import LocationForm from './LocationForm';
 import LocationSearchBox from './LocationSearchBox';
 import MapLayerSelector from './MapLayerSelector';
@@ -211,14 +210,25 @@ const Map = (): React.JSX.Element => {
       </div>
 
       {/* Map Layer Selector Toggle */}
-      <div className="absolute top-6 right-6 z-10">
+      <div className="absolute top-6 left-6 z-50">
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
-          className="bg-white hover:bg-gray-50 border border-gray-300 rounded-lg p-2 shadow-lg transition-colors"
-          title="Changer le fond de carte"
+          className={`
+            relative bg-white hover:bg-blue-50 border-2 rounded-xl p-3 shadow-xl
+            transition-all duration-200 group
+            ${showLayerSelector ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'}
+          `}
+          title="🗺️ Changer le fond de carte"
         >
+          {/* Badge avec indicateur */}
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+
           <svg
-            className="w-5 h-5 text-gray-600"
+            className={`w-6 h-6 transition-colors ${
+              showLayerSelector
+                ? 'text-blue-600'
+                : 'text-gray-600 group-hover:text-blue-600'
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -233,7 +243,7 @@ const Map = (): React.JSX.Element => {
         </button>
 
         {showLayerSelector && (
-          <div className="absolute top-12 right-0 min-w-[280px]">
+          <div className="absolute top-12 left-0 min-w-[280px] z-50">
             <MapLayerSelector
               map={mapRef?.current || null}
               currentLayer={currentMapLayer}
@@ -245,9 +255,6 @@ const Map = (): React.JSX.Element => {
 
       {/* Map Container */}
       <div id="map" className="h-screen w-screen z-0" />
-
-      {/* IGN Info Badge */}
-      <IGNInfoBadge />
     </div>
   );
 };

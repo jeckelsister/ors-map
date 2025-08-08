@@ -19,18 +19,10 @@ export default function HikingPlannerPage(): React.JSX.Element {
     if (hasShownInitialToast.current) return;
 
     hasShownInitialToast.current = true;
-    const ignApiKey = import.meta.env.VITE_IGN_API_KEY;
-    if (ignApiKey) {
-      showToast(
-        '✅ Cartes France optimisées : OSM France + IGN disponibles !',
-        'success'
-      );
-    } else {
-      showToast(
-        '✅ Cartes OSM France activées avec sentiers GR/GRP pour la randonnée !',
-        'success'
-      );
-    }
+    showToast(
+      '🎯 3 cartes parfaites pour la randonnée : OSM France, OpenTopoMap & CyclOSM !',
+      'success'
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // showToast est stable grâce à useCallback dans useToast
 
@@ -104,7 +96,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 relative">
       <Navigation />
 
       <div className="container mx-auto px-4 py-6">
@@ -212,8 +204,53 @@ export default function HikingPlannerPage(): React.JSX.Element {
           </div>
 
           {/* Map and Results */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Hiking Map with IGN integration */}
+          <div className="lg:col-span-2 space-y-6 relative">
+            {/* Sélecteur de cartes - Position optimale */}
+            <div className="absolute top-4 left-4 z-50">
+              <button
+                onClick={() => {
+                  // Déclencher l'ouverture du sélecteur via le composant HikingMap
+                  const mapLayerButton = document.querySelector(
+                    '[title*="Sélectionner les cartes"]'
+                  ) as HTMLButtonElement;
+                  if (mapLayerButton) {
+                    mapLayerButton.click();
+                  }
+                }}
+                className="bg-white hover:bg-blue-50 border-2 border-green-500 rounded-xl p-3 shadow-lg
+                          transition-all duration-200 group hover:border-green-600"
+                title="🗺️ Choisir les cartes de randonnée"
+              >
+                {/* Badge indicateur */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+
+                {/* Tooltip informatif */}
+                <div
+                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2
+                               bg-gray-900 text-white text-xs px-3 py-2 rounded-lg
+                               opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                               whitespace-nowrap pointer-events-none"
+                >
+                  🗺️ OSM France • OpenTopoMap • CyclOSM
+                </div>
+
+                <svg
+                  className="w-6 h-6 text-green-600 group-hover:text-green-700 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Hiking Map with 3 essential layers */}
             <HikingMap
               route={currentRoute}
               refuges={refuges}
