@@ -16,6 +16,7 @@ import type {
   RouteSummaryData,
   UseMapRouteReturn,
 } from '@/types/profile';
+import { logger } from '@/utils/logger';
 import {
   calculateCenter,
   formatDistance,
@@ -91,7 +92,7 @@ export default function useMapRoute({
           ...elevationData,
         };
       } catch (error) {
-        console.warn("Erreur lors du calcul de l'élévation :", error);
+        logger.warn("Erreur lors du calcul de l'élévation :", error);
         return {
           duration: durationText,
           distance: distanceText,
@@ -202,7 +203,7 @@ export default function useMapRoute({
             ? err.message
             : 'Error while retrieving the route.'
         );
-        console.error('Route processing error:', err);
+        logger.error('Route processing error:', err);
       } finally {
         setIsLoading(false);
       }
