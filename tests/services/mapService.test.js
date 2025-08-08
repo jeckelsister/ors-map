@@ -1,10 +1,28 @@
-import axios from 'axios';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { calculateElevation, fetchRoute } from '../../src/services/mapService';
 
-// Mock d'axios
-vi.mock('axios');
-const mockedAxios = vi.mocked(axios);
+// Mock d'axios avec vi.hoisted
+const { mockPost, mockGet } = vi.hoisted(() => ({
+  mockPost: vi.fn(),
+  mockGet: vi.fn()
+}));
+
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn(() => ({
+      post: mockPost,
+      get: mockGet,
+      interceptors: {
+        response: {
+          use: vi.fn()
+        }
+      }
+    })),
+    post: mockPost,
+    get: mockGet,
+    isAxiosError: vi.fn(() => true)
+  }
+}));
 
 // Mock for the elevation API fetch
 const mockFetch = vi.fn();
@@ -36,7 +54,7 @@ describe('mapService', () => {
         ],
       };
 
-      mockedAxios.post.mockResolvedValueOnce({ data: mockRouteData });
+      mockPost.mockResolvedValueOnce({ data: mockRouteData });
 
       const result = await fetchRoute(
         [48.8566, 2.3522], // Paris
@@ -45,7 +63,7 @@ describe('mapService', () => {
         'test-api-key'
       );
 
-      expect(mockedAxios.post).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'https://api.openrouteservice.org/v2/directions/foot-hiking/geojson',
         {
           coordinates: [
@@ -66,7 +84,7 @@ describe('mapService', () => {
     });
 
     it('should handle API errors', async () => {
-      mockedAxios.post.mockRejectedValueOnce(new Error('API Error'));
+      mockPost.mockRejectedValueOnce(new Error('API Error'));
 
       await expect(
         fetchRoute(

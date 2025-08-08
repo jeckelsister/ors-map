@@ -35,7 +35,12 @@ describe('LocationForm', () => {
     const user = userEvent.setup();
     const onCreateTrace = vi.fn();
 
-    render(<LocationForm {...defaultProps} onCreateTrace={onCreateTrace} />);
+    render(<LocationForm 
+      {...defaultProps} 
+      startQuery="Paris"
+      endQuery="Lyon"
+      onCreateTrace={onCreateTrace} 
+    />);
 
     await user.click(screen.getByText('Créer la trace'));
     expect(onCreateTrace).toHaveBeenCalledOnce();
@@ -53,7 +58,7 @@ describe('LocationForm', () => {
 
     render(<LocationForm {...defaultProps} />);
 
-    const locationButton = screen.getByTitle('Utiliser ma position');
+    const locationButton = screen.getByTitle('Utiliser ma position GPS');
     await user.click(locationButton);
 
     expect(mockGetCurrentPosition).toHaveBeenCalled();
