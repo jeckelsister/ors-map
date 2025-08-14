@@ -39,6 +39,7 @@ export interface RouteStage {
 }
 
 export interface Coordinates {
+  id?: string;
   lat: number;
   lng: number;
   name?: string;

@@ -1,6 +1,22 @@
 import type { Coordinates } from '@/types/hiking';
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import React, { useState } from 'react';
 import { FaMinus, FaPlus, FaRedo, FaRoute } from 'react-icons/fa';
+import DraggableWaypoint from './DraggableWaypoint';
 
 interface RouteStagesPlannerProps {
   waypoints: Coordinates[];
@@ -23,10 +39,38 @@ export default function RouteStagesPlanner({
 }: RouteStagesPlannerProps): React.JSX.Element {
   const [newWaypointName, setNewWaypointName] = useState('');
 
+  // Drag & Drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for reordering waypoints
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = waypoints.findIndex(
+        waypoint => waypoint.id === active.id
+      );
+      const newIndex = waypoints.findIndex(
+        waypoint => waypoint.id === over?.id
+      );
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newWaypoints = arrayMove(waypoints, oldIndex, newIndex);
+        onWaypointsChange(newWaypoints);
+      }
+    }
+  };
+
   const addWaypoint = () => {
     if (waypoints.length >= 20) return; // Limit to 20 waypoints
 
     const newWaypoint: Coordinates = {
+      id: `waypoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       lat: 0,
       lng: 0,
       name: newWaypointName || `Point ${waypoints.length + 1}`,
@@ -155,37 +199,36 @@ export default function RouteStagesPlanner({
           </button>
         </div>
 
-        <div className="space-y-2 max-h-40 overflow-y-auto">
-          {waypoints.map((waypoint, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
+        <div className="space-y-2">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={waypoints.map(
+                waypoint =>
+                  waypoint.id || `waypoint-${waypoints.indexOf(waypoint)}`
+              )}
+              strategy={verticalListSortingStrategy}
             >
-              <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-                {index === 0
-                  ? 'A'
-                  : index === waypoints.length - 1 && !isLoop
-                    ? 'B'
-                    : index + 1}
-              </div>
-
-              <input
-                type="text"
-                value={waypoint.name || ''}
-                onChange={e => updateWaypoint(index, 'name', e.target.value)}
-                placeholder={`Point ${index + 1}`}
-                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-              />
-
-              <button
-                onClick={() => removeWaypoint(index)}
-                disabled={waypoints.length <= 2}
-                className="p-1 text-red-600 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaMinus className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
+              {waypoints.map((waypoint, index) => (
+                <DraggableWaypoint
+                  key={waypoint.id || `waypoint-${index}`}
+                  waypoint={waypoint}
+                  index={index}
+                  isFirst={index === 0}
+                  isLast={index === waypoints.length - 1}
+                  isLoop={isLoop}
+                  onUpdate={(field, value) =>
+                    updateWaypoint(index, field, value)
+                  }
+                  onRemove={() => removeWaypoint(index)}
+                  canRemove={waypoints.length > 2}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Add waypoint input */}
@@ -208,9 +251,19 @@ export default function RouteStagesPlanner({
         </div>
       </div>
 
-      {/* Info about clicking on map */}
-      <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 p-2 rounded">
-        💡 Cliquez sur la carte pour positionner vos points de passage
+      {/* Info about clicking on map and drag & drop */}
+      <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 p-2 rounded space-y-1">
+        <div>
+          💡 Double-cliquez sur la carte (points accrochés automatiquement aux
+          sentiers)
+        </div>
+        <div>
+          🔄 Glissez-déposez les points dans la liste pour changer l'ordre
+        </div>
+        <div>
+          🎯 L'itinéraire sera automatiquement divisé en {stageCount} étape
+          {stageCount > 1 ? 's' : ''} lors de la création
+        </div>
       </div>
     </div>
   );

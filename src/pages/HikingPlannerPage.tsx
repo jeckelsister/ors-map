@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
 import HikingMap from '../components/hiking/HikingMap';
@@ -13,6 +13,7 @@ import type { HikingProfile, Refuge, WaterPoint } from '../types/hiking';
 export default function HikingPlannerPage(): React.JSX.Element {
   const { showToast } = useToast();
   const hasShownInitialToast = useRef(false);
+  const pendingToastMessage = useRef<string | null>(null);
 
   // Show map integration notification on mount (only once)
   React.useEffect(() => {
@@ -94,6 +95,92 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
     showToast('Fichier GPX téléchargé avec succès!', 'success');
   };
+
+  const handleMapClick = useCallback(
+    async (lat: number, lng: number) => {
+      try {
+        // Utiliser directement les coordonnées cliquées
+        const finalLat = lat;
+        const finalLng = lng;
+
+        // Logic: Premier clic = Point A, dernier clic = Point B, clics intermédiaires = étapes
+        setWaypoints(prev => {
+          const newWaypoints = [...prev];
+
+          // Si c'est le premier clic et que Point A n'est pas défini
+          if (
+            newWaypoints.length === 2 &&
+            newWaypoints[0].lat === 0 &&
+            newWaypoints[0].lng === 0
+          ) {
+            // Remplacer Point A
+            newWaypoints[0] = {
+              ...newWaypoints[0],
+              lat: finalLat,
+              lng: finalLng,
+              name: 'Point A',
+            };
+            pendingToastMessage.current = 'Point A (départ) défini';
+            return newWaypoints;
+          }
+
+          // Si Point A existe mais Point B n'est pas défini
+          if (
+            newWaypoints.length === 2 &&
+            newWaypoints[1].lat === 0 &&
+            newWaypoints[1].lng === 0
+          ) {
+            // Remplacer Point B
+            newWaypoints[1] = {
+              ...newWaypoints[1],
+              lat: finalLat,
+              lng: finalLng,
+              name: 'Point B',
+            };
+            pendingToastMessage.current = 'Point B (arrivée) défini';
+            return newWaypoints;
+          }
+
+          // Si les deux points existent, ajouter une étape avant le point B
+          if (newWaypoints.length >= 2) {
+            const pointB = newWaypoints[newWaypoints.length - 1]; // Sauvegarder Point B
+            const etapeNumber = newWaypoints.length - 1;
+
+            // Insérer la nouvelle étape avant Point B
+            newWaypoints[newWaypoints.length - 1] = {
+              id: `waypoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              lat: finalLat,
+              lng: finalLng,
+              name: `Étape ${etapeNumber}`,
+            };
+
+            // Remettre Point B à la fin
+            newWaypoints.push({
+              ...pointB,
+              name: 'Point B',
+            });
+
+            pendingToastMessage.current = `Étape ${etapeNumber} ajoutée`;
+            return newWaypoints;
+          }
+
+          return newWaypoints;
+        });
+      } catch (error) {
+        console.error('Error in handleMapClick:', error);
+        showToast('Erreur lors du placement du point', 'error');
+      }
+    },
+    [setWaypoints, showToast]
+  );
+
+  // Effect to show pending toast messages
+  React.useEffect(() => {
+    if (pendingToastMessage.current) {
+      showToast(pendingToastMessage.current, 'success');
+      pendingToastMessage.current = null;
+    }
+  }, [waypoints, showToast]);
 
   return (
     <div className="min-h-screen bg-gray-100 relative">
@@ -257,6 +344,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
               waterPoints={waterPoints}
               showRefuges={showRefuges}
               showWaterPoints={showWaterPoints}
+              waypoints={waypoints}
+              onMapClick={handleMapClick}
             />
 
             {/* Route Summary */}

@@ -16,6 +16,8 @@ interface HikingMapProps {
   showRefuges?: boolean;
   showWaterPoints?: boolean;
   className?: string;
+  onMapClick?: (lat: number, lng: number) => void;
+  waypoints?: Array<{ lat: number; lng: number; name?: string }>;
 }
 
 const HikingMap: React.FC<HikingMapProps> = ({
@@ -25,11 +27,14 @@ const HikingMap: React.FC<HikingMapProps> = ({
   showRefuges = false,
   showWaterPoints = false,
   className = '',
+  onMapClick,
+  waypoints = [],
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const routeLayerRef = useRef<L.GeoJSON | null>(null);
   const refugeLayersRef = useRef<L.Marker[]>([]);
   const waterPointLayersRef = useRef<L.Marker[]>([]);
+  const waypointMarkersRef = useRef<L.Marker[]>([]);
   const [currentMapLayer, setCurrentMapLayer] =
     useState<keyof typeof MAP_LAYERS>('osmFrance');
   const [showLayerSelector, setShowLayerSelector] = useState<boolean>(false);
@@ -41,6 +46,10 @@ const HikingMap: React.FC<HikingMapProps> = ({
       // Default to France center for hiking
       const center: [number, number] = [45.0, 2.0];
       const map = initializeMap('hiking-map', center, 6, 'osmFrance');
+
+      // Disable double-click zoom to prevent conflicts
+      map.doubleClickZoom.disable();
+
       mapRef.current = map;
     }
 
@@ -50,16 +59,38 @@ const HikingMap: React.FC<HikingMapProps> = ({
         mapRef.current = null;
       }
     };
-  }, []);
+  }, []); // Removed onMapClick dependency
+
+  // Handle map click events separately
+  useEffect(() => {
+    if (mapRef.current && onMapClick) {
+      const map = mapRef.current;
+
+      const handleDoubleClick = (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        onMapClick(lat, lng);
+      };
+
+      map.on('dblclick', handleDoubleClick);
+
+      return () => {
+        map.off('dblclick', handleDoubleClick);
+      };
+    }
+  }, [onMapClick]);
 
   // Display route
   useEffect(() => {
-    if (!mapRef.current || !route) return;
+    if (!mapRef.current) return;
 
     // Remove existing route
     if (routeLayerRef.current) {
       mapRef.current.removeLayer(routeLayerRef.current);
+      routeLayerRef.current = null;
     }
+
+    // If no route, stop here (route has been cleared)
+    if (!route) return;
 
     // Add new route
     try {
@@ -213,6 +244,80 @@ const HikingMap: React.FC<HikingMapProps> = ({
     }
   }, [showWaterPoints, waterPoints]);
 
+  // Display waypoints
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Clear existing waypoint markers
+    waypointMarkersRef.current.forEach(marker => {
+      mapRef.current!.removeLayer(marker);
+    });
+    waypointMarkersRef.current = [];
+
+    // Add waypoint markers
+    waypoints.forEach((waypoint, index) => {
+      if (waypoint.lat === 0 && waypoint.lng === 0) return; // Skip invalid coordinates
+
+      const isStart = index === 0;
+      const isEnd = index === waypoints.length - 1 && waypoints.length > 1;
+
+      let markerHtml = '';
+      let markerClass = '';
+
+      if (isStart) {
+        // Point A (départ) - Vert
+        markerHtml = `
+          <div class="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
+            A
+          </div>
+        `;
+        markerClass = 'start-marker';
+      } else if (isEnd) {
+        // Point B (arrivée) - Rouge
+        markerHtml = `
+          <div class="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
+            B
+          </div>
+        `;
+        markerClass = 'end-marker';
+      } else {
+        // Étapes intermédiaires - Bleu avec numéro
+        const stepNumber = index;
+        markerHtml = `
+          <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white">
+            ${stepNumber}
+          </div>
+        `;
+        markerClass = 'intermediate-marker';
+      }
+
+      const icon = L.divIcon({
+        className: `waypoint-marker ${markerClass}`,
+        html: markerHtml,
+        iconSize: isStart || isEnd ? [40, 40] : [32, 32],
+        iconAnchor: isStart || isEnd ? [20, 20] : [16, 16],
+      });
+
+      const pointType = isStart
+        ? 'Départ'
+        : isEnd
+          ? 'Arrivée'
+          : `Étape ${index}`;
+      const marker = L.marker([waypoint.lat, waypoint.lng], { icon }).addTo(
+        mapRef.current!
+      ).bindPopup(`
+          <div class="text-center">
+            <strong>${pointType}</strong><br>
+            <small>${waypoint.name || `Point ${index + 1}`}</small><br>
+            <small>Lat: ${waypoint.lat.toFixed(6)}</small><br>
+            <small>Lng: ${waypoint.lng.toFixed(6)}</small>
+          </div>
+        `);
+
+      waypointMarkersRef.current.push(marker);
+    });
+  }, [waypoints]);
+
   const handleMapLayerChange = (layer: keyof typeof MAP_LAYERS) => {
     if (mapRef.current) {
       changeMapLayer(mapRef.current, layer);
@@ -281,8 +386,37 @@ const HikingMap: React.FC<HikingMapProps> = ({
       </div>
 
       {/* Map legend */}
-      <div className="absolute bottom-4 left-4 z-10 bg-white bg-opacity-90 rounded-lg p-3 text-sm">
-        <div className="flex items-center space-x-4">
+      <div
+        className="absolute bottom-4 left-4 z-[9998] bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200"
+        style={{ zIndex: 9998 }}
+      >
+        <div className="flex items-center space-x-4 flex-wrap">
+          {waypoints.length > 0 && (
+            <>
+              <div className="flex items-center space-x-1">
+                <div className="w-5 h-5 bg-green-600 rounded-full text-white text-xs flex items-center justify-center font-bold">
+                  A
+                </div>
+                <span>Départ</span>
+              </div>
+              {waypoints.length > 2 && (
+                <div className="flex items-center space-x-1">
+                  <div className="w-4 h-4 bg-blue-600 rounded-full text-white text-xs flex items-center justify-center font-bold">
+                    •
+                  </div>
+                  <span>Étapes</span>
+                </div>
+              )}
+              {waypoints.length > 1 && (
+                <div className="flex items-center space-x-1">
+                  <div className="w-5 h-5 bg-red-600 rounded-full text-white text-xs flex items-center justify-center font-bold">
+                    B
+                  </div>
+                  <span>Arrivée</span>
+                </div>
+              )}
+            </>
+          )}
           {route && (
             <div className="flex items-center space-x-1">
               <div className="w-4 h-1 bg-pink-600 rounded"></div>
@@ -305,7 +439,7 @@ const HikingMap: React.FC<HikingMapProps> = ({
       </div>
 
       {/* Map container */}
-      <div id="hiking-map" className="h-[600px] w-full" />
+      <div id="hiking-map" className="h-[calc(100vh-16rem)] w-full" />
     </div>
   );
 };

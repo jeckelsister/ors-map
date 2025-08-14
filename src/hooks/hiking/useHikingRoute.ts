@@ -1,6 +1,7 @@
 import { HIKING_PROFILES } from '@/constants/hiking';
 import {
   createHikingRoute,
+  divideRouteIntoStages,
   findRefugesNearRoute,
   findWaterPointsNearRoute,
 } from '@/services/hikingService';
@@ -27,8 +28,18 @@ export default function useHikingRoute({
     HIKING_PROFILES[0] // Default to first profile
   );
   const [waypoints, setWaypoints] = useState<Coordinates[]>([
-    { lat: 0, lng: 0, name: 'Point A' },
-    { lat: 0, lng: 0, name: 'Point B' },
+    { 
+      id: `waypoint-${Date.now()}-init-a`, 
+      lat: 0, 
+      lng: 0, 
+      name: 'Point A' 
+    },
+    { 
+      id: `waypoint-${Date.now()}-init-b`, 
+      lat: 0, 
+      lng: 0, 
+      name: 'Point B' 
+    },
   ]);
   const [isLoop, setIsLoop] = useState(false);
   const [stageCount, setStageCount] = useState(1);
@@ -43,6 +54,23 @@ export default function useHikingRoute({
   const [showRefuges, setShowRefuges] = useState(true);
   const [showWaterPoints, setShowWaterPoints] = useState(true);
 
+  // Utility function to ensure waypoints have unique IDs
+  const ensureWaypointIds = useCallback((waypoints: Coordinates[]): Coordinates[] => {
+    return waypoints.map((waypoint, index) => ({
+      ...waypoint,
+      id: waypoint.id || `waypoint-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+    }));
+  }, []);
+
+  // Override setWaypoints to ensure IDs
+  const setWaypointsWithIds = useCallback((waypoints: Coordinates[] | ((prev: Coordinates[]) => Coordinates[])) => {
+    if (typeof waypoints === 'function') {
+      setWaypoints(prev => ensureWaypointIds(waypoints(prev)));
+    } else {
+      setWaypoints(ensureWaypointIds(waypoints));
+    }
+  }, [ensureWaypointIds]);
+
   // Find POIs near route
   const findPOIsNearRoute = useCallback(async (route: HikingRoute) => {
     try {
@@ -53,14 +81,10 @@ export default function useHikingRoute({
 
       if (foundRefuges.status === 'fulfilled') {
         setRefuges(foundRefuges.value);
-      } else {
-        console.warn('Could not find refuges:', foundRefuges.reason);
       }
 
       if (foundWaterPoints.status === 'fulfilled') {
         setWaterPoints(foundWaterPoints.value);
-      } else {
-        console.warn('Could not find water points:', foundWaterPoints.reason);
       }
     } catch (error) {
       console.error('Error finding POIs:', error);
@@ -69,11 +93,6 @@ export default function useHikingRoute({
 
   // Create hiking route
   const createRoute = useCallback(async () => {
-    if (!hikingProfile) {
-      onError?.('Veuillez sélectionner un profil de randonnée');
-      return;
-    }
-
     if (waypoints.length < 2) {
       onError?.('Au moins 2 points sont nécessaires pour créer un itinéraire');
       return;
@@ -93,15 +112,19 @@ export default function useHikingRoute({
       const route = await createHikingRoute(
         waypoints,
         isLoop,
-        hikingProfile,
-        stageCount
+        1 // Créer d'abord un itinéraire simple
       );
 
-      setCurrentRoute(route);
-      onSuccess?.(route);
+      // Si stageCount > 1, diviser automatiquement l'itinéraire
+      const finalRoute = stageCount > 1 
+        ? divideRouteIntoStages(route, stageCount)
+        : route;
+
+      setCurrentRoute(finalRoute);
+      onSuccess?.(finalRoute);
 
       // Find POIs near the route
-      await findPOIsNearRoute(route);
+      await findPOIsNearRoute(finalRoute);
     } catch (error) {
       console.error('Error creating hiking route:', error);
       onError?.(
@@ -113,7 +136,6 @@ export default function useHikingRoute({
       setIsLoading(false);
     }
   }, [
-    hikingProfile,
     waypoints,
     isLoop,
     stageCount,
@@ -193,7 +215,7 @@ export default function useHikingRoute({
     hikingProfile,
     setHikingProfile,
     waypoints,
-    setWaypoints,
+    setWaypoints: setWaypointsWithIds,
     isLoop,
     setIsLoop,
     stageCount,
