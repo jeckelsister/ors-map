@@ -17,7 +17,7 @@ describe('Navigation Component', () => {
     expect(screen.getByText('WayMaker')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Map' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '🥾 Randonnée' })).toBeInTheDocument();
   });
 
   test('highlights active home link', () => {
@@ -36,12 +36,12 @@ describe('Navigation Component', () => {
     expect(mapLink).toHaveClass('bg-blue-50');
   });
 
-  test('highlights active about link', () => {
-    renderWithRouter(<Navigation />, ['/about']);
+  test('highlights active hiking link', () => {
+    renderWithRouter(<Navigation />, ['/hiking']);
 
-    const aboutLink = screen.getByRole('link', { name: 'About' });
-    expect(aboutLink).toHaveClass('text-blue-600');
-    expect(aboutLink).toHaveClass('bg-blue-50');
+    const hikingLink = screen.getByRole('link', { name: '🥾 Randonnée' });
+    expect(hikingLink).toHaveClass('text-blue-600');
+    expect(hikingLink).toHaveClass('bg-blue-50');
   });
 
   test('navigation links have correct href attributes', () => {
@@ -59,9 +59,9 @@ describe('Navigation Component', () => {
       'href',
       '/map'
     );
-    expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: '🥾 Randonnée' })).toHaveAttribute(
       'href',
-      '/about'
+      '/hiking'
     );
   });
 });

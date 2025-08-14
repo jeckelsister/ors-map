@@ -8,7 +8,6 @@ import { ToastProvider } from './hooks/shared/useToast';
 const Home = lazy(() => import('./pages/Home'));
 const MapPage = lazy(() => import('./pages/MapPage'));
 const HikingPlannerPage = lazy(() => import('./pages/HikingPlannerPage'));
-const About = lazy(() => import('./pages/About'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Loading component
@@ -29,7 +28,6 @@ export default function App(): React.JSX.Element {
               <Route path="/" element={<Home />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/hiking" element={<HikingPlannerPage />} />
-              <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

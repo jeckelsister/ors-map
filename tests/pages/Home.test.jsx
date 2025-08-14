@@ -14,34 +14,33 @@ describe('Home Page', () => {
 
     expect(screen.getByText('WayMaker')).toBeInTheDocument();
     expect(
-      screen.getByText(/A powerful route planning application/)
+      screen.getByText(/Planifiez vos randonnées avec profil altimétrique et export GPX/)
     ).toBeInTheDocument();
   });
 
   test('renders navigation links', () => {
     renderWithRouter(<Home />);
 
-    expect(screen.getByRole('link', { name: 'Open Map' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'Learn More' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '🥾 Planificateur Randonnée' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Carte Simple' })).toBeInTheDocument();
   });
 
   test('renders feature cards', () => {
     renderWithRouter(<Home />);
 
-    expect(screen.getByText('Interactive Mapping')).toBeInTheDocument();
-    expect(screen.getByText('Fast Routing')).toBeInTheDocument();
-    expect(screen.getByText('Detailed Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Randonnée Avancée')).toBeInTheDocument();
+    expect(screen.getByText('Profil Altimétrique')).toBeInTheDocument();
+    expect(screen.getByText('Refuges & Points d\'eau')).toBeInTheDocument();
+    expect(screen.getByText('Export GPX')).toBeInTheDocument();
   });
 
   test('navigation links have correct href attributes', () => {
     renderWithRouter(<Home />);
 
-    const mapLink = screen.getByRole('link', { name: 'Open Map' });
-    const aboutLink = screen.getByRole('link', { name: 'Learn More' });
+    const mapLink = screen.getByRole('link', { name: 'Carte Simple' });
+    const hikingLink = screen.getByRole('link', { name: '🥾 Planificateur Randonnée' });
 
     expect(mapLink).toHaveAttribute('href', '/map');
-    expect(aboutLink).toHaveAttribute('href', '/about');
+    expect(hikingLink).toHaveAttribute('href', '/hiking');
   });
 });
