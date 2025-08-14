@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
-import HikingMap from '../components/hiking/HikingMap';
+import HikingMap, { type HikingMapRef } from '../components/hiking/HikingMap';
 import HikingProfileSelector from '../components/hiking/HikingProfileSelector';
 import POIDisplayControls from '../components/hiking/POIDisplayControls';
 import RouteStagesPlanner from '../components/hiking/RouteStagesPlanner';
@@ -14,6 +14,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
   const { showToast } = useToast();
   const hasShownInitialToast = useRef(false);
   const pendingToastMessage = useRef<string | null>(null);
+  const hikingMapRef = useRef<HikingMapRef>(null);
 
   // Show map integration notification on mount (only once)
   React.useEffect(() => {
@@ -61,6 +62,15 @@ export default function HikingPlannerPage(): React.JSX.Element {
         'success'
       ),
   });
+
+  // Custom reset function that also clears map waypoints
+  const handleReset = useCallback(() => {
+    resetAll();
+    // Force clear waypoints from map using ref
+    setTimeout(() => {
+      hikingMapRef.current?.clearWaypoints();
+    }, 50);
+  }, [resetAll]);
 
   const [selectedTab, setSelectedTab] = useState<
     'planning' | 'profile' | 'export' | 'poi'
@@ -253,7 +263,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     </button>
 
                     <button
-                      onClick={resetAll}
+                      onClick={handleReset}
                       className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       Reset
@@ -339,6 +349,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
             {/* Hiking Map with 3 essential layers */}
             <HikingMap
+              ref={hikingMapRef}
               route={currentRoute}
               refuges={refuges}
               waterPoints={waterPoints}

@@ -7,7 +7,7 @@ import {
 import type { HikingRoute, Refuge, WaterPoint } from '@/types/hiking';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 
 interface HikingMapProps {
   route?: HikingRoute | null;
@@ -20,18 +20,24 @@ interface HikingMapProps {
   waypoints?: Array<{ lat: number; lng: number; name?: string }>;
 }
 
-const HikingMap: React.FC<HikingMapProps> = ({
-  route,
-  refuges = [],
-  waterPoints = [],
-  showRefuges = false,
-  showWaterPoints = false,
-  className = '',
-  onMapClick,
-  waypoints = [],
-}) => {
+export interface HikingMapRef {
+  clearWaypoints: () => void;
+}
+
+const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
+  const {
+    route,
+    refuges = [],
+    waterPoints = [],
+    showRefuges = false,
+    showWaterPoints = false,
+    className = '',
+    onMapClick,
+    waypoints = [],
+  } = props;
   const mapRef = useRef<L.Map | null>(null);
   const routeLayerRef = useRef<L.GeoJSON | null>(null);
+  const routeMarkersRef = useRef<L.Marker[]>([]);
   const refugeLayersRef = useRef<L.Marker[]>([]);
   const waterPointLayersRef = useRef<L.Marker[]>([]);
   const waypointMarkersRef = useRef<L.Marker[]>([]);
@@ -83,11 +89,17 @@ const HikingMap: React.FC<HikingMapProps> = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Remove existing route
+    // Remove existing route layer
     if (routeLayerRef.current) {
       mapRef.current.removeLayer(routeLayerRef.current);
       routeLayerRef.current = null;
     }
+
+    // Remove existing route markers
+    routeMarkersRef.current.forEach(marker => {
+      mapRef.current!.removeLayer(marker);
+    });
+    routeMarkersRef.current = [];
 
     // If no route, stop here (route has been cleared)
     if (!route) return;
@@ -125,7 +137,7 @@ const HikingMap: React.FC<HikingMapProps> = ({
           iconAnchor: [16, 16],
         });
 
-        L.marker([stage.startPoint.lat, stage.startPoint.lng], {
+        const stageMarker = L.marker([stage.startPoint.lat, stage.startPoint.lng], {
           icon: startIcon,
         }).addTo(mapRef.current!).bindPopup(`
             <div class="text-center">
@@ -134,6 +146,9 @@ const HikingMap: React.FC<HikingMapProps> = ({
               <small>Dénivelé: +${stage.ascent}m/-${stage.descent}m</small>
             </div>
           `);
+        
+        // Store the marker for cleanup
+        routeMarkersRef.current.push(stageMarker);
       });
 
       // Add finish marker for last stage
@@ -149,7 +164,7 @@ const HikingMap: React.FC<HikingMapProps> = ({
         iconAnchor: [16, 16],
       });
 
-      L.marker([lastStage.endPoint.lat, lastStage.endPoint.lng], {
+      const finishMarker = L.marker([lastStage.endPoint.lat, lastStage.endPoint.lng], {
         icon: finishIcon,
       }).addTo(mapRef.current!).bindPopup(`
           <div class="text-center">
@@ -158,6 +173,9 @@ const HikingMap: React.FC<HikingMapProps> = ({
             <small>Dénivelé total: +${route.totalAscent}m/-${route.totalDescent}m</small>
           </div>
         `);
+      
+      // Store the marker for cleanup
+      routeMarkersRef.current.push(finishMarker);
     } catch (error) {
       console.error('Error displaying route on map:', error);
     }
@@ -248,15 +266,22 @@ const HikingMap: React.FC<HikingMapProps> = ({
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Clear existing waypoint markers
+    // Always clear existing waypoint markers first
     waypointMarkersRef.current.forEach(marker => {
       mapRef.current!.removeLayer(marker);
     });
     waypointMarkersRef.current = [];
 
-    // Add waypoint markers
+    // If no waypoints, stop here (during reset cleanup)
+    if (!waypoints || waypoints.length === 0) {
+      return;
+    }
+
+    // Add waypoint markers only for valid coordinates
     waypoints.forEach((waypoint, index) => {
-      if (waypoint.lat === 0 && waypoint.lng === 0) return; // Skip invalid coordinates
+      if (waypoint.lat === 0 && waypoint.lng === 0) {
+        return; // Skip invalid coordinates
+      }
 
       const isStart = index === 0;
       const isEnd = index === waypoints.length - 1 && waypoints.length > 1;
@@ -317,6 +342,25 @@ const HikingMap: React.FC<HikingMapProps> = ({
       waypointMarkersRef.current.push(marker);
     });
   }, [waypoints]);
+
+  // Expose clearWaypoints function via ref
+  useImperativeHandle(ref, () => ({
+    clearWaypoints: () => {
+      if (mapRef.current) {
+        // Clear waypoint markers
+        waypointMarkersRef.current.forEach(marker => {
+          mapRef.current!.removeLayer(marker);
+        });
+        waypointMarkersRef.current = [];
+        
+        // Clear route markers
+        routeMarkersRef.current.forEach(marker => {
+          mapRef.current!.removeLayer(marker);
+        });
+        routeMarkersRef.current = [];
+      }
+    }
+  }), []);
 
   const handleMapLayerChange = (layer: keyof typeof MAP_LAYERS) => {
     if (mapRef.current) {
@@ -442,6 +486,8 @@ const HikingMap: React.FC<HikingMapProps> = ({
       <div id="hiking-map" className="h-[calc(100vh-16rem)] w-full" />
     </div>
   );
-};
+});
+
+HikingMap.displayName = 'HikingMap';
 
 export default HikingMap;

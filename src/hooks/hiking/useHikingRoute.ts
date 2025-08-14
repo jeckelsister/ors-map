@@ -190,10 +190,27 @@ export default function useHikingRoute({
 
   // Reset all data
   const resetAll = useCallback(() => {
-    setWaypoints([
-      { lat: 0, lng: 0, name: 'Point A' },
-      { lat: 0, lng: 0, name: 'Point B' },
-    ]);
+    // First clear waypoints completely to trigger cleanup
+    setWaypoints([]);
+    
+    // Then set them back to initial state after a short delay
+    setTimeout(() => {
+      setWaypoints([
+        { 
+          id: `waypoint-reset-${Date.now()}-a`, 
+          lat: 0, 
+          lng: 0, 
+          name: 'Point A' 
+        },
+        { 
+          id: `waypoint-reset-${Date.now()}-b`, 
+          lat: 0, 
+          lng: 0, 
+          name: 'Point B' 
+        },
+      ]);
+    }, 10);
+    
     setIsLoop(false);
     setStageCount(1);
     clearRoute();
