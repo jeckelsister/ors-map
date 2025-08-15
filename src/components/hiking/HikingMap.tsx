@@ -15,6 +15,8 @@ interface HikingMapProps {
   waterPoints?: WaterPoint[];
   showRefuges?: boolean;
   showWaterPoints?: boolean;
+  onToggleRefuges?: (show: boolean) => void;
+  onToggleWaterPoints?: (show: boolean) => void;
   className?: string;
   onMapClick?: (lat: number, lng: number) => void;
   waypoints?: Array<{ lat: number; lng: number; name?: string }>;
@@ -31,6 +33,8 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
     waterPoints = [],
     showRefuges = false,
     showWaterPoints = false,
+    onToggleRefuges,
+    onToggleWaterPoints,
     className = '',
     onMapClick,
     waypoints = [],
@@ -467,17 +471,37 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
               <span>Itinéraire</span>
             </div>
           )}
-          {showRefuges && refuges.length > 0 && (
-            <div className="flex items-center space-x-1">
+          {refuges.length > 0 && (
+            <button
+              onClick={() => onToggleRefuges?.(!showRefuges)}
+              className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                showRefuges 
+                  ? 'bg-green-100 hover:bg-green-200' 
+                  : 'bg-gray-100 hover:bg-gray-200 opacity-60'
+              }`}
+              title={showRefuges ? 'Masquer les refuges' : 'Afficher les refuges'}
+            >
               <span>🏠</span>
-              <span>Refuges</span>
-            </div>
+              <span className={showRefuges ? 'text-green-800' : 'text-gray-600'}>
+                Refuges
+              </span>
+            </button>
           )}
-          {showWaterPoints && waterPoints.length > 0 && (
-            <div className="flex items-center space-x-1">
+          {waterPoints.length > 0 && (
+            <button
+              onClick={() => onToggleWaterPoints?.(!showWaterPoints)}
+              className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                showWaterPoints 
+                  ? 'bg-blue-100 hover:bg-blue-200' 
+                  : 'bg-gray-100 hover:bg-gray-200 opacity-60'
+              }`}
+              title={showWaterPoints ? 'Masquer les points d\'eau' : 'Afficher les points d\'eau'}
+            >
               <span>💧</span>
-              <span>Points d'eau</span>
-            </div>
+              <span className={showWaterPoints ? 'text-blue-800' : 'text-gray-600'}>
+                Points d'eau
+              </span>
+            </button>
           )}
         </div>
       </div>

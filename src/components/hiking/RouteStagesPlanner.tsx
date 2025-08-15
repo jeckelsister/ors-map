@@ -112,13 +112,18 @@ export default function RouteStagesPlanner({
     onWaypointsChange(newWaypoints);
   };
 
-  const handleLocationSelect = (index: number, lat: number, lng: number, name: string) => {
+  const handleLocationSelect = (
+    index: number,
+    lat: number,
+    lng: number,
+    name: string
+  ) => {
     const newWaypoints = [...waypoints];
-    newWaypoints[index] = { 
-      ...newWaypoints[index], 
-      lat, 
-      lng, 
-      name 
+    newWaypoints[index] = {
+      ...newWaypoints[index],
+      lat,
+      lng,
+      name,
     };
     onWaypointsChange(newWaypoints);
   };
@@ -251,7 +256,7 @@ export default function RouteStagesPlanner({
                   }
                   onRemove={() => removeWaypoint(index)}
                   canRemove={waypoints.length > 2}
-                  onLocationSelect={(lat, lng, name) => 
+                  onLocationSelect={(lat, lng, name) =>
                     handleLocationSelect(index, lat, lng, name)
                   }
                 />
@@ -284,15 +289,10 @@ export default function RouteStagesPlanner({
       {/* Info about clicking on map and drag & drop */}
       <div className="text-xs text-gray-500 bg-yellow-50 border border-yellow-200 p-2 rounded space-y-1">
         <div>
-          💡 Double-cliquez sur la carte (points accrochés automatiquement aux
-          sentiers)
+          💡 Double-cliquez sur la carte pour définir les points de passage
         </div>
         <div>
           🔄 Glissez-déposez les points dans la liste pour changer l'ordre
-        </div>
-        <div>
-          🎯 L'itinéraire sera automatiquement divisé en {stageCount} étape
-          {stageCount > 1 ? 's' : ''} lors de la création
         </div>
       </div>
     </div>

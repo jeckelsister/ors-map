@@ -355,6 +355,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
               waterPoints={waterPoints}
               showRefuges={showRefuges}
               showWaterPoints={showWaterPoints}
+              onToggleRefuges={setShowRefuges}
+              onToggleWaterPoints={setShowWaterPoints}
               waypoints={waypoints}
               onMapClick={handleMapClick}
             />
