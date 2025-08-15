@@ -75,8 +75,8 @@ export default function useHikingRoute({
   const findPOIsNearRoute = useCallback(async (route: HikingRoute) => {
     try {
       const [foundRefuges, foundWaterPoints] = await Promise.allSettled([
-        findRefugesNearRoute(route.geojson, 5), // 5km radius
-        findWaterPointsNearRoute(route.geojson, 2), // 2km radius
+        findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
+        findWaterPointsNearRoute(route.geojson, 1), // 1km radius - points d'eau très proches
       ]);
 
       if (foundRefuges.status === 'fulfilled') {

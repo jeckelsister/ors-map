@@ -579,6 +579,59 @@ const createRouteStage = async (
 };
 
 /**
+ * Calculate minimum distance from a point to a line (route)
+ */
+const calculateDistanceToRoute = (
+  pointLat: number,
+  pointLng: number,
+  routeCoordinates: [number, number][]
+): number => {
+  let minDistance = Infinity;
+
+  for (let i = 0; i < routeCoordinates.length - 1; i++) {
+    const segmentStart = [routeCoordinates[i][1], routeCoordinates[i][0]] as [number, number];
+    const segmentEnd = [routeCoordinates[i + 1][1], routeCoordinates[i + 1][0]] as [number, number];
+    
+    const distance = distanceToLineSegment(
+      [pointLat, pointLng] as [number, number],
+      segmentStart,
+      segmentEnd
+    );
+    
+    minDistance = Math.min(minDistance, distance);
+  }
+
+  return minDistance;
+};
+
+/**
+ * Calculate distance from a point to a line segment
+ */
+const distanceToLineSegment = (
+  point: [number, number],
+  lineStart: [number, number],
+  lineEnd: [number, number]
+): number => {
+  const [px, py] = point;
+  const [x1, y1] = lineStart;
+  const [x2, y2] = lineEnd;
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  
+  if (dx === 0 && dy === 0) {
+    // Line segment is a point
+    return calculateDistance(point, lineStart);
+  }
+
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)));
+  const projectionX = x1 + t * dx;
+  const projectionY = y1 + t * dy;
+
+  return calculateDistance(point, [projectionX, projectionY]);
+};
+
+/**
  * Find refuges near the route
  */
 export const findRefugesNearRoute = async (
@@ -619,8 +672,8 @@ export const findRefugesNearRoute = async (
       headers: { 'Content-Type': 'text/plain' },
     });
 
-    const refuges: Refuge[] = response.data.elements.map(
-      (element: OverpassElement) => ({
+    const refuges: Refuge[] = response.data.elements
+      .map((element: OverpassElement) => ({
         id: element.id.toString(),
         name: element.tags.name || 'Refuge sans nom',
         type: determineRefugeType(element.tags),
@@ -633,8 +686,16 @@ export const findRefugesNearRoute = async (
         open_season: element.tags.opening_hours,
         contact: element.tags.phone || element.tags.website,
         services: extractRefugeServices(element.tags),
-      })
-    );
+      }))
+      .filter((refuge: Refuge) => {
+        // Filtrer par distance réelle à l'itinéraire
+        const distanceToRoute = calculateDistanceToRoute(
+          refuge.lat,
+          refuge.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      });
 
     return refuges;
   } catch (error) {
@@ -703,8 +764,8 @@ export const findWaterPointsNearRoute = async (
       headers: { 'Content-Type': 'text/plain' },
     });
 
-    const waterPoints: WaterPoint[] = response.data.elements.map(
-      (element: OverpassElement) => ({
+    const waterPoints: WaterPoint[] = response.data.elements
+      .map((element: OverpassElement) => ({
         id: element.id.toString(),
         name: element.tags.name || determineWaterPointName(element.tags),
         type: determineWaterPointType(element.tags),
@@ -714,8 +775,15 @@ export const findWaterPointsNearRoute = async (
         reliability: determineReliability(element.tags),
         quality: determineWaterQuality(element.tags),
         notes: element.tags.description,
-      })
-    );
+      }))
+      .filter((waterPoint: WaterPoint) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          waterPoint.lat,
+          waterPoint.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      });
 
     return waterPoints;
   } catch (error) {
