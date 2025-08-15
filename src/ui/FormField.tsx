@@ -1,4 +1,4 @@
-import { memo, ReactNode, useMemo } from 'react';
+import { memo, ReactNode, useMemo, cloneElement, isValidElement, ReactElement } from 'react';
 
 interface FormFieldProps {
   label: string;
@@ -52,7 +52,9 @@ const FormField = memo<FormFieldProps>(
         </label>
 
         <div className="relative">
-          {children}
+          {isValidElement(children)
+            ? cloneElement(children as ReactElement<{ id?: string }>, { id: fieldId })
+            : children}
 
           {error && (
             <p

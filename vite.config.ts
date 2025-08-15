@@ -6,7 +6,13 @@ import { defineConfig } from 'vite';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      // Optimize React for production
+      babel: {
+        // Remove React DevTools in production
+        plugins: process.env.NODE_ENV === 'production' ? ['transform-remove-console'] : [],
+      },
+    }),
     tailwindcss()
   ],
   base: '/ors-map/',
@@ -28,13 +34,22 @@ export default defineConfig({
     // Optimize build output
     target: 'esnext',
     minify: 'esbuild', // Use esbuild instead of terser for faster builds
+    cssCodeSplit: true, // Enable CSS code splitting
+    sourcemap: false, // Disable sourcemaps in production for smaller bundle
     rollupOptions: {
       output: {
         manualChunks: {
+          // Core React libraries
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
+          
+          // Large external libraries - separate chunks for better caching
           leaflet: ['leaflet'],
+          
+          // Icons - separate chunk since they're used throughout the app
           icons: ['react-icons/fa', 'react-icons/md', 'react-icons/hi'],
+          
+          // DnD libraries
           dnd: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
         },
         // Optimize asset file names
@@ -49,19 +64,48 @@ export default defineConfig({
           }
           return `assets/[name]-[hash][extname]`;
         },
+        // Optimize chunk file names for better caching
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+      },
+      treeshake: {
+        // Enable aggressive tree-shaking
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        unknownGlobalSideEffects: false,
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 800, // Lower warning limit to catch large chunks
+    reportCompressedSize: true, // Report gzipped sizes for better insights
   },
   // Performance optimizations
   optimizeDeps: {
-    include: ['leaflet', 'react', 'react-dom', 'react-router-dom'],
+    include: [
+      'leaflet', 
+      'react', 
+      'react-dom', 
+      'react-router-dom',
+      'react-icons/fa',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable'
+    ],
     exclude: ['@testing-library/react', '@testing-library/user-event'],
   },
   // Development server optimizations
   server: {
     fs: {
       allow: ['..'],
+    },
+    // Enable HMR for faster development
+    hmr: {
+      overlay: true,
+    },
+  },
+  // Enable CSS optimization
+  css: {
+    devSourcemap: true,
+    preprocessorOptions: {
+      // Configure CSS preprocessing if needed
     },
   },
 });
