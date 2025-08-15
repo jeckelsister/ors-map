@@ -20,50 +20,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Touch-friendly tap targets */
-button, 
-a, 
-[role="button"] {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-/* Eco-tourism themed gradients */
-.eco-gradient {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
-}
-
-.eco-gradient-soft {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
-}
-
-/* Glass morphism effect for modern look */
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Enhanced backdrop blur */
-.backdrop-blur-enhanced {
-  backdrop-filter: blur(20px) saturate(180%);
-}
-
-/* Hardware acceleration for animations */
-.gpu-accelerated {
-  transform: translateZ(0);
-  will-change: transform, opacity;
-}
-
-/* Mobile-optimized touch interactions */
-.touch-manipulation {
-  touch-action: manipulation;
-}
-
-/* Optimized tap highlights */
-button, a {
-  -webkit-tap-highlight-color: rgba(16, 185, 129, 0.2);
-}
+/* Essential custom styles that can't be replaced by Tailwind utilities */
 
 /* PWA-safe area insets for modern devices */
 .safe-area-inset {
@@ -73,16 +30,7 @@ button, a {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Responsive text sizes with viewport units */
-.text-responsive {
-  font-size: clamp(1rem, 2.5vw, 1.5rem);
-}
-
-.text-responsive-lg {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-}
-
-/* Optimized styles for map markers and popups */
+/* Map-specific styles that require exact CSS */
 .custom-popup .leaflet-popup-content-wrapper {
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -96,19 +44,6 @@ button, a {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Optimized marker container for better performance */
-.custom-start-marker {
-  filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3));
-  transform: translateZ(0); /* Force hardware acceleration */
-}
-
-/* Smooth transitions for map interactions */
-.leaflet-container {
-  transition: cursor 0.2s ease;
-  border-radius: 16px;
-}
-
-/* Mobile-friendly map controls */
 .leaflet-control-container {
   font-size: 16px !important;
 }
@@ -120,120 +55,16 @@ button, a {
   font-size: 18px !important;
 }
 
-/* Optimized button hover effects */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Enhanced button styles */
-.btn-eco {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 16px;
-  padding: 12px 24px;
-  font-weight: 600;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-  transition: all 0.3s ease;
-  touch-action: manipulation;
-}
-
-.btn-eco:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-}
-
-.btn-eco:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-/* Performance optimization: use transform instead of changing properties */
-@keyframes pulse-optimized {
-  0%,
-  100% {
-    transform: scale(1) translateZ(0);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.5) translateZ(0);
-    opacity: 0.3;
-  }
-}
-
-.animate-pulse-optimized {
-  animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Optimized loader animation with eco theme */
-@keyframes spin-optimized {
-  0% {
-    transform: rotate(0deg) translateZ(0);
-  }
-  100% {
-    transform: rotate(360deg) translateZ(0);
-  }
-}
-
-.animate-spin-optimized {
-  animation: spin-optimized 1s linear infinite;
-}
-
-/* Floating animation for cards */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateZ(0);
-  }
-  50% {
-    transform: translateY(-10px) translateZ(0);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Eco-themed scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(16, 185, 129, 0.1);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+/* Performance optimizations */
+button, a {
+  -webkit-tap-highlight-color: rgba(16, 185, 129, 0.2);
 }
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
-  /* Optimize text rendering on mobile */
   body {
     text-rendering: optimizeSpeed;
-  }
-  
-  /* Larger touch targets on mobile */
-  .mobile-touch-friendly {
-    min-height: 48px;
-    padding: 12px 16px;
-  }
-  
-  /* Prevent horizontal scroll on mobile */
-  body {
     overflow-x: hidden;
-  }
-  
-  /* Optimize animations on mobile for better performance */
-  .animate-float {
-    animation-duration: 8s;
   }
 }
 
@@ -242,12 +73,5 @@ button, a {
   .crisp-edges {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
-  }
-}
-
-/* Dark mode support for better battery life on OLED screens */
-@media (prefers-color-scheme: dark) {
-  .auto-dark {
-    filter: brightness(0.8) contrast(1.2);
   }
 }
