@@ -65,7 +65,12 @@ export default function POIDisplayControls({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-700">Points d'intérêt</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-700">Points d'intérêt</h3>
+        <div className="text-xs text-gray-500 italic">
+          📍 Cliquez pour zoomer
+        </div>
+      </div>
 
       {/* Refuges Section */}
       <div className="space-y-3">
@@ -118,12 +123,13 @@ export default function POIDisplayControls({
                   <button
                     key={refuge.id}
                     onClick={() => onRefugeSelect?.(refuge)}
-                    className="w-full text-left p-2 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    className="w-full text-left p-2 hover:bg-blue-50 hover:border-blue-300 rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer group"
+                    title={`Cliquer pour zoomer sur ${refuge.name}`}
                   >
                     <div className="flex items-start gap-2">
                       <span className="text-sm">{typeInfo.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-gray-800 truncate">
+                        <div className="text-xs font-medium text-gray-800 truncate group-hover:text-blue-700 transition-colors">
                           {refuge.name}
                         </div>
                         <div className="text-xs text-gray-500">
@@ -135,6 +141,9 @@ export default function POIDisplayControls({
                             Capacité: {refuge.capacity} places
                           </div>
                         )}
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">
+                        🔍
                       </div>
                     </div>
                   </button>
@@ -209,12 +218,13 @@ export default function POIDisplayControls({
                   <button
                     key={waterPoint.id}
                     onClick={() => onWaterPointSelect?.(waterPoint)}
-                    className="w-full text-left p-2 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+                    className="w-full text-left p-2 hover:bg-blue-50 hover:border-blue-300 rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer group"
+                    title={`Cliquer pour zoomer sur ${waterPoint.name}`}
                   >
                     <div className="flex items-start gap-2">
                       <span className="text-sm">{typeInfo.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-gray-800 truncate">
+                        <div className="text-xs font-medium text-gray-800 truncate group-hover:text-blue-700 transition-colors">
                           {waterPoint.name}
                         </div>
                         <div className="text-xs text-gray-500">
@@ -230,6 +240,9 @@ export default function POIDisplayControls({
                           {waterPoint.reliability === 'seasonal' &&
                             ' • Saisonnier'}
                         </div>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">
+                        🔍
                       </div>
                     </div>
                   </button>

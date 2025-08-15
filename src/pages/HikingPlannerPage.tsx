@@ -80,12 +80,28 @@ export default function HikingPlannerPage(): React.JSX.Element {
   };
 
   const handleRefugeSelect = (refuge: Refuge) => {
-    showToast(`Refuge: ${refuge.name} (${refuge.type})`, 'info');
+    // Vérifier que les coordonnées sont valides
+    if (!refuge.lat || !refuge.lng || refuge.lat === 0 || refuge.lng === 0) {
+      showToast(`❌ Erreur: Coordonnées invalides pour ${refuge.name}`, 'error');
+      return;
+    }
+    
+    // Zoom to the refuge on the map
+    hikingMapRef.current?.zoomToPOI(refuge.lat, refuge.lng, 16);
+    showToast(`📍 Zoom sur: ${refuge.name} (${refuge.type})`, 'info');
   };
 
   const handleWaterPointSelect = (waterPoint: WaterPoint) => {
+    // Vérifier que les coordonnées sont valides
+    if (!waterPoint.lat || !waterPoint.lng || waterPoint.lat === 0 || waterPoint.lng === 0) {
+      showToast(`❌ Erreur: Coordonnées invalides pour ${waterPoint.name}`, 'error');
+      return;
+    }
+    
+    // Zoom to the water point on the map
+    hikingMapRef.current?.zoomToPOI(waterPoint.lat, waterPoint.lng, 16);
     showToast(
-      `Point d'eau: ${waterPoint.name} (${waterPoint.quality})`,
+      `📍 Zoom sur: ${waterPoint.name} (${waterPoint.quality})`,
       'info'
     );
   };

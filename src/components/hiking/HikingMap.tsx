@@ -7,7 +7,7 @@ import {
 import type { HikingRoute, Refuge, WaterPoint } from '@/types/hiking';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 
 interface HikingMapProps {
   route?: HikingRoute | null;
@@ -24,6 +24,7 @@ interface HikingMapProps {
 
 export interface HikingMapRef {
   clearWaypoints: () => void;
+  zoomToPOI: (lat: number, lng: number, zoomLevel?: number) => void;
 }
 
 const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
@@ -362,6 +363,48 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
           mapRef.current!.removeLayer(marker);
         });
         routeMarkersRef.current = [];
+      }
+    },
+    zoomToPOI: (lat: number, lng: number, zoomLevel: number = 15) => {
+      if (!mapRef.current) {
+        return;
+      }
+
+      try {
+        // Zoom to the POI location with smooth animation
+        mapRef.current.setView([lat, lng], zoomLevel, {
+          animate: true,
+          duration: 1.0 // 1 second animation
+        });
+
+        // Add a temporary highlight marker
+        const highlightIcon = L.divIcon({
+          className: 'poi-highlight-marker',
+          html: `
+            <div style="
+              width: 24px; 
+              height: 24px; 
+              background-color: #ef4444; 
+              border-radius: 50%; 
+              border: 3px solid white;
+              box-shadow: 0 0 0 2px #ef4444;
+              animation: pulse 1s infinite;
+            "></div>
+          `,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+
+        const tempMarker = L.marker([lat, lng], { icon: highlightIcon }).addTo(mapRef.current);
+        
+        // Remove the temporary marker after 3 seconds
+        setTimeout(() => {
+          if (mapRef.current && tempMarker) {
+            mapRef.current.removeLayer(tempMarker);
+          }
+        }, 3000);
+      } catch (error) {
+        console.error('❌ Erreur lors du zoom:', error);
       }
     }
   }), []);
