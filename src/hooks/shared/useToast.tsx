@@ -4,8 +4,8 @@ import React, {
   useCallback,
   useContext,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from 'react';
 import Toast from '../../components/shared/Toast';
 
@@ -72,15 +72,23 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <div className="fixed top-4 right-4 space-y-2 z-50">
-        {toasts.map(toast => (
-          <Toast
+      <div className="fixed top-4 right-4 space-y-3 z-50 pointer-events-none">
+        {toasts.map((toast, index) => (
+          <div
             key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            duration={toast.duration}
-            onClose={() => removeToast(toast.id)}
-          />
+            className="pointer-events-auto"
+            style={{
+              transform: `translateY(${index * 8}px)`,
+              zIndex: 50 - index,
+            }}
+          >
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              duration={toast.duration}
+              onClose={() => removeToast(toast.id)}
+            />
+          </div>
         ))}
       </div>
     </ToastContext.Provider>

@@ -28,9 +28,19 @@ describe('Toast Component', () => {
       <Toast message="Success message" type="success" onClose={mockOnClose} />
     );
 
-    const toast = screen.getByText('Success message').closest('div');
-    expect(toast).toHaveClass('bg-green-600', 'text-white');
-    expect(screen.getByText('✅')).toBeInTheDocument();
+    const toastContainer = screen.getByTestId('toast-success');
+    expect(toastContainer).toHaveClass(
+      'relative',
+      'overflow-hidden',
+      'rounded-xl'
+    );
+    expect(toastContainer.className).toMatch(
+      /bg-gradient-to-r.*from-green-500/
+    );
+
+    // Vérifier que l'icône Lucide est présente (CheckCircle)
+    const icon = toastContainer.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 
   it('renders error toast with correct styling and icon', () => {
@@ -38,9 +48,17 @@ describe('Toast Component', () => {
       <Toast message="Error message" type="error" onClose={mockOnClose} />
     );
 
-    const toast = screen.getByText('Error message').closest('div');
-    expect(toast).toHaveClass('bg-red-600', 'text-white');
-    expect(screen.getByText('❌')).toBeInTheDocument();
+    const toastContainer = screen.getByTestId('toast-error');
+    expect(toastContainer).toHaveClass(
+      'relative',
+      'overflow-hidden',
+      'rounded-xl'
+    );
+    expect(toastContainer.className).toMatch(/bg-gradient-to-r.*from-red-500/);
+
+    // Vérifier que l'icône Lucide est présente (XCircle)
+    const icon = toastContainer.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 
   it('renders warning toast with correct styling and icon', () => {
@@ -48,17 +66,35 @@ describe('Toast Component', () => {
       <Toast message="Warning message" type="warning" onClose={mockOnClose} />
     );
 
-    const toast = screen.getByText('Warning message').closest('div');
-    expect(toast).toHaveClass('bg-yellow-500', 'text-white');
-    expect(screen.getByText('⚠️')).toBeInTheDocument();
+    const toastContainer = screen.getByTestId('toast-warning');
+    expect(toastContainer).toHaveClass(
+      'relative',
+      'overflow-hidden',
+      'rounded-xl'
+    );
+    expect(toastContainer.className).toMatch(
+      /bg-gradient-to-r.*from-amber-500/
+    );
+
+    // Vérifier que l'icône Lucide est présente (AlertTriangle)
+    const icon = toastContainer.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 
   it('renders info toast with correct styling and icon', () => {
     render(<Toast message="Info message" type="info" onClose={mockOnClose} />);
 
-    const toast = screen.getByText('Info message').closest('div');
-    expect(toast).toHaveClass('bg-blue-600', 'text-white');
-    expect(screen.getByText('ℹ️')).toBeInTheDocument();
+    const toastContainer = screen.getByTestId('toast-info');
+    expect(toastContainer).toHaveClass(
+      'relative',
+      'overflow-hidden',
+      'rounded-xl'
+    );
+    expect(toastContainer.className).toMatch(/bg-gradient-to-r.*from-blue-500/);
+
+    // Vérifier que l'icône Lucide est présente (Info)
+    const icon = toastContainer.querySelector('svg');
+    expect(icon).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', () => {
@@ -68,6 +104,11 @@ describe('Toast Component', () => {
 
     const closeButton = screen.getByLabelText('Close notification');
     fireEvent.click(closeButton);
+
+    // Attendre un délai pour l'animation avant de vérifier que onClose est appelé
+    act(() => {
+      vi.advanceTimersByTime(300); // Durée de l'animation de sortie
+    });
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -79,9 +120,9 @@ describe('Toast Component', () => {
 
     expect(mockOnClose).not.toHaveBeenCalled();
 
-    // Fast-forward time by 3000ms
+    // Fast-forward pour l'animation d'entrée + délai de fermeture automatique + animation de sortie
     act(() => {
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3000 + 300); // duration + animation de sortie
     });
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -99,15 +140,15 @@ describe('Toast Component', () => {
 
     expect(mockOnClose).not.toHaveBeenCalled();
 
-    // Fast-forward time by 4999ms (should not close yet)
+    // Fast-forward time by 4999ms + 300ms animation (should not close yet)
     act(() => {
       vi.advanceTimersByTime(4999);
     });
     expect(mockOnClose).not.toHaveBeenCalled();
 
-    // Fast-forward 1 more ms (should close now)
+    // Fast-forward 1 more ms + animation duration (should close now)
     act(() => {
-      vi.advanceTimersByTime(1);
+      vi.advanceTimersByTime(1 + 300);
     });
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -129,29 +170,23 @@ describe('Toast Component', () => {
     expect(mockOnClose).not.toHaveBeenCalled();
   });
 
-  it('has correct positioning and z-index classes', () => {
+  it('has correct positioning and layout classes', () => {
     render(
       <Toast message="Test message" type="success" onClose={mockOnClose} />
     );
 
-    const toast = screen.getByText('Test message').closest('div');
-    expect(toast).toHaveClass('fixed', 'top-4', 'right-4', 'z-50');
-  });
+    // Vérifier le conteneur principal
+    const mainContainer = screen
+      .getByText('Test message')
+      .closest('[class*="max-w-sm"]');
+    expect(mainContainer).toHaveClass('max-w-sm', 'w-full');
 
-  it('has correct layout classes', () => {
-    render(
-      <Toast message="Test message" type="success" onClose={mockOnClose} />
-    );
-
-    const toast = screen.getByText('Test message').closest('div');
-    expect(toast).toHaveClass(
-      'p-4',
-      'rounded-lg',
-      'shadow-lg',
-      'flex',
-      'items-center',
-      'gap-2',
-      'max-w-sm'
+    // Vérifier le conteneur du toast
+    const toastContainer = screen.getByTestId('toast-success');
+    expect(toastContainer).toHaveClass(
+      'relative',
+      'overflow-hidden',
+      'rounded-xl'
     );
   });
 
@@ -165,8 +200,11 @@ describe('Toast Component', () => {
 
     expect(screen.getByText(longMessage)).toBeInTheDocument();
 
-    const messageElement = screen.getByText(longMessage);
-    expect(messageElement).toHaveClass('flex-1');
+    // Vérifier que le conteneur de contenu a la classe flex-1
+    const contentContainer = screen
+      .getByText(longMessage)
+      .closest('[class*="flex-1"]');
+    expect(contentContainer).toHaveClass('flex-1', 'min-w-0');
   });
 
   it('resets timer when duration prop changes', () => {
@@ -202,9 +240,9 @@ describe('Toast Component', () => {
     // Should not close yet since new duration is 2000ms from the rerender
     expect(mockOnClose).not.toHaveBeenCalled();
 
-    // Fast-forward another 1000ms to complete the new duration
+    // Fast-forward another 1000ms + animation to complete the new duration
     act(() => {
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000 + 300);
     });
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);

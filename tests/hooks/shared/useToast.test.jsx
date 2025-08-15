@@ -266,11 +266,12 @@ describe('useToast Hook', () => {
       </ToastProvider>
     );
 
-    // The toast container should be present even without toasts
+    // Le nouveau conteneur de toasts utilise space-y-3 et pointer-events-none
     const container = document.querySelector(
-      '.fixed.top-4.right-4.space-y-2.z-50'
+      '.fixed.top-4.right-4.space-y-3.z-50'
     );
     expect(container).toBeInTheDocument();
+    expect(container).toHaveClass('pointer-events-none');
   });
 
   it('removes specific toast by ID', async () => {
