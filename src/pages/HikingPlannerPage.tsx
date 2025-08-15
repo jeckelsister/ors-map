@@ -1,12 +1,12 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { 
-  Map, 
-  Mountain, 
-  MapPin, 
+import {
   Download,
+  Map,
+  MapPin,
+  Mountain,
+  Rocket,
   RotateCcw,
-  Rocket
 } from 'lucide-react';
+import React, { useCallback, useRef, useState } from 'react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
 import HikingMap, { type HikingMapRef } from '../components/hiking/HikingMap';
@@ -244,7 +244,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
             Planificateur de randonnée
           </h1>
           <p className="text-sm md:text-base text-emerald-100">
-            Créez des itinéraires multi-étapes avec profil altimétrique et export GPX
+            Créez des itinéraires multi-étapes avec profil altimétrique et
+            export GPX
           </p>
         </div>
       </div>
@@ -252,17 +253,32 @@ export default function HikingPlannerPage(): React.JSX.Element {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 pb-20 md:pb-6">
         {/* Mobile: Stack layout, Desktop: Grid layout */}
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 md:gap-6">
-          
           {/* Control Panel - Mobile: Collapsible, Desktop: Always visible */}
           <div className="lg:col-span-1 space-y-4 md:space-y-6 order-2 lg:order-1">
             {/* Tab Navigation */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl border border-white/20 sticky top-4 z-40">
               <div className="flex space-x-1 bg-gray-100 rounded-2xl p-1">
                 {[
-                  { id: 'planning', label: 'Plan', icon: <Map className="w-4 h-4" /> },
-                  { id: 'profile', label: 'Profil', icon: <Mountain className="w-4 h-4" /> },
-                  { id: 'poi', label: 'POI', icon: <MapPin className="w-4 h-4" /> },
-                  { id: 'export', label: 'Export', icon: <Download className="w-4 h-4" /> },
+                  {
+                    id: 'planning',
+                    label: 'Plan',
+                    icon: <Map className="w-4 h-4" />,
+                  },
+                  {
+                    id: 'profile',
+                    label: 'Profil',
+                    icon: <Mountain className="w-4 h-4" />,
+                  },
+                  {
+                    id: 'poi',
+                    label: 'POI',
+                    icon: <MapPin className="w-4 h-4" />,
+                  },
+                  {
+                    id: 'export',
+                    label: 'Export',
+                    icon: <Download className="w-4 h-4" />,
+                  },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -274,7 +290,9 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     }`}
                   >
                     <span className="text-emerald-600">{tab.icon}</span>
-                    <span className="hidden sm:inline text-xs md:text-sm">{tab.label}</span>
+                    <span className="hidden sm:inline text-xs md:text-sm">
+                      {tab.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -301,7 +319,9 @@ export default function HikingPlannerPage(): React.JSX.Element {
                       disabled={isLoading || waypoints.length < 2}
                       className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
                     >
-                      {isLoading ? 'Création...' : (
+                      {isLoading ? (
+                        'Création...'
+                      ) : (
                         <>
                           <Rocket className="w-4 h-4" />
                           Créer l'itinéraire
@@ -358,7 +378,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
           <div className="lg:col-span-2 space-y-4 md:space-y-6 relative order-1 lg:order-2">
             {/* Hiking Map with responsive sizing */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-              <div className="h-64 sm:h-80 md:h-96 lg:h-[500px] relative">
+              <div className="h-64 sm:h-80 md:h-[60vh] lg:h-[calc(100vh-160px)] xl:h-[calc(100vh-255px)] relative">
                 <HikingMap
                   ref={hikingMapRef}
                   route={currentRoute}
@@ -411,7 +431,10 @@ export default function HikingPlannerPage(): React.JSX.Element {
                       {currentRoute.stages ? currentRoute.stages.length : 0}
                     </div>
                     <div className="text-xs md:text-sm text-gray-600">
-                      étape{currentRoute.stages && currentRoute.stages.length > 1 ? 's' : ''}
+                      étape
+                      {currentRoute.stages && currentRoute.stages.length > 1
+                        ? 's'
+                        : ''}
                     </div>
                   </div>
                 </div>
@@ -433,7 +456,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
                           </span>
                           <div className="flex flex-wrap gap-2 text-xs">
                             <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg font-medium">
-                              {stage.distance ? stage.distance.toFixed(1) : '0'}km
+                              {stage.distance ? stage.distance.toFixed(1) : '0'}
+                              km
                             </span>
                             <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg font-medium">
                               +{stage.ascent || 0}m

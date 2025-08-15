@@ -20,7 +20,7 @@ export default function MapPage(): React.JSX.Element {
       {/* Map Component with responsive sizing */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 pb-20 md:pb-6">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-          <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-16rem)]">
+          <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-160px)] xl:h-[calc(100vh-140px)]">
             <Map />
           </div>
         </div>
