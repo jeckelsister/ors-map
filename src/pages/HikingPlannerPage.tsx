@@ -1,4 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { 
+  Map, 
+  Mountain, 
+  MapPin, 
+  Download,
+  RotateCcw,
+  Rocket
+} from 'lucide-react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
 import HikingMap, { type HikingMapRef } from '../components/hiking/HikingMap';
@@ -251,10 +259,10 @@ export default function HikingPlannerPage(): React.JSX.Element {
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl border border-white/20 sticky top-4 z-40">
               <div className="flex space-x-1 bg-gray-100 rounded-2xl p-1">
                 {[
-                  { id: 'planning', label: 'Plan', icon: '🗺️' },
-                  { id: 'profile', label: 'Profil', icon: '⛰️' },
-                  { id: 'poi', label: 'POI', icon: '📍' },
-                  { id: 'export', label: 'Export', icon: '📁' },
+                  { id: 'planning', label: 'Plan', icon: <Map className="w-4 h-4" /> },
+                  { id: 'profile', label: 'Profil', icon: <Mountain className="w-4 h-4" /> },
+                  { id: 'poi', label: 'POI', icon: <MapPin className="w-4 h-4" /> },
+                  { id: 'export', label: 'Export', icon: <Download className="w-4 h-4" /> },
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -265,7 +273,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
-                    <span className="text-base md:text-sm">{tab.icon}</span>
+                    <span className="text-emerald-600">{tab.icon}</span>
                     <span className="hidden sm:inline text-xs md:text-sm">{tab.label}</span>
                   </button>
                 ))}
@@ -291,16 +299,22 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     <button
                       onClick={createRoute}
                       disabled={isLoading || waypoints.length < 2}
-                      className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium text-sm md:text-base"
+                      className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
                     >
-                      {isLoading ? 'Création...' : "🚀 Créer l'itinéraire"}
+                      {isLoading ? 'Création...' : (
+                        <>
+                          <Rocket className="w-4 h-4" />
+                          Créer l'itinéraire
+                        </>
+                      )}
                     </button>
 
                     <button
                       onClick={handleReset}
-                      className="px-4 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all shadow-lg sm:w-auto w-full"
+                      className="px-4 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all shadow-lg sm:w-auto w-full flex items-center justify-center gap-2"
                     >
-                      🔄 Reset
+                      <RotateCcw className="w-4 h-4" />
+                      Reset
                     </button>
                   </div>
                 </div>
@@ -449,7 +463,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
           {isLoading ? (
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
           ) : (
-            <span className="text-xl">🚀</span>
+            <Rocket className="text-xl" />
           )}
         </button>
       </div>

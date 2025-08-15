@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Home, Map, Mountain } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Navigation(): React.JSX.Element {
@@ -37,33 +38,36 @@ export default function Navigation(): React.JSX.Element {
           <div className="hidden md:flex space-x-2 lg:space-x-4">
             <Link
               to="/"
-              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all flex items-center gap-2 ${
                 isActive('/')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🏠 Home
+              <Home className="w-4 h-4" />
+              Home
             </Link>
             <Link
               to="/map"
-              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all flex items-center gap-2 ${
                 isActive('/map')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🗺️ Carte
+              <Map className="w-4 h-4" />
+              Carte
             </Link>
             <Link
               to="/hiking"
-              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-3 lg:px-4 py-2 rounded-2xl text-sm font-medium transition-all flex items-center gap-2 ${
                 isActive('/hiking')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🥾 Randonnée
+              <Mountain className="w-4 h-4" />
+              Randonnée
             </Link>
           </div>
 
@@ -105,35 +109,38 @@ export default function Navigation(): React.JSX.Element {
             <Link
               to="/"
               onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-4 py-3 rounded-2xl text-sm font-medium transition-all flex items-center gap-3 ${
                 isActive('/')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🏠 Home
+              <Home className="w-5 h-5" />
+              Home
             </Link>
             <Link
               to="/map"
               onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-4 py-3 rounded-2xl text-sm font-medium transition-all flex items-center gap-3 ${
                 isActive('/map')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🗺️ Carte Interactive
+              <Map className="w-5 h-5" />
+              Carte Interactive
             </Link>
             <Link
               to="/hiking"
               onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
+              className={`px-4 py-3 rounded-2xl text-sm font-medium transition-all flex items-center gap-3 ${
                 isActive('/hiking')
                   ? 'text-white bg-white/20 shadow-lg'
                   : 'text-white/80 hover:text-white hover:bg-white/10'
               }`}
             >
-              🥾 Planificateur Randonnée
+              <Mountain className="w-5 h-5" />
+              Planificateur Randonnée
             </Link>
           </div>
         </div>
