@@ -44,7 +44,7 @@ interface ScrollableListProps {
 }
 
 /**
- * Composant liste scrollable réutilisable
+ * Composant liste scrollable réutilisable avec scroll amélioré
  */
 const ScrollableList = memo<ScrollableListProps>(({
   children,
@@ -61,7 +61,13 @@ const ScrollableList = memo<ScrollableListProps>(({
   }
 
   return (
-    <div className={`${maxHeight} overflow-y-auto space-y-1`}>
+    <div 
+      className={`${maxHeight} overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500 space-y-1 pr-1`}
+      style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#9CA3AF #F3F4F6'
+      }}
+    >
       {children}
     </div>
   );
@@ -79,7 +85,7 @@ interface POIItemProps {
 }
 
 /**
- * Composant item de point d'intérêt réutilisable
+ * Composant item de point d'intérêt réutilisable avec animations améliorées
  */
 const POIItem = memo<POIItemProps>(({
   name,
@@ -91,22 +97,22 @@ const POIItem = memo<POIItemProps>(({
 }) => (
   <button
     onClick={onClick}
-    className="w-full text-left p-2 hover:bg-blue-50 hover:border-blue-300 rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer group"
+    className="w-full text-left p-3 hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer group transform hover:scale-[1.02] active:scale-[0.98]"
     title={`Cliquer pour zoomer sur ${name}`}
   >
-    <div className="flex items-start gap-2">
-      <span className="text-sm">{typeIcon}</span>
+    <div className="flex items-start gap-3">
+      <span className="text-base flex-shrink-0 mt-0.5">{typeIcon}</span>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-gray-800 truncate group-hover:text-blue-700 transition-colors">
+        <div className="text-sm font-medium text-gray-800 truncate group-hover:text-blue-700 transition-colors">
           {name}
         </div>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 mt-0.5">
           {typeName}
           {elevation && elevation > 0 && ` • ${elevation}m`}
         </div>
         {children}
       </div>
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">
+      <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-blue-500 transform group-hover:scale-110">
         🔍
       </div>
     </div>

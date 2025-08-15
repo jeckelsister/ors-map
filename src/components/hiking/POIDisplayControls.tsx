@@ -1,10 +1,9 @@
-import { REFUGE_TYPES, WATER_POINT_TYPES } from '@/constants/hiking';
-import type { Refuge, WaterPoint } from '@/types/hiking';
-import React, { useState, useMemo, useCallback } from 'react';
+import type { Refuge, WaterPoint } from '../../types/hiking';
+import { useState, useMemo, useCallback } from 'react';
 import { FaHome, FaTint } from 'react-icons/fa';
-import ToggleSection from '@/ui/ToggleSection';
-import { FilterSelect, ScrollableList, POIItem } from '@/ui/POIComponents';
-import Legend from '@/ui/Legend';
+import ToggleSection from '../../ui/ToggleSection';
+import { FilterSelect, ScrollableList, POIItem } from '../../ui/POIComponents';
+import Legend from '../../ui/Legend';
 
 interface POIDisplayControlsProps {
   refuges: Refuge[];
@@ -19,22 +18,22 @@ interface POIDisplayControlsProps {
 
 // Filter options configuration
 const REFUGE_FILTER_OPTIONS = [
-  { value: 'gardé', label: 'Guarded refuges' },
-  { value: 'libre', label: 'Free refuges' },
+  { value: 'gardé', label: 'Refuges gardés' },
+  { value: 'libre', label: 'Refuges libres' },
   { value: 'bivouac', label: 'Bivouacs' }
 ];
 
 const WATER_FILTER_OPTIONS = [
-  { value: 'source', label: 'Springs' },
-  { value: 'fontaine', label: 'Fountains' },
-  { value: 'rivière', label: 'Rivers' },
-  { value: 'lac', label: 'Lakes' }
+  { value: 'source', label: 'Sources' },
+  { value: 'fontaine', label: 'Fontaines' },
+  { value: 'rivière', label: 'Rivières' },
+  { value: 'lac', label: 'Lacs' }
 ];
 
 // Legend configuration
 const legendItems = [
-  { type: 'refuge', name: 'Refuges', color: '#e53e3e' },
-  { type: 'waterPoint', name: 'Water points', color: '#3182ce' },
+  { icon: '🏠', label: 'Refuges' },
+  { icon: '💧', label: 'Points d\'eau' },
 ];
 
 export default function POIDisplayControls({
@@ -52,20 +51,14 @@ export default function POIDisplayControls({
 
   // Filter refuges based on selected filter
   const filteredRefuges = useMemo(() => {
-    if (!refugeFilter) return refuges;
-    return refuges.filter(refuge => {
-      const type = REFUGE_TYPES[refuge.type as keyof typeof REFUGE_TYPES];
-      return type === refugeFilter;
-    });
+    if (!refugeFilter || refugeFilter === 'all') return refuges;
+    return refuges.filter(refuge => refuge.type === refugeFilter);
   }, [refuges, refugeFilter]);
 
   // Filter water points based on selected filter
   const filteredWaterPoints = useMemo(() => {
-    if (!waterFilter) return waterPoints;
-    return waterPoints.filter(point => {
-      const type = WATER_POINT_TYPES[point.type as keyof typeof WATER_POINT_TYPES];
-      return type === waterFilter;
-    });
+    if (!waterFilter || waterFilter === 'all') return waterPoints;
+    return waterPoints.filter(point => point.type === waterFilter);
   }, [waterPoints, waterFilter]);
 
   // Handle refuge selection
@@ -84,8 +77,10 @@ export default function POIDisplayControls({
       <ToggleSection
         title="Refuges"
         icon={<FaHome />}
-        isOpen={showRefuges}
-        onToggle={onToggleRefuges}
+        count={filteredRefuges.length}
+        isVisible={showRefuges}
+        onToggle={() => onToggleRefuges(!showRefuges)}
+        accentColor="green"
       >
         <div className="space-y-3">
           {/* Filter */}
@@ -93,37 +88,42 @@ export default function POIDisplayControls({
             options={REFUGE_FILTER_OPTIONS}
             value={refugeFilter}
             onChange={setRefugeFilter}
-            placeholder="Filter by type"
+            placeholder="Filtrer par type"
           />
 
           {/* List */}
-          <ScrollableList maxHeight="200px">
-            {filteredRefuges.map(refuge => (
-              <POIItem
-                key={refuge.id}
-                poi={refuge}
-                type="refuge"
-                onClick={handleRefugeClick}
-              />
-            ))}
-            {filteredRefuges.length === 0 && (
-              <div className="text-gray-500 text-sm text-center py-4">
-                {refuges.length === 0 
-                  ? '🔍 Aucun refuge trouvé (possible timeout API)'
-                  : 'Aucun refuge ne correspond aux filtres'
-                }
-              </div>
-            )}
-          </ScrollableList>
+          {filteredRefuges.length > 0 ? (
+            <ScrollableList maxHeight="max-h-48 md:max-h-64">
+              {filteredRefuges.map(refuge => (
+                <POIItem
+                  key={refuge.id}
+                  name={refuge.name}
+                  typeIcon="🏠"
+                  typeName={refuge.type}
+                  elevation={refuge.elevation}
+                  onClick={() => handleRefugeClick(refuge)}
+                />
+              ))}
+            </ScrollableList>
+          ) : (
+            <div className="text-gray-500 text-sm text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              {refuges.length === 0 
+                ? '🔍 Aucun refuge trouvé (possible timeout API)'
+                : 'Aucun refuge ne correspond aux filtres'
+              }
+            </div>
+          )}
         </div>
       </ToggleSection>
 
       {/* Water points section */}
       <ToggleSection
-        title="Water points"
+        title="Points d'eau"
         icon={<FaTint />}
-        isOpen={showWaterPoints}
-        onToggle={onToggleWaterPoints}
+        count={filteredWaterPoints.length}
+        isVisible={showWaterPoints}
+        onToggle={() => onToggleWaterPoints(!showWaterPoints)}
+        accentColor="blue"
       >
         <div className="space-y-3">
           {/* Filter */}
@@ -131,28 +131,30 @@ export default function POIDisplayControls({
             options={WATER_FILTER_OPTIONS}
             value={waterFilter}
             onChange={setWaterFilter}
-            placeholder="Filter by type"
+            placeholder="Filtrer par type"
           />
 
           {/* List */}
-          <ScrollableList maxHeight="200px">
-            {filteredWaterPoints.map(waterPoint => (
-              <POIItem
-                key={waterPoint.id}
-                poi={waterPoint}
-                type="waterPoint"
-                onClick={handleWaterPointClick}
-              />
-            ))}
-            {filteredWaterPoints.length === 0 && (
-              <div className="text-gray-500 text-sm text-center py-4">
-                {waterPoints.length === 0 
-                  ? '🔍 Aucun point d\'eau trouvé (possible timeout API)'
-                  : 'Aucun point d\'eau ne correspond aux filtres'
-                }
-              </div>
-            )}
-          </ScrollableList>
+          {filteredWaterPoints.length > 0 ? (
+            <ScrollableList maxHeight="max-h-48 md:max-h-64">
+              {filteredWaterPoints.map(waterPoint => (
+                <POIItem
+                  key={waterPoint.id}
+                  name={waterPoint.name}
+                  typeIcon="💧"
+                  typeName={waterPoint.type}
+                  onClick={() => handleWaterPointClick(waterPoint)}
+                />
+              ))}
+            </ScrollableList>
+          ) : (
+            <div className="text-gray-500 text-sm text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              {waterPoints.length === 0 
+                ? '🔍 Aucun point d\'eau trouvé (possible timeout API)'
+                : 'Aucun point d\'eau ne correspond aux filtres'
+              }
+            </div>
+          )}
         </div>
       </ToggleSection>
 

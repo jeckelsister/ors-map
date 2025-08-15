@@ -18,10 +18,10 @@ import Navigation from '../components/shared/Navigation';
 import useHikingRoute from '../hooks/hiking/useHikingRoute';
 import { useToast } from '../hooks/shared/useToast';
 import type {
+  Coordinates,
   HikingProfile,
   Refuge,
   WaterPoint,
-  Coordinates,
 } from '../types/hiking';
 
 export default function HikingPlannerPage(): React.JSX.Element {
@@ -355,54 +355,46 @@ export default function HikingPlannerPage(): React.JSX.Element {
               )}
 
               {selectedTab === 'profile' && (
-                <div className="max-h-96 overflow-y-auto">
-                  <ElevationProfile route={currentRoute} showStages={true} />
-                </div>
+                <ElevationProfile route={currentRoute} showStages={true} />
               )}
 
               {selectedTab === 'poi' && (
-                <div className="max-h-96 overflow-y-auto">
-                  <POIDisplayControls
-                    refuges={refuges}
-                    waterPoints={waterPoints}
-                    showRefuges={showRefuges}
-                    showWaterPoints={showWaterPoints}
-                    onToggleRefuges={setShowRefuges}
-                    onToggleWaterPoints={setShowWaterPoints}
-                    onRefugeSelect={handleRefugeSelect}
-                    onWaterPointSelect={handleWaterPointSelect}
-                  />
-                </div>
+                <POIDisplayControls
+                  refuges={refuges}
+                  waterPoints={waterPoints}
+                  showRefuges={showRefuges}
+                  showWaterPoints={showWaterPoints}
+                  onToggleRefuges={setShowRefuges}
+                  onToggleWaterPoints={setShowWaterPoints}
+                  onRefugeSelect={handleRefugeSelect}
+                  onWaterPointSelect={handleWaterPointSelect}
+                />
               )}
 
               {selectedTab === 'gpx' && (
-                <div className="max-h-96 overflow-y-auto">
-                  <GPXUpload
-                    onGPXImported={(waypoints: Coordinates[], metadata) => {
-                      setWaypoints(waypoints);
-                      showToast(
-                        metadata?.name
-                          ? `✅ ${metadata.name} importé avec ${waypoints.length} points`
-                          : `✅ GPX importé avec ${waypoints.length} points`,
-                        'success'
-                      );
-                    }}
-                    onError={(error: string) => {
-                      showToast(`❌ Erreur GPX: ${error}`, 'error');
-                    }}
-                  />
-                </div>
+                <GPXUpload
+                  onGPXImported={(waypoints: Coordinates[], metadata) => {
+                    setWaypoints(waypoints);
+                    showToast(
+                      metadata?.name
+                        ? `✅ ${metadata.name} importé avec ${waypoints.length} points`
+                        : `✅ GPX importé avec ${waypoints.length} points`,
+                      'success'
+                    );
+                  }}
+                  onError={(error: string) => {
+                    showToast(`❌ Erreur GPX: ${error}`, 'error');
+                  }}
+                />
               )}
 
               {selectedTab === 'export' && (
-                <div className="max-h-96 overflow-y-auto">
-                  <GPXExportControls
-                    route={currentRoute}
-                    refuges={refuges}
-                    waterPoints={waterPoints}
-                    onExport={handleGPXExport}
-                  />
-                </div>
+                <GPXExportControls
+                  route={currentRoute}
+                  refuges={refuges}
+                  waterPoints={waterPoints}
+                  onExport={handleGPXExport}
+                />
               )}
             </div>
           </div>
