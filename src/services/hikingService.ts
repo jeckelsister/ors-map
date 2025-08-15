@@ -2,8 +2,8 @@ import type {
   Coordinates,
   ElevationPoint,
   GPXExportOptions,
-  HikingRoute,
   HikingProfile,
+  HikingRoute,
   Refuge,
   RouteStage,
   WaterPoint,
@@ -48,7 +48,7 @@ const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
   }
 
   const { preferences } = hikingProfile;
-  
+
   // Base profile - always use foot-hiking as it's the most suitable for trails
   const profile = 'foot-hiking';
   let options: ORSOptions = {};
@@ -118,8 +118,6 @@ if (!ORS_API_KEY || ORS_API_KEY === 'your_api_key_here') {
   // Test API immediately on load
   testOrsApi();
 }
-
-
 
 /**
  * Calculate elevation profile for a route
@@ -207,7 +205,10 @@ const toRad = (value: number): number => (value * Math.PI) / 180;
 /**
  * Divise un itinéraire en étapes équidistantes le long du tracé
  */
-export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): HikingRoute => {
+export const divideRouteIntoStages = (
+  route: HikingRoute,
+  stageCount: number
+): HikingRoute => {
   if (stageCount <= 1 || !route.stages || route.stages.length === 0) {
     return route;
   }
@@ -223,8 +224,11 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     return route;
   }
 
-  const allCoordinates: [number, number][] = geometry.coordinates as [number, number][];
-  
+  const allCoordinates: [number, number][] = geometry.coordinates as [
+    number,
+    number,
+  ][];
+
   if (allCoordinates.length < 2) {
     return route;
   }
@@ -232,10 +236,10 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
   // Calculate cumulative distances along the route
   const distances: number[] = [0];
   let totalDistance = 0;
-  
+
   for (let i = 1; i < allCoordinates.length; i++) {
     const segmentDistance = calculateDistance(
-      [allCoordinates[i-1][1], allCoordinates[i-1][0]],
+      [allCoordinates[i - 1][1], allCoordinates[i - 1][0]],
       [allCoordinates[i][1], allCoordinates[i][0]]
     );
     totalDistance += segmentDistance;
@@ -249,21 +253,22 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
   for (let stageIndex = 0; stageIndex < stageCount; stageIndex++) {
     const startDistance = stageIndex * stageDistance;
     const endDistance = (stageIndex + 1) * stageDistance;
-    
+
     // Find start and end indices in coordinates
     const startIndex = findDistanceIndex(distances, startDistance);
-    const endIndex = stageIndex === stageCount - 1 
-      ? allCoordinates.length - 1 
-      : findDistanceIndex(distances, endDistance);
-    
+    const endIndex =
+      stageIndex === stageCount - 1
+        ? allCoordinates.length - 1
+        : findDistanceIndex(distances, endDistance);
+
     // Extract coordinates for this stage
     const stageCoordinates = allCoordinates.slice(startIndex, endIndex + 1);
-    
+
     if (stageCoordinates.length < 2) continue;
 
-        // Calculate stage statistics
-    const stats = calculateSegmentStats(stageCoordinates, elevationProfile);
-    
+    // Calculate stage statistics
+    const stageStats = calculateStageStats(stageCoordinates);
+
     // Create stage with GeoJSON
     const stageGeoJSON: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
@@ -285,27 +290,29 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     };
 
     // Create simplified elevation profile
-    const elevationProfile: ElevationPoint[] = stageCoordinates.map((coord, index) => ({
-      distance: (stageStats.distance / stageCoordinates.length) * index,
-      elevation: 1200 + Math.sin(index * 0.1) * 200, // Simulation
-      lat: coord[1],
-      lng: coord[0],
-    }));
+    const elevationProfile: ElevationPoint[] = stageCoordinates.map(
+      (coord, index) => ({
+        distance: (stageStats.distance / stageCoordinates.length) * index,
+        elevation: 1200 + Math.sin(index * 0.1) * 200, // Simulation
+        lat: coord[1],
+        lng: coord[0],
+      })
+    );
 
     newStages.push({
       id: `stage_auto_${Date.now()}_${stageIndex + 1}`,
       name: `Étape ${stageIndex + 1}`,
-      startPoint: { 
-        lat: stageCoordinates[0][1], 
+      startPoint: {
+        lat: stageCoordinates[0][1],
         lng: stageCoordinates[0][0],
         id: `start_${stageIndex + 1}`,
-        name: `Début étape ${stageIndex + 1}`
+        name: `Début étape ${stageIndex + 1}`,
       },
-      endPoint: { 
-        lat: stageCoordinates[stageCoordinates.length-1][1], 
-        lng: stageCoordinates[stageCoordinates.length-1][0],
+      endPoint: {
+        lat: stageCoordinates[stageCoordinates.length - 1][1],
+        lng: stageCoordinates[stageCoordinates.length - 1][0],
         id: `end_${stageIndex + 1}`,
-        name: `Fin étape ${stageIndex + 1}`
+        name: `Fin étape ${stageIndex + 1}`,
       },
       distance: stageStats.distance,
       ascent: stageStats.ascent,
@@ -328,7 +335,10 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
 /**
  * Trouve l'index de coordonnée le plus proche d'une distance donnée
  */
-const findDistanceIndex = (distances: number[], targetDistance: number): number => {
+const findDistanceIndex = (
+  distances: number[],
+  targetDistance: number
+): number => {
   for (let i = 0; i < distances.length - 1; i++) {
     if (distances[i] <= targetDistance && distances[i + 1] >= targetDistance) {
       const diffCurrent = Math.abs(distances[i] - targetDistance);
@@ -342,7 +352,9 @@ const findDistanceIndex = (distances: number[], targetDistance: number): number 
 /**
  * Calcule les statistiques d'une étape
  */
-const calculateStageStats = (coordinates: [number, number][]): {
+const calculateStageStats = (
+  coordinates: [number, number][]
+): {
   distance: number;
   ascent: number;
   descent: number;
@@ -353,13 +365,14 @@ const calculateStageStats = (coordinates: [number, number][]): {
 
   for (let i = 1; i < coordinates.length; i++) {
     const segmentDistance = calculateDistance(
-      [coordinates[i-1][1], coordinates[i-1][0]],
+      [coordinates[i - 1][1], coordinates[i - 1][0]],
       [coordinates[i][1], coordinates[i][0]]
     );
     distance += segmentDistance;
 
     // Basic elevation simulation
-    const altitudeDiff = (coordinates[i][1] - coordinates[i-1][1]) * 111000 * 0.01;
+    const altitudeDiff =
+      (coordinates[i][1] - coordinates[i - 1][1]) * 111000 * 0.01;
     if (altitudeDiff > 0) {
       ascent += Math.abs(altitudeDiff);
     } else {
@@ -370,7 +383,7 @@ const calculateStageStats = (coordinates: [number, number][]): {
   return {
     distance,
     ascent: Math.round(ascent),
-    descent: Math.round(descent)
+    descent: Math.round(descent),
   };
 };
 
@@ -589,15 +602,21 @@ const calculateDistanceToRoute = (
   let minDistance = Infinity;
 
   for (let i = 0; i < routeCoordinates.length - 1; i++) {
-    const segmentStart = [routeCoordinates[i][1], routeCoordinates[i][0]] as [number, number];
-    const segmentEnd = [routeCoordinates[i + 1][1], routeCoordinates[i + 1][0]] as [number, number];
-    
+    const segmentStart = [routeCoordinates[i][1], routeCoordinates[i][0]] as [
+      number,
+      number,
+    ];
+    const segmentEnd = [
+      routeCoordinates[i + 1][1],
+      routeCoordinates[i + 1][0],
+    ] as [number, number];
+
     const distance = distanceToLineSegment(
       [pointLat, pointLng] as [number, number],
       segmentStart,
       segmentEnd
     );
-    
+
     minDistance = Math.min(minDistance, distance);
   }
 
@@ -618,13 +637,16 @@ const distanceToLineSegment = (
 
   const dx = x2 - x1;
   const dy = y2 - y1;
-  
+
   if (dx === 0 && dy === 0) {
     // Line segment is a point
     return calculateDistance(point, lineStart);
   }
 
-  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)));
+  const t = Math.max(
+    0,
+    Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy))
+  );
   const projectionX = x1 + t * dx;
   const projectionY = y1 + t * dy;
 
@@ -644,13 +666,14 @@ const retryRequest = async <T>(
       return await fn();
     } catch (error) {
       const isLastAttempt = i === maxRetries - 1;
-      const isTimeoutError = error instanceof Error && 
+      const isTimeoutError =
+        error instanceof Error &&
         (error.message.includes('504') || error.message.includes('timeout'));
-      
+
       if (isLastAttempt || !isTimeoutError) {
         throw error;
       }
-      
+
       // Wait before retrying (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
     }
@@ -686,9 +709,10 @@ export const findRefugesNearRoute = async (
     const buffer = radiusKm / 111; // Rough conversion to degrees
 
     // Use retry mechanism for the API call
-    const response = await retryRequest(async () => {
-      // Reduced timeout and simplified query for better performance
-      const overpassQuery = `
+    const response = await retryRequest(
+      async () => {
+        // Reduced timeout and simplified query for better performance
+        const overpassQuery = `
         [out:json][timeout:8];
         (
           node["tourism"="alpine_hut"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
@@ -697,11 +721,14 @@ export const findRefugesNearRoute = async (
         out geom;
       `;
 
-      return await axios.post(OVERPASS_API_URL, overpassQuery, {
-        headers: { 'Content-Type': 'text/plain' },
-        timeout: 10000, // 10 seconds timeout for the request
-      });
-    }, 2, 1000); // 2 retries with 1 second initial delay
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 10000, // 10 seconds timeout for the request
+        });
+      },
+      2,
+      1000
+    ); // 2 retries with 1 second initial delay
 
     const refuges: Refuge[] = response.data.elements
       .map((element: OverpassElement) => ({
@@ -781,8 +808,9 @@ export const findWaterPointsNearRoute = async (
     const buffer = radiusKm / 111;
 
     // Use retry mechanism for the API call
-    const response = await retryRequest(async () => {
-      const overpassQuery = `
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
         [out:json][timeout:8];
         (
           node["natural"="spring"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
@@ -791,11 +819,14 @@ export const findWaterPointsNearRoute = async (
         out geom;
       `;
 
-      return await axios.post(OVERPASS_API_URL, overpassQuery, {
-        headers: { 'Content-Type': 'text/plain' },
-        timeout: 10000, // 10 seconds timeout
-      });
-    }, 2, 1000); // 2 retries with 1 second initial delay
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 10000, // 10 seconds timeout
+        });
+      },
+      2,
+      1000
+    ); // 2 retries with 1 second initial delay
 
     const waterPoints: WaterPoint[] = response.data.elements
       .map((element: OverpassElement) => ({
