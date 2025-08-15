@@ -25,7 +25,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
       'success'
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // showToast est stable grâce à useCallback dans useToast
+  }, []); // showToast is stable thanks to useCallback in useToast
 
   const {
     // Route planning
@@ -80,8 +80,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
   };
 
   const handleRefugeSelect = (refuge: Refuge) => {
-    // Vérifier que les coordonnées sont valides
-    if (!refuge.lat || !refuge.lng || refuge.lat === 0 || refuge.lng === 0) {
+    // Check that coordinates are valid
+    if (!refuge.lat || !refuge.lng || isNaN(Number(refuge.lat)) || isNaN(Number(refuge.lng))) {
       showToast(`❌ Erreur: Coordonnées invalides pour ${refuge.name}`, 'error');
       return;
     }
@@ -92,7 +92,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
   };
 
   const handleWaterPointSelect = (waterPoint: WaterPoint) => {
-    // Vérifier que les coordonnées sont valides
+    // Check that coordinates are valid
     if (!waterPoint.lat || !waterPoint.lng || waterPoint.lat === 0 || waterPoint.lng === 0) {
       showToast(`❌ Erreur: Coordonnées invalides pour ${waterPoint.name}`, 'error');
       return;
@@ -124,15 +124,15 @@ export default function HikingPlannerPage(): React.JSX.Element {
   const handleMapClick = useCallback(
     async (lat: number, lng: number) => {
       try {
-        // Utiliser directement les coordonnées cliquées
+        // Use clicked coordinates directly
         const finalLat = lat;
         const finalLng = lng;
 
-        // Logic: Premier clic = Point A, dernier clic = Point B, clics intermédiaires = étapes
+        // Logic: First click = Point A, last click = Point B, intermediate clicks = stages
         setWaypoints(prev => {
           const newWaypoints = [...prev];
 
-          // Si c'est le premier clic et que Point A n'est pas défini
+          // If it's the first click and Point A is not defined
           if (
             newWaypoints.length === 2 &&
             newWaypoints[0].lat === 0 &&
@@ -149,7 +149,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
             return newWaypoints;
           }
 
-          // Si Point A existe mais Point B n'est pas défini
+          // If Point A exists but Point B is not defined
           if (
             newWaypoints.length === 2 &&
             newWaypoints[1].lat === 0 &&
@@ -166,12 +166,12 @@ export default function HikingPlannerPage(): React.JSX.Element {
             return newWaypoints;
           }
 
-          // Si les deux points existent, ajouter une étape avant le point B
+          // If both points exist, add a stage before point B
           if (newWaypoints.length >= 2) {
-            const pointB = newWaypoints[newWaypoints.length - 1]; // Sauvegarder Point B
+            const pointB = newWaypoints[newWaypoints.length - 1]; // Save Point B
             const etapeNumber = newWaypoints.length - 1;
 
-            // Insérer la nouvelle étape avant Point B
+            // Insert the new stage before Point B
             newWaypoints[newWaypoints.length - 1] = {
               id: `waypoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               lat: finalLat,
@@ -179,7 +179,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
               name: `Étape ${etapeNumber}`,
             };
 
-            // Remettre Point B à la fin
+            // Put Point B back at the end
             newWaypoints.push({
               ...pointB,
               name: 'Point B',
@@ -314,11 +314,11 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
           {/* Map and Results */}
           <div className="lg:col-span-2 space-y-6 relative">
-            {/* Sélecteur de cartes - Position optimale */}
+            {/* Map selector - Optimal position */}
             <div className="absolute top-4 left-4 z-50">
               <button
                 onClick={() => {
-                  // Déclencher l'ouverture du sélecteur via le composant HikingMap
+                  // Trigger selector opening via HikingMap component
                   const mapLayerButton = document.querySelector(
                     '[title*="Sélectionner les cartes"]'
                   ) as HTMLButtonElement;

@@ -55,26 +55,26 @@ const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
 
   // Configure routing based on preferences
   if (preferences.preferOfficial && !preferences.allowUnofficial) {
-    // Sentiers officiels uniquement - éviter les routes non appropriées
+    // Official trails only - avoid inappropriate routes
     options = {
-      avoid_features: ['steps', 'ferries'], // Éviter escaliers et ferries
-      // Note: ORS foot-hiking privilégie déjà les sentiers de randonnée
-      // On peut ajuster avec des profils personnalisés si nécessaire
+      avoid_features: ['steps', 'ferries'], // Avoid stairs and ferries
+      // Note: ORS foot-hiking already favors hiking trails
+      // We can adjust with custom profiles if necessary
     };
   } else if (preferences.preferOfficial && preferences.allowUnofficial) {
-    // Chemins mixtes - balance entre officiels et alternatives
+    // Mixed paths - balance between official and alternatives
     options = {
-      avoid_features: ['ferries'], // Éviter seulement les ferries
-      // Autoriser plus de variété dans les chemins
+      avoid_features: ['ferries'], // Avoid only ferries
+      // Allow more variety in paths
     };
   } else if (preferences.noPreference) {
-    // Sans préférence - utiliser le profil le plus permissif
+    // No preference - use the most permissive profile
     options = {
-      avoid_features: [], // N'éviter aucun type de chemin
-      // Optimiser uniquement sur distance/temps/dénivelé
+      avoid_features: [], // Don't avoid any type of path
+      // Optimize only on distance/time/elevation
     };
   } else {
-    // Cas par défaut
+    // Default case
     options = {
       avoid_features: ['ferries'],
     };
@@ -212,7 +212,7 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     return route;
   }
 
-  // Récupérer toutes les coordonnées de l'itinéraire principal
+  // Get all coordinates from the main route
   const firstStage = route.stages[0];
   if (!firstStage.geojson?.features?.[0]?.geometry) {
     return route;
@@ -229,7 +229,7 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     return route;
   }
 
-  // Calculer les distances cumulatives le long de l'itinéraire
+  // Calculate cumulative distances along the route
   const distances: number[] = [0];
   let totalDistance = 0;
   
@@ -242,7 +242,7 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     distances.push(totalDistance);
   }
 
-  // Calculer les points de division équidistants
+  // Calculate equidistant division points
   const stageDistance = totalDistance / stageCount;
   const newStages: RouteStage[] = [];
 
@@ -250,21 +250,21 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
     const startDistance = stageIndex * stageDistance;
     const endDistance = (stageIndex + 1) * stageDistance;
     
-    // Trouver les indices de début et fin dans les coordonnées
+    // Find start and end indices in coordinates
     const startIndex = findDistanceIndex(distances, startDistance);
     const endIndex = stageIndex === stageCount - 1 
       ? allCoordinates.length - 1 
       : findDistanceIndex(distances, endDistance);
     
-    // Extraire les coordonnées pour cette étape
+    // Extract coordinates for this stage
     const stageCoordinates = allCoordinates.slice(startIndex, endIndex + 1);
     
     if (stageCoordinates.length < 2) continue;
 
-    // Calculer les statistiques de l'étape
-    const stageStats = calculateStageStats(stageCoordinates);
+        // Calculate stage statistics
+    const stats = calculateSegmentStats(stageCoordinates, elevationProfile);
     
-    // Créer l'étape avec GeoJSON
+    // Create stage with GeoJSON
     const stageGeoJSON: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
       features: [
@@ -276,15 +276,15 @@ export const divideRouteIntoStages = (route: HikingRoute, stageCount: number): H
           },
           properties: {
             summary: {
-              distance: stageStats.distance * 1000, // en mètres
-              duration: stageStats.distance * 900, // 15 min/km en secondes
+              distance: stageDistance * 1000, // in meters
+              duration: stageStats.distance * 900, // 15 min/km in seconds
             },
           },
         },
       ],
     };
 
-    // Créer le profil d'élévation simplifié
+    // Create simplified elevation profile
     const elevationProfile: ElevationPoint[] = stageCoordinates.map((coord, index) => ({
       distance: (stageStats.distance / stageCoordinates.length) * index,
       elevation: 1200 + Math.sin(index * 0.1) * 200, // Simulation
@@ -358,7 +358,7 @@ const calculateStageStats = (coordinates: [number, number][]): {
     );
     distance += segmentDistance;
 
-    // Simulation basique du dénivelé
+    // Basic elevation simulation
     const altitudeDiff = (coordinates[i][1] - coordinates[i-1][1]) * 111000 * 0.01;
     if (altitudeDiff > 0) {
       ascent += Math.abs(altitudeDiff);
@@ -497,7 +497,7 @@ const createRouteStage = async (
           Authorization: ORS_API_KEY,
           'Content-Type': 'application/json',
         },
-        timeout: 30000, // 30 secondes de timeout
+        timeout: 30000, // 30 seconds timeout
       }
     );
 
@@ -688,7 +688,7 @@ export const findRefugesNearRoute = async (
         services: extractRefugeServices(element.tags),
       }))
       .filter((refuge: Refuge) => {
-        // Filtrer par distance réelle à l'itinéraire
+        // Filter by actual distance to route
         const distanceToRoute = calculateDistanceToRoute(
           refuge.lat,
           refuge.lng,

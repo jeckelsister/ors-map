@@ -30,17 +30,17 @@ interface ChunkInfo {
  * Hook pour optimiser le bundle et les performances de chargement
  */
 export function useBundleOptimization(): BundleOptimizationHook {
-  // Préchargement des composants avec dynamic import
+  // Component preloading with dynamic import
   const preloadComponent = useCallback(async (componentPath: string): Promise<void> => {
     try {
-      // Précharger le composant via dynamic import
+      // Preload component via dynamic import
       await import(/* webpackPreload: true */ componentPath);
     } catch (error) {
       console.warn(`Failed to preload component: ${componentPath}`, error);
     }
   }, []);
 
-  // Prefetch des routes pour améliorer la navigation
+  // Route prefetching to improve navigation
   const prefetchRoute = useCallback((route: string): void => {
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => {
@@ -52,19 +52,19 @@ export function useBundleOptimization(): BundleOptimizationHook {
     }
   }, []);
 
-  // Optimisation des images avec paramètres d'URL
+  // Image optimization with URL parameters
   const optimizeImages = useCallback((
     imageSrc: string, 
     options: ImageOptimizationOptions = {}
   ): string => {
     const { width, height, quality = 85, format } = options;
     
-    // Si l'image est locale, retourner directement
+    // If the image is local, return directly
     if (imageSrc.startsWith('/') || imageSrc.startsWith('./')) {
       return imageSrc;
     }
 
-    // Pour les URLs externes, ajouter des paramètres d'optimisation
+    // For external URLs, add optimization parameters
     const url = new URL(imageSrc);
     
     if (width) url.searchParams.set('w', width.toString());
@@ -75,7 +75,7 @@ export function useBundleOptimization(): BundleOptimizationHook {
     return url.toString();
   }, []);
 
-  // Mesure de la taille du bundle (en développement)
+  // Bundle size measurement (in development)
   const measureBundleSize = useCallback((): BundleSizeInfo => {
     if (process.env.NODE_ENV !== 'development') {
       return {
@@ -85,7 +85,7 @@ export function useBundleOptimization(): BundleOptimizationHook {
       };
     }
 
-    // Estimation basée sur les scripts chargés
+    // Estimation based on loaded scripts
     const scripts = Array.from(document.querySelectorAll('script[src]'));
     const chunks: ChunkInfo[] = scripts.map((script) => {
       const src = script.getAttribute('src') || '';
@@ -93,7 +93,7 @@ export function useBundleOptimization(): BundleOptimizationHook {
       
       return {
         name: src.split('/').pop() || 'unknown',
-        size: 0, // Taille réelle non disponible côté client
+        size: 0, // Actual size not available client-side
         isAsync,
       };
     });
@@ -113,7 +113,7 @@ export function useBundleOptimization(): BundleOptimizationHook {
   };
 }
 
-// Hook pour lazy loading d'images
+// Hook for lazy image loading
 export function useLazyImage(src: string, options: ImageOptimizationOptions = {}) {
   const { optimizeImages } = useBundleOptimization();
   
@@ -126,7 +126,7 @@ export function useLazyImage(src: string, options: ImageOptimizationOptions = {}
   };
 }
 
-// Hook pour préchargement conditionnel
+// Hook for conditional preloading
 export function useConditionalPreload(condition: boolean, componentPath: string) {
   const { preloadComponent } = useBundleOptimization();
   

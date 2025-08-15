@@ -26,17 +26,17 @@ interface PerformanceWithMemory extends Performance {
 export function useMemoryOptimization(): MemoryOptimizationHook {
   const cleanupFunctions = useRef<Set<() => void>>(new Set());
 
-  // Cache WeakMap pour éviter les fuites mémoire
+  // WeakMap cache to avoid memory leaks
   const createWeakCache = useCallback(<K extends object, V>(): WeakMap<K, V> => {
     return new WeakMap<K, V>();
   }, []);
 
-  // Enregistrement des fonctions de nettoyage
+  // Register cleanup functions
   const cleanupOnUnmount = useCallback((cleanup: () => void): void => {
     cleanupFunctions.current.add(cleanup);
   }, []);
 
-  // Mesure de l'utilisation mémoire (si disponible)
+  // Memory usage measurement (if available)
   const measureMemoryUsage = useCallback((): MemoryInfo | null => {
     const perf = performance as PerformanceWithMemory;
     if ('memory' in perf && perf.memory) {
@@ -45,7 +45,7 @@ export function useMemoryOptimization(): MemoryOptimizationHook {
     return null;
   }, []);
 
-  // Nettoyage automatique au démontage
+  // Automatic cleanup on unmount
   useEffect(() => {
     const cleanupSet = cleanupFunctions.current;
     return () => {
@@ -67,7 +67,7 @@ export function useMemoryOptimization(): MemoryOptimizationHook {
   };
 }
 
-// Hook pour observer les fuites mémoire
+// Hook to observe memory leaks
 export function useMemoryLeakDetector(componentName: string) {
   const { measureMemoryUsage, cleanupOnUnmount } = useMemoryOptimization();
   const initialMemory = useRef<MemoryInfo | null>(null);
@@ -82,7 +82,7 @@ export function useMemoryLeakDetector(componentName: string) {
         const increase = currentMemory.usedJSHeapSize - initialMemory.current.usedJSHeapSize;
         maxMemoryIncrease.current = Math.max(maxMemoryIncrease.current, increase);
         
-        // Avertissement si augmentation mémoire excessive
+        // Warning if excessive memory increase
         if (increase > 50 * 1024 * 1024) { // 50MB
           console.warn(
             `Potential memory leak in ${componentName}: ${Math.round(increase / 1024 / 1024)}MB increase`
@@ -105,7 +105,7 @@ export function useMemoryLeakDetector(componentName: string) {
   }, [componentName, measureMemoryUsage, cleanupOnUnmount]);
 }
 
-// Hook pour optimiser les listes de données
+// Hook to optimize data lists
 export function useOptimizedList<T extends object>(
   items: T[],
   getItemId: (item: T) => string | number,
@@ -116,7 +116,7 @@ export function useOptimizedList<T extends object>(
   const prevItems = useRef<T[]>(items);
   const optimizedItems = useRef<T[]>(items);
 
-  // Optimisation des items avec cache et limitation
+  // Item optimization with cache and limitation
   const shouldUpdate = items.length !== prevItems.current.length ||
     items.some((item, index) => {
       const prevItem = prevItems.current[index];
@@ -128,7 +128,7 @@ export function useOptimizedList<T extends object>(
     prevItems.current = items;
   }
 
-  // Cache des IDs pour éviter les recalculs
+  // Cache IDs to avoid recalculations
   const getOptimizedItemId = useCallback((item: T): string | number => {
     if (itemCache.current.has(item)) {
       return itemCache.current.get(item)!;

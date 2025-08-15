@@ -215,7 +215,7 @@ export default function useMapRoute({
     fetchAndDisplayRoute();
 
     return () => {
-      // Ne pas nettoyer la carte ici, on veut la garder
+      // Don't clean up the map here, we want to keep it
     };
   }, [
     showTrace,

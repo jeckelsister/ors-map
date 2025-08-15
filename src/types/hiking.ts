@@ -9,7 +9,7 @@ export interface HikingProfile {
 export interface PathPreferences {
   preferOfficial: boolean; // GR, HRP, etc.
   allowUnofficial: boolean; // Sentiers non-officiels
-  noPreference: boolean; // Sans préférence
+  noPreference: boolean; // No preference
 }
 
 export interface HikingRoute {

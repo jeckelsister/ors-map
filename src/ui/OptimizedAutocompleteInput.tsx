@@ -16,8 +16,8 @@ interface OptimizedAutocompleteInputProps {
 }
 
 /**
- * Composant Autocomplete optimisé avec VirtualList pour de nombreuses suggestions
- * Utilise le virtual scrolling quand plus de 10 suggestions
+ * Optimized Autocomplete component with VirtualList for many suggestions
+ * Uses virtual scrolling when more than 10 suggestions
  */
 export default function OptimizedAutocompleteInput({
   label,
@@ -35,15 +35,15 @@ export default function OptimizedAutocompleteInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = `autocomplete-input-${Math.random().toString(36).substr(2, 9)}`;
   
-  // Hook pour VirtualList
+  // Hook for VirtualList
   const { scrollElementRef, scrollToIndex } = useVirtualList(suggestions);
   
-  // Calculer la hauteur du container
+  // Calculate container height
   const containerHeight = useMemo(() => {
     return Math.min(suggestions.length, maxVisibleSuggestions) * suggestionHeight;
   }, [suggestions.length, maxVisibleSuggestions, suggestionHeight]);
 
-  // Déterminer si on utilise VirtualList ou une liste normale
+  // Determine if we use VirtualList or a normal list
   const useVirtualScrolling = suggestions.length > 10;
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function OptimizedAutocompleteInput({
     setFocusedIndex(-1);
   }, [suggestions, value]);
 
-  // Scroller vers l'élément focusé lors des navigation clavier
+  // Scroll to focused element during keyboard navigation
   useEffect(() => {
     if (focusedIndex >= 0 && useVirtualScrolling) {
       scrollToIndex(focusedIndex);
@@ -94,7 +94,7 @@ export default function OptimizedAutocompleteInput({
     setFocusedIndex(-1);
   }, [onSuggestionClick]);
 
-  // Renderer pour les éléments de suggestion
+  // Renderer for suggestion elements
   const renderSuggestion = useCallback((suggestion: LocationSuggestion, index: number) => (
     <div
       onClick={() => handleSuggestionClick(suggestion)}
@@ -165,7 +165,7 @@ export default function OptimizedAutocompleteInput({
             </ul>
           )}
           
-          {/* Indicateur de performance en développement */}
+          {/* Performance indicator in development */}
           {process.env.NODE_ENV === 'development' && (
             <div className="px-2 py-1 text-xs text-gray-500 border-t bg-gray-50">
               {suggestions.length} suggestions • {useVirtualScrolling ? 'Virtual' : 'Standard'} rendering

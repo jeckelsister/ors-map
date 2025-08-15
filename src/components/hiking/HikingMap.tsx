@@ -295,7 +295,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
       let markerClass = '';
 
       if (isStart) {
-        // Point A (départ) - Vert
+        // Point A (start) - Green
         markerHtml = `
           <div class="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
             A
@@ -303,7 +303,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
         `;
         markerClass = 'start-marker';
       } else if (isEnd) {
-        // Point B (arrivée) - Rouge
+        // Point B (arrival) - Red
         markerHtml = `
           <div class="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
             B
@@ -311,7 +311,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
         `;
         markerClass = 'end-marker';
       } else {
-        // Étapes intermédiaires - Bleu avec numéro
+        // Intermediate stages - Blue with number
         const stepNumber = index;
         markerHtml = `
           <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white">
@@ -430,7 +430,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
           title="🗺️ Sélectionner les cartes de randonnée"
           style={{ zIndex: 9999, position: 'relative' }}
         >
-          {/* Badge discret mais visible */}
+          {/* Discreet but visible badge */}
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
 
           {/* Label au survol */}

@@ -220,7 +220,7 @@ const Map = (): React.JSX.Element => {
           `}
           title="🗺️ Changer le fond de carte"
         >
-          {/* Badge avec indicateur */}
+          {/* Badge with indicator */}
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
 
           <svg

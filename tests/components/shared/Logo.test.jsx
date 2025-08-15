@@ -15,7 +15,7 @@ describe('Logo Component', () => {
     render(<Logo />);
 
     const logoImage = screen.getByRole('img');
-    expect(logoImage).toHaveClass('w-10', 'h-10'); // size par défaut 'md'
+    expect(logoImage).toHaveClass('w-10', 'h-10'); // default size 'md'
   });
 
   test('applies large size correctly', () => {

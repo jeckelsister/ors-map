@@ -34,7 +34,7 @@ describe('FormField', () => {
       </FormField>
     );
 
-    // Utiliser getByRole pour cibler spécifiquement l'élément alert
+    // Use getByRole to specifically target the alert element
     const errorElement = screen.getByRole('alert');
     expect(errorElement).toBeInTheDocument();
     expect(errorElement).toHaveTextContent(`⚠️ ${errorMessage}`);
@@ -51,7 +51,7 @@ describe('FormField', () => {
     );
 
     expect(screen.getByText(helpText)).toBeInTheDocument();
-    // Le composant utilise text-gray-500, pas text-gray-600
+    // The component uses text-gray-500, not text-gray-600
     expect(screen.getByText(helpText)).toHaveClass('text-gray-500');
   });
 
@@ -91,9 +91,9 @@ describe('FormField', () => {
     const label = screen.getByLabelText('My Test Field');
     const input = screen.getByRole('textbox');
     
-    // Le composant génère l'ID correctement et l'applique à l'input
+    // The component generates the ID correctly and applies it to the input
     expect(input).toHaveAttribute('id', 'field-my-test-field');
-    // Le label doit être associé à l'input via htmlFor
+    // The label should be associated with the input via htmlFor
     expect(label).toBe(input);
   });
 
@@ -107,12 +107,12 @@ describe('FormField', () => {
       </FormField>
     );
 
-    // Le message d'erreur est affiché
+    // The error message is displayed
     const errorElement = screen.getByRole('alert');
     expect(errorElement).toBeInTheDocument();
     expect(errorElement).toHaveTextContent(`⚠️ ${errorMessage}`);
     
-    // Le helpText n'est pas affiché quand il y a une erreur selon la logique du composant
+    // The helpText is not displayed when there is an error according to component logic
     expect(screen.queryByText(helpText)).not.toBeInTheDocument();
   });
 

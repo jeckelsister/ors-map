@@ -7,13 +7,13 @@ interface VirtualListProps<T> {
   containerHeight: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   className?: string;
-  overscan?: number; // Nombre d'éléments supplémentaires à rendre pour un scrolling fluide
+  overscan?: number; // Number of additional elements to render for smooth scrolling
   getItemKey?: (item: T, index: number) => string | number;
 }
 
 /**
- * Composant Virtual List optimisé pour les grandes listes
- * Rend seulement les éléments visibles pour améliorer les performances
+ * Optimized Virtual List component for large lists
+ * Only renders visible elements to improve performance
  */
 function VirtualListInner<T>({
   items,
@@ -27,7 +27,7 @@ function VirtualListInner<T>({
   const { renderCount } = usePerformanceMonitor('VirtualList');
   const [scrollTop, setScrollTop] = useState(0);
 
-  // Calculs optimisés pour déterminer les éléments visibles
+  // Optimized calculations to determine visible elements
   const visibleRange = useMemo(() => {
     const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const endIndex = Math.min(
@@ -38,7 +38,7 @@ function VirtualListInner<T>({
     return { startIndex, endIndex };
   }, [scrollTop, itemHeight, containerHeight, items.length, overscan]);
 
-  // Éléments visibles avec optimisation mémoire
+  // Visible elements with memory optimization
   const visibleItems = useMemo(() => {
     const result = [];
     for (let i = visibleRange.startIndex; i <= visibleRange.endIndex; i++) {
@@ -53,15 +53,15 @@ function VirtualListInner<T>({
     return result;
   }, [items, visibleRange, getItemKey]);
 
-  // Gestionnaire de scroll optimisé
+  // Optimized scroll handler
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
   }, []);
 
-  // Hauteur totale de la liste
+  // Total height of the list
   const totalHeight = items.length * itemHeight;
 
-  // Offset pour positionner correctement les éléments visibles
+  // Offset to position visible elements correctly
   const offsetY = visibleRange.startIndex * itemHeight;
 
   return (
@@ -72,9 +72,9 @@ function VirtualListInner<T>({
       onScroll={handleScroll}
       data-render-count={process.env.NODE_ENV === 'development' ? renderCount : undefined}
     >
-      {/* Container avec la hauteur totale pour maintenir la scrollbar */}
+      {/* Container with total height to maintain scrollbar */}
       <div style={{ height: totalHeight, position: 'relative' }}>
-        {/* Container des éléments visibles */}
+        {/* Container for visible elements */}
         <div
           style={{
             transform: `translateY(${offsetY}px)`,
@@ -102,7 +102,7 @@ function VirtualListInner<T>({
   );
 }
 
-// Création du composant avec forwardRef et gestion des génériques
+// Component creation with forwardRef and generic handling
 type VirtualListComponent = <T>(
   props: VirtualListProps<T> & { ref?: React.Ref<HTMLDivElement> }
 ) => React.ReactElement;

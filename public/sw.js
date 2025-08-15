@@ -1,5 +1,5 @@
-// Service Worker pour la mise en cache des ressources statiques
-// Améliore les performances et permet un fonctionnement hors ligne partiel
+// Service Worker for static resources caching
+// Improves performance and enables partial offline functionality
 
 const CACHE_NAME = 'waymaker-v1';
 const STATIC_RESOURCES = [
@@ -7,10 +7,10 @@ const STATIC_RESOURCES = [
   '/index.html',
   '/src/main.tsx',
   '/src/App.tsx',
-  // Ajouter d'autres ressources statiques critiques
+  // Add other critical static resources
 ];
 
-// Installation du service worker
+// Service worker installation
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +20,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activation et nettoyage des anciens caches
+// Activation and cleanup of old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,7 +35,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Stratégie de cache: Network First pour les API, Cache First pour les assets
+// Cache strategy: Network First for APIs, Cache First for assets
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -69,7 +69,7 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Background sync pour les actions hors ligne
+// Background sync for offline actions
 self.addEventListener('sync', (event) => {
   if (event.tag === 'background-sync') {
     event.waitUntil(doBackgroundSync());
@@ -77,6 +77,6 @@ self.addEventListener('sync', (event) => {
 });
 
 async function doBackgroundSync() {
-  // Implémenter la synchronisation en arrière-plan si nécessaire
+  // Implement background sync if needed
   // Background sync completed
 }

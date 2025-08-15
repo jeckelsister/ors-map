@@ -72,14 +72,14 @@ const LocationForm = ({
     };
   }, [isMapClickMode, isEndMapClickMode, disableMapClickForStart, disableMapClickForEnd]);
 
-  // Helper pour créer une location à partir de coordonnées
+  // Helper to create a location from coordinates
   const createLocationFromCoords = useCallback((lat: number, lng: number, name: string): Location => ({
     lat,
     lng,
     name
   }), []);
 
-  // Helper pour créer une location à partir d'une suggestion
+  // Helper to create a location from a suggestion
   const createLocationFromSuggestion = useCallback((suggestion: LocationSuggestion): Location => ({
     lat: Number(suggestion.lat),
     lng: Number(suggestion.lon),
@@ -211,7 +211,7 @@ const LocationForm = ({
       : `${baseClasses} bg-gray-300 text-gray-500 cursor-not-allowed`;
   }, [canCreateTrace]);
 
-  // Boutons d'action pour les inputs
+  // Action buttons for inputs
   const startActions = useMemo(() => [
     <IconButton
       key="geolocation"

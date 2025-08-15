@@ -41,10 +41,10 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({
   const [isExpanded, setIsExpanded] = useState(false);
   const [startTime] = useState(Date.now());
 
-  // Détection de fuites mémoire
+  // Memory leak detection
   useMemoryLeakDetector('PerformanceMonitor');
 
-  // Mise à jour des statistiques
+  // Statistics update
   useEffect(() => {
     if (!enabled) return;
 
@@ -61,10 +61,10 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({
       });
     };
 
-    // Mise à jour initiale
+    // Initial update
     updateStats();
 
-    // Mise à jour périodique
+    // Periodic update
     const interval = setInterval(updateStats, 2000);
 
     return () => clearInterval(interval);
@@ -100,7 +100,7 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({
         ${className}
       `}
     >
-      {/* Header avec toggle */}
+      {/* Header with toggle */}
       <div
         className="flex items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -112,7 +112,7 @@ const PerformanceMonitor = memo<PerformanceMonitorProps>(({
         <span className="ml-2">{isExpanded ? '▼' : '▶'}</span>
       </div>
 
-      {/* Détails expandables */}
+      {/* Expandable details */}
       {isExpanded && (
         <div className="mt-2 space-y-1 min-w-48">
           <div className="border-b border-gray-600 pb-1 mb-2">

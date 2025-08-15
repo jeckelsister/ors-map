@@ -126,7 +126,7 @@ export const getAvailableMapLayers = (): Array<{
   available: boolean;
 }> => {
   return [
-    // 🥇 CARTES ESSENTIELLES RANDONNÉE
+    // 🥇 ESSENTIAL HIKING MAPS
     {
       key: 'osmFrance',
       name: MAP_LAYERS.osmFrance.name,

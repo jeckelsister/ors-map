@@ -100,7 +100,7 @@ export const usePerformanceMonitor = (componentName: string) => {
     if (process.env.NODE_ENV === 'development') {
       renderCountRef.current += 1;
       
-      // Ne log que tous les 10 renders pour éviter le spam
+      // Only log every 10 renders to avoid spam
       if (renderCountRef.current % 10 === 0) {
         const timeSinceMount = Date.now() - mountTimeRef.current;
         console.warn(`${componentName} rendered ${renderCountRef.current} times in ${timeSinceMount}ms`);

@@ -76,7 +76,7 @@ export default function useHikingRoute({
     try {
       const [foundRefuges, foundWaterPoints] = await Promise.allSettled([
         findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
-        findWaterPointsNearRoute(route.geojson, 1), // 1km radius - points d'eau très proches
+        findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
       ]);
 
       if (foundRefuges.status === 'fulfilled') {
@@ -112,11 +112,11 @@ export default function useHikingRoute({
       const route = await createHikingRoute(
         waypoints,
         isLoop,
-        1, // Créer d'abord un itinéraire simple
-        hikingProfile // Passer le profil de randonnée
+        1, // First create a simple route
+        hikingProfile // Pass the hiking profile
       );
 
-      // Si stageCount > 1, diviser automatiquement l'itinéraire
+      // If stageCount > 1, automatically divide the route
       const finalRoute = stageCount > 1 
         ? divideRouteIntoStages(route, stageCount)
         : route;
