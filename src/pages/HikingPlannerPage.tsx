@@ -263,7 +263,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
           {/* Control Panel - Mobile: Collapsible, Desktop: Always visible */}
           <div className="lg:col-span-1 space-y-4 md:space-y-6 order-2 lg:order-1">
             {/* Tab Navigation */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl border border-white/20 sticky top-4 z-40">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl border border-white/20">
               <div className="flex flex-wrap lg:flex-nowrap gap-1 bg-gray-100 rounded-2xl p-1">
                 {[
                   {
