@@ -5,6 +5,7 @@ import React, {
   useContext,
   useMemo,
   useState,
+  useRef,
 } from 'react';
 import Toast from '../../components/shared/Toast';
 
@@ -40,13 +41,19 @@ interface ToastProviderProps {
 
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastIdCounter = useRef(0); // Performance: avoid Date.now() and Math.random()
 
   const showToast = useCallback(
     (message: string, type: ToastItem['type'], duration?: number) => {
-      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // More efficient ID generation
+      const id = `toast-${++toastIdCounter.current}`;
       const newToast: ToastItem = { id, message, type, duration };
 
-      setToasts(prev => [...prev, newToast]);
+      setToasts(prev => {
+        // Performance: limit max toasts to prevent memory bloat
+        const newToasts = [...prev, newToast];
+        return newToasts.length > 5 ? newToasts.slice(-5) : newToasts;
+      });
     },
     []
   );

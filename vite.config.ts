@@ -5,7 +5,10 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss()
+  ],
   base: '/ors-map/',
   resolve: {
     alias: {
@@ -22,13 +25,29 @@ export default defineConfig({
     },
   },
   build: {
+    // Optimize build output
+    target: 'esnext',
+    minify: 'esbuild', // Use esbuild instead of terser for faster builds
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           leaflet: ['leaflet'],
-          ui: ['@emotion/react', '@emotion/styled', '@mui/material'],
+          icons: ['react-icons/fa', 'react-icons/md', 'react-icons/hi'],
+          dnd: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+        },
+        // Optimize asset file names
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
+          
+          if (/\.(png|jpe?g|gif|svg|webp|avif)$/i.test(assetInfo.name)) {
+            return `img/[name]-[hash][extname]`;
+          }
+          if (/\.(css)$/i.test(assetInfo.name)) {
+            return `css/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
         },
       },
     },
@@ -37,5 +56,12 @@ export default defineConfig({
   // Performance optimizations
   optimizeDeps: {
     include: ['leaflet', 'react', 'react-dom', 'react-router-dom'],
+    exclude: ['@testing-library/react', '@testing-library/user-event'],
+  },
+  // Development server optimizations
+  server: {
+    fs: {
+      allow: ['..'],
+    },
   },
 });

@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 
+/* Global performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* Optimized scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hardware acceleration for animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
 /* Optimized styles for map markers and popups */
 .custom-popup .leaflet-popup-content-wrapper {
   border-radius: 8px;
@@ -15,6 +31,7 @@
 /* Optimized marker container for better performance */
 .custom-start-marker {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 /* Smooth transitions for map interactions */
@@ -32,15 +49,29 @@
 @keyframes pulse-optimized {
   0%,
   100% {
-    transform: scale(1);
+    transform: scale(1) translateZ(0);
     opacity: 0.7;
   }
   50% {
-    transform: scale(1.5);
+    transform: scale(1.5) translateZ(0);
     opacity: 0.3;
   }
 }
 
 .animate-pulse-optimized {
   animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Optimized loader animation */
+@keyframes spin-optimized {
+  0% {
+    transform: rotate(0deg) translateZ(0);
+  }
+  100% {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.animate-spin-optimized {
+  animation: spin-optimized 1s linear infinite;
 }
