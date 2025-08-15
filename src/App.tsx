@@ -4,16 +4,19 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import OfflineIndicator from './components/shared/OfflineIndicator';
 import { ToastProvider } from './hooks/shared/useToast';
 
-// Lazy load pages for better performance
-const Home = lazy(() => import('./pages/Home'));
-const MapPage = lazy(() => import('./pages/MapPage'));
-const HikingPlannerPage = lazy(() => import('./pages/HikingPlannerPage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+// Lazy load pages for better performance with error handling
+const Home = lazy(() => import('./pages/Home').catch(() => ({ default: () => <div>Erreur de chargement de la page d'accueil</div> })));
+const MapPage = lazy(() => import('./pages/MapPage').catch(() => ({ default: () => <div>Erreur de chargement de la page carte</div> })));
+const HikingPlannerPage = lazy(() => import('./pages/HikingPlannerPage').catch(() => ({ default: () => <div>Erreur de chargement du planificateur</div> })));
+const NotFound = lazy(() => import('./pages/NotFound').catch(() => ({ default: () => <div>Page non trouvée</div> })));
 
 // Loading component
 const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+  <div className="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-green-600 flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto mb-4"></div>
+      <p className="text-white font-medium">Chargement...</p>
+    </div>
   </div>
 );
 

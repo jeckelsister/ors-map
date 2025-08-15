@@ -10,6 +10,27 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Eco-tourism themed gradients */
+.eco-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+}
+
+.eco-gradient-soft {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
+}
+
+/* Glass morphism effect for modern look */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Enhanced backdrop blur */
+.backdrop-blur-enhanced {
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
 /* Hardware acceleration for animations */
 .gpu-accelerated {
   transform: translateZ(0);
@@ -18,31 +39,51 @@ html {
 
 /* Optimized styles for map markers and popups */
 .custom-popup .leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .custom-popup .leaflet-popup-tip {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Optimized marker container for better performance */
 .custom-start-marker {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3));
   transform: translateZ(0); /* Force hardware acceleration */
 }
 
 /* Smooth transitions for map interactions */
 .leaflet-container {
   transition: cursor 0.2s ease;
+  border-radius: 16px;
 }
 
 /* Optimized button hover effects */
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced button styles */
+.btn-eco {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 24px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-eco:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
 }
 
 /* Performance optimization: use transform instead of changing properties */
@@ -62,7 +103,7 @@ html {
   animation: pulse-optimized 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Optimized loader animation */
+/* Optimized loader animation with eco theme */
 @keyframes spin-optimized {
   0% {
     transform: rotate(0deg) translateZ(0);
@@ -74,4 +115,37 @@ html {
 
 .animate-spin-optimized {
   animation: spin-optimized 1s linear infinite;
+}
+
+/* Floating animation for cards */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) translateZ(0);
+  }
+  50% {
+    transform: translateY(-10px) translateZ(0);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Eco-themed scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #059669, #047857);
 }

@@ -11,21 +11,8 @@ import type { HikingProfile, Refuge, WaterPoint } from '../types/hiking';
 
 export default function HikingPlannerPage(): React.JSX.Element {
   const { showToast } = useToast();
-  const hasShownInitialToast = useRef(false);
   const pendingToastMessage = useRef<string | null>(null);
   const hikingMapRef = useRef<HikingMapRef>(null);
-
-  // Show map integration notification on mount (only once)
-  React.useEffect(() => {
-    if (hasShownInitialToast.current) return;
-
-    hasShownInitialToast.current = true;
-    showToast(
-      '🎯 3 cartes parfaites pour la randonnée : OSM France, OpenTopoMap & CyclOSM !',
-      'success'
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // showToast is stable thanks to useCallback in useToast
 
   const {
     // Route planning
@@ -54,12 +41,19 @@ export default function HikingPlannerPage(): React.JSX.Element {
     createRoute,
     resetAll,
   } = useHikingRoute({
-    onError: error => showToast(error, 'error'),
-    onSuccess: route =>
-      showToast(
-        `Itinéraire créé: ${route.totalDistance.toFixed(1)}km`,
-        'success'
-      ),
+    onError: error => {
+      const errorMessage =
+        typeof error === 'string' ? error : 'Une erreur est survenue';
+      showToast(errorMessage, 'error');
+    },
+    onSuccess: route => {
+      if (route && typeof route.totalDistance === 'number') {
+        showToast(
+          `Itinéraire créé: ${route.totalDistance.toFixed(1)}km`,
+          'success'
+        );
+      }
+    },
   });
 
   // Custom reset function that also clears map waypoints
@@ -81,44 +75,68 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
   const handleRefugeSelect = (refuge: Refuge) => {
     // Check that coordinates are valid
-    if (!refuge.lat || !refuge.lng || isNaN(Number(refuge.lat)) || isNaN(Number(refuge.lng))) {
-      showToast(`❌ Erreur: Coordonnées invalides pour ${refuge.name}`, 'error');
+    if (
+      !refuge.lat ||
+      !refuge.lng ||
+      isNaN(Number(refuge.lat)) ||
+      isNaN(Number(refuge.lng))
+    ) {
+      showToast(
+        `❌ Erreur: Coordonnées invalides pour ${refuge.name || 'ce refuge'}`,
+        'error'
+      );
       return;
     }
-    
+
     // Zoom to the refuge on the map
     hikingMapRef.current?.zoomToPOI(refuge.lat, refuge.lng, 16);
-    showToast(`📍 Zoom sur: ${refuge.name} (${refuge.type})`, 'info');
+    showToast(
+      `📍 Zoom sur: ${refuge.name || 'refuge'} (${refuge.type || 'refuge'})`,
+      'info'
+    );
   };
 
   const handleWaterPointSelect = (waterPoint: WaterPoint) => {
     // Check that coordinates are valid
-    if (!waterPoint.lat || !waterPoint.lng || waterPoint.lat === 0 || waterPoint.lng === 0) {
-      showToast(`❌ Erreur: Coordonnées invalides pour ${waterPoint.name}`, 'error');
+    if (
+      !waterPoint.lat ||
+      !waterPoint.lng ||
+      waterPoint.lat === 0 ||
+      waterPoint.lng === 0
+    ) {
+      showToast(
+        `❌ Erreur: Coordonnées invalides pour ${waterPoint.name || "ce point d'eau"}`,
+        'error'
+      );
       return;
     }
-    
+
     // Zoom to the water point on the map
     hikingMapRef.current?.zoomToPOI(waterPoint.lat, waterPoint.lng, 16);
     showToast(
-      `📍 Zoom sur: ${waterPoint.name} (${waterPoint.quality})`,
+      `📍 Zoom sur: ${waterPoint.name || "point d'eau"} (${waterPoint.quality || 'qualité inconnue'})`,
       'info'
     );
   };
 
   const handleGPXExport = (gpxContent: string, filename: string) => {
-    // Custom export handler
-    const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      // Custom export handler
+      const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-    showToast('Fichier GPX téléchargé avec succès!', 'success');
+      showToast('Fichier GPX téléchargé avec succès!', 'success');
+    } catch (error) {
+      console.error("Erreur lors de l'export GPX:", error);
+      showToast('Erreur lors du téléchargement du fichier GPX', 'error');
+    }
   };
 
   const handleMapClick = useCallback(
@@ -208,26 +226,29 @@ export default function HikingPlannerPage(): React.JSX.Element {
   }, [waypoints, showToast]);
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-400 via-teal-500 to-green-600 relative">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold mb-2">
             Planificateur de randonnée
           </h1>
-          <p className="text-gray-600">
+          <p className="text-emerald-100">
             Créez des itinéraires multi-étapes avec profil altimétrique et
             export GPX
           </p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Control Panel */}
           <div className="lg:col-span-1 space-y-6">
             {/* Tab Navigation */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20">
+              <div className="flex space-x-1 bg-gray-100 rounded-2xl p-1">
                 {[
                   { id: 'planning', label: 'Planning', icon: '🗺️' },
                   { id: 'profile', label: 'Profil', icon: '⛰️' },
@@ -237,9 +258,9 @@ export default function HikingPlannerPage(): React.JSX.Element {
                   <button
                     key={tab.id}
                     onClick={() => setSelectedTab(tab.id as typeof selectedTab)}
-                    className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                       selectedTab === tab.id
-                        ? 'bg-white text-blue-600 shadow-sm'
+                        ? 'bg-white text-emerald-600 shadow-sm'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
@@ -251,7 +272,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
             </div>
 
             {/* Tab Content */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/20">
               {selectedTab === 'planning' && (
                 <div className="space-y-4">
                   <RouteStagesPlanner
@@ -269,16 +290,16 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     <button
                       onClick={createRoute}
                       disabled={isLoading || waypoints.length < 2}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg font-medium"
                     >
-                      {isLoading ? 'Création...' : "Créer l'itinéraire"}
+                      {isLoading ? 'Création...' : "🚀 Créer l'itinéraire"}
                     </button>
 
                     <button
                       onClick={handleReset}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                      className="px-4 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all shadow-lg"
                     >
-                      Reset
+                      🔄
                     </button>
                   </div>
                 </div>
@@ -314,123 +335,95 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
           {/* Map and Results */}
           <div className="lg:col-span-2 space-y-6 relative">
-            {/* Map selector - Optimal position */}
-            <div className="absolute top-4 left-4 z-50">
-              <button
-                onClick={() => {
-                  // Trigger selector opening via HikingMap component
-                  const mapLayerButton = document.querySelector(
-                    '[title*="Sélectionner les cartes"]'
-                  ) as HTMLButtonElement;
-                  if (mapLayerButton) {
-                    mapLayerButton.click();
-                  }
-                }}
-                className="bg-white hover:bg-blue-50 border-2 border-green-500 rounded-xl p-3 shadow-lg
-                          transition-all duration-200 group hover:border-green-600"
-                title="🗺️ Choisir les cartes de randonnée"
-              >
-                {/* Badge indicateur */}
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-
-                {/* Tooltip informatif */}
-                <div
-                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2
-                               bg-gray-900 text-white text-xs px-3 py-2 rounded-lg
-                               opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                               whitespace-nowrap pointer-events-none"
-                >
-                  🗺️ OSM France • OpenTopoMap • CyclOSM
-                </div>
-
-                <svg
-                  className="w-6 h-6 text-green-600 group-hover:text-green-700 transition-colors"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                  />
-                </svg>
-              </button>
+            {/* Hiking Map with modern styling */}
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+              <HikingMap
+                ref={hikingMapRef}
+                route={currentRoute}
+                refuges={refuges}
+                waterPoints={waterPoints}
+                showRefuges={showRefuges}
+                showWaterPoints={showWaterPoints}
+                onToggleRefuges={setShowRefuges}
+                onToggleWaterPoints={setShowWaterPoints}
+                waypoints={waypoints}
+                onMapClick={handleMapClick}
+              />
             </div>
-
-            {/* Hiking Map with 3 essential layers */}
-            <HikingMap
-              ref={hikingMapRef}
-              route={currentRoute}
-              refuges={refuges}
-              waterPoints={waterPoints}
-              showRefuges={showRefuges}
-              showWaterPoints={showWaterPoints}
-              onToggleRefuges={setShowRefuges}
-              onToggleWaterPoints={setShowWaterPoints}
-              waypoints={waypoints}
-              onMapClick={handleMapClick}
-            />
 
             {/* Route Summary */}
             {currentRoute && (
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                  Résumé de l'itinéraire
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  📊 Résumé de l'itinéraire
                 </h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {currentRoute.totalDistance.toFixed(1)}
+                  <div className="text-center bg-emerald-50 rounded-xl p-4">
+                    <div className="text-2xl font-bold text-emerald-600">
+                      {currentRoute.totalDistance
+                        ? currentRoute.totalDistance.toFixed(1)
+                        : '0'}
                     </div>
                     <div className="text-sm text-gray-600">km</div>
                   </div>
 
-                  <div className="text-center">
+                  <div className="text-center bg-green-50 rounded-xl p-4">
                     <div className="text-2xl font-bold text-green-600">
-                      +{currentRoute.totalAscent}
+                      +{currentRoute.totalAscent || 0}
                     </div>
                     <div className="text-sm text-gray-600">m</div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">
-                      -{currentRoute.totalDescent}
+                  <div className="text-center bg-orange-50 rounded-xl p-4">
+                    <div className="text-2xl font-bold text-orange-600">
+                      -{currentRoute.totalDescent || 0}
                     </div>
                     <div className="text-sm text-gray-600">m</div>
                   </div>
 
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {currentRoute.stages.length}
+                  <div className="text-center bg-blue-50 rounded-xl p-4">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {currentRoute.stages ? currentRoute.stages.length : 0}
                     </div>
                     <div className="text-sm text-gray-600">
-                      étape{currentRoute.stages.length > 1 ? 's' : ''}
+                      étape
+                      {currentRoute.stages && currentRoute.stages.length > 1
+                        ? 's'
+                        : ''}
                     </div>
                   </div>
                 </div>
 
                 {/* Stages Details */}
-                <div className="space-y-2">
-                  <h3 className="font-medium text-gray-700">
-                    Détail des étapes:
-                  </h3>
-                  {currentRoute.stages.map(stage => (
-                    <div
-                      key={stage.id}
-                      className="flex justify-between items-center p-2 bg-gray-50 rounded"
-                    >
-                      <span className="font-medium text-sm">{stage.name}</span>
-                      <div className="flex gap-4 text-xs text-gray-600">
-                        <span>{stage.distance.toFixed(1)}km</span>
-                        <span>+{stage.ascent}m</span>
-                        <span>-{stage.descent}m</span>
+                {currentRoute.stages && currentRoute.stages.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-gray-700 flex items-center gap-2">
+                      🗺️ Détail des étapes:
+                    </h3>
+                    {currentRoute.stages.map(stage => (
+                      <div
+                        key={stage.id}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-xl"
+                      >
+                        <span className="font-medium text-sm">
+                          {stage.name || 'Étape'}
+                        </span>
+                        <div className="flex gap-3 text-xs">
+                          <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg font-medium">
+                            {stage.distance ? stage.distance.toFixed(1) : '0'}km
+                          </span>
+                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded-lg font-medium">
+                            +{stage.ascent || 0}m
+                          </span>
+                          <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-lg font-medium">
+                            -{stage.descent || 0}m
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

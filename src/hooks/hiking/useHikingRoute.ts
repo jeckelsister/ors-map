@@ -128,11 +128,18 @@ export default function useHikingRoute({
       await findPOIsNearRoute(finalRoute);
     } catch (error) {
       console.error('Error creating hiking route:', error);
-      onError?.(
-        error instanceof Error
-          ? error.message
-          : "Erreur lors de la création de l'itinéraire"
-      );
+      
+      // Safe error message extraction
+      let errorMessage = "Erreur lors de la création de l'itinéraire";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = String(error.message);
+      }
+      
+      onError?.(errorMessage);
     } finally {
       setIsLoading(false);
     }
