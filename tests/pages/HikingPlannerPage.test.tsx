@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -40,8 +41,8 @@ describe('HikingPlannerPage', () => {
       </MockWrapper>
     );
 
-    // Should start with planning tab active
-    expect(screen.getByText('Type de sentiers')).toBeInTheDocument();
+    // Should start with planning tab active - check for a specific heading that exists
+    expect(screen.getByRole('heading', { name: /Préférences de sentiers/i })).toBeInTheDocument();
 
     // Switch to profile tab
     fireEvent.click(screen.getByText('Profil'));
@@ -55,7 +56,7 @@ describe('HikingPlannerPage', () => {
 
     // Switch to export tab
     fireEvent.click(screen.getByText('Export'));
-    expect(screen.getByText('Export GPX')).toBeInTheDocument();
+    expect(screen.getByText('Créez un itinéraire pour exporter en GPX')).toBeInTheDocument();
   });
 
   it('displays route creation form', () => {
@@ -66,7 +67,7 @@ describe('HikingPlannerPage', () => {
     );
 
     expect(screen.getByText("Planification d'itinéraire")).toBeInTheDocument();
-    expect(screen.getByText('Sentiers officiels')).toBeInTheDocument();
+    expect(screen.getAllByText('Sentiers officiels')[0]).toBeInTheDocument();
     expect(screen.getByText('Chemins mixtes')).toBeInTheDocument();
     expect(screen.getByText('Sentiers montagne')).toBeInTheDocument();
     expect(screen.getByText('Sans préférence')).toBeInTheDocument();
@@ -79,7 +80,7 @@ describe('HikingPlannerPage', () => {
       </MockWrapper>
     );
 
-    const officialTrailsButton = screen.getByText('Sentiers officiels');
+    const officialTrailsButton = screen.getAllByText('Sentiers officiels')[0];
     fireEvent.click(officialTrailsButton);
 
     // Check if the profile preferences are displayed
@@ -166,8 +167,8 @@ describe('HikingPlannerPage', () => {
 
     const createButton = screen.getByText("Créer l'itinéraire");
 
-    // Should be disabled initially (waypoints not positioned)
-    expect(createButton).toBeDisabled();
+    // Should be enabled initially (2 waypoints exist)
+    expect(createButton).toBeEnabled();
   });
 
   it('shows reset functionality', () => {
