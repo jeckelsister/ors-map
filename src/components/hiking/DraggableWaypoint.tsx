@@ -3,6 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
 import { FaGripVertical, FaMinus } from 'react-icons/fa';
+import WaypointAutocomplete from './WaypointAutocomplete';
 
 interface DraggableWaypointProps {
   waypoint: Coordinates;
@@ -13,6 +14,7 @@ interface DraggableWaypointProps {
   onUpdate: (field: keyof Coordinates, value: string | number) => void;
   onRemove: () => void;
   canRemove: boolean;
+  onLocationSelect?: (lat: number, lng: number, name: string) => void;
 }
 
 export default function DraggableWaypoint({
@@ -24,6 +26,7 @@ export default function DraggableWaypoint({
   onUpdate,
   onRemove,
   canRemove,
+  onLocationSelect,
 }: DraggableWaypointProps): React.JSX.Element {
   const {
     attributes,
@@ -80,14 +83,21 @@ export default function DraggableWaypoint({
         {getWaypointLabel()}
       </div>
 
-      {/* Name Input */}
-      <input
-        type="text"
-        value={waypoint.name || ''}
-        onChange={e => onUpdate('name', e.target.value)}
-        placeholder={`Point ${index + 1}`}
-        className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-      />
+      {/* Name Input with Autocomplete */}
+      <div className="flex-1">
+        <WaypointAutocomplete
+          value={waypoint.name || ''}
+          onChange={(value) => onUpdate('name', value)}
+          onLocationSelect={(lat, lng, name) => {
+            onUpdate('lat', lat);
+            onUpdate('lng', lng);
+            onUpdate('name', name);
+            onLocationSelect?.(lat, lng, name);
+          }}
+          placeholder={`Point ${index + 1}`}
+          className="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+        />
+      </div>
 
       {/* Coordinates Display */}
       {waypoint.lat !== 0 && waypoint.lng !== 0 && (

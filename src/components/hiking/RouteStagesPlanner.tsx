@@ -17,6 +17,7 @@ import {
 import React, { useState } from 'react';
 import { FaMinus, FaPlus, FaRedo, FaRoute } from 'react-icons/fa';
 import DraggableWaypoint from './DraggableWaypoint';
+import WaypointAutocomplete from './WaypointAutocomplete';
 
 interface RouteStagesPlannerProps {
   waypoints: Coordinates[];
@@ -80,6 +81,20 @@ export default function RouteStagesPlanner({
     setNewWaypointName('');
   };
 
+  const addWaypointFromLocation = (lat: number, lng: number, name: string) => {
+    if (waypoints.length >= 20) return; // Limit to 20 waypoints
+
+    const newWaypoint: Coordinates = {
+      id: `waypoint-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      lat,
+      lng,
+      name,
+    };
+
+    onWaypointsChange([...waypoints, newWaypoint]);
+    setNewWaypointName('');
+  };
+
   const removeWaypoint = (index: number) => {
     if (waypoints.length <= 2) return; // Keep at least 2 points
 
@@ -94,6 +109,17 @@ export default function RouteStagesPlanner({
   ) => {
     const newWaypoints = [...waypoints];
     newWaypoints[index] = { ...newWaypoints[index], [field]: value };
+    onWaypointsChange(newWaypoints);
+  };
+
+  const handleLocationSelect = (index: number, lat: number, lng: number, name: string) => {
+    const newWaypoints = [...waypoints];
+    newWaypoints[index] = { 
+      ...newWaypoints[index], 
+      lat, 
+      lng, 
+      name 
+    };
     onWaypointsChange(newWaypoints);
   };
 
@@ -225,22 +251,26 @@ export default function RouteStagesPlanner({
                   }
                   onRemove={() => removeWaypoint(index)}
                   canRemove={waypoints.length > 2}
+                  onLocationSelect={(lat, lng, name) => 
+                    handleLocationSelect(index, lat, lng, name)
+                  }
                 />
               ))}
             </SortableContext>
           </DndContext>
         </div>
 
-        {/* Add waypoint input */}
+        {/* Add waypoint input with autocomplete */}
         <div className="flex gap-2">
-          <input
-            type="text"
-            value={newWaypointName}
-            onChange={e => setNewWaypointName(e.target.value)}
-            placeholder="Nom du nouveau point"
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            onKeyPress={e => e.key === 'Enter' && addWaypoint()}
-          />
+          <div className="flex-1">
+            <WaypointAutocomplete
+              value={newWaypointName}
+              onChange={setNewWaypointName}
+              onLocationSelect={addWaypointFromLocation}
+              placeholder="Nom du nouveau point"
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            />
+          </div>
           <button
             onClick={addWaypoint}
             disabled={waypoints.length >= 20}
