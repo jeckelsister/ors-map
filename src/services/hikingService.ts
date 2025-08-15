@@ -10,7 +10,6 @@ import type {
 } from '@/types/hiking';
 import axios from 'axios';
 
-// Types for external APIs
 interface OverpassElement {
   id: number;
   lat: number;
@@ -32,7 +31,6 @@ interface ORSRequestBody {
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
 
-// Use OpenRouteService API directly
 const ORS_BASE_URL = 'https://api.openrouteservice.org';
 
 /**
@@ -40,7 +38,6 @@ const ORS_BASE_URL = 'https://api.openrouteservice.org';
  */
 const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
   if (!hikingProfile) {
-    // Default parameters for foot-hiking
     return {
       profile: 'foot-hiking',
       options: {},
@@ -49,32 +46,22 @@ const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
 
   const { preferences } = hikingProfile;
 
-  // Base profile - always use foot-hiking as it's the most suitable for trails
   const profile = 'foot-hiking';
   let options: ORSOptions = {};
 
-  // Configure routing based on preferences
   if (preferences.preferOfficial && !preferences.allowUnofficial) {
-    // Official trails only - avoid inappropriate routes
     options = {
-      avoid_features: ['steps', 'ferries'], // Avoid stairs and ferries
-      // Note: ORS foot-hiking already favors hiking trails
-      // We can adjust with custom profiles if necessary
+      avoid_features: ['steps', 'ferries'],
     };
   } else if (preferences.preferOfficial && preferences.allowUnofficial) {
-    // Mixed paths - balance between official and alternatives
     options = {
-      avoid_features: ['ferries'], // Avoid only ferries
-      // Allow more variety in paths
+      avoid_features: ['ferries'],
     };
   } else if (preferences.noPreference) {
-    // No preference - use the most permissive profile
     options = {
-      avoid_features: [], // Don't avoid any type of path
-      // Optimize only on distance/time/elevation
+      avoid_features: [],
     };
   } else {
-    // Default case
     options = {
       avoid_features: ['ferries'],
     };
@@ -94,7 +81,7 @@ const testOrsApi = async () => {
         coordinates: [
           [2.3522, 48.8566],
           [2.2945, 48.8584],
-        ], // Paris test coordinates
+        ],
       },
       {
         headers: {
@@ -109,13 +96,11 @@ const testOrsApi = async () => {
   }
 };
 
-// Validate API configuration and test ORS
 if (!ORS_API_KEY || ORS_API_KEY === 'your_api_key_here') {
   console.error(
     '⚠️ OpenRouteService API key not configured. Route creation will fail.'
   );
 } else {
-  // Test API immediately on load
   testOrsApi();
 }
 
@@ -125,12 +110,10 @@ if (!ORS_API_KEY || ORS_API_KEY === 'your_api_key_here') {
 export const calculateElevationProfile = async (
   coordinates: [number, number][]
 ): Promise<ElevationPoint[]> => {
-  // Optimize number of points for elevation API
   let coords = coordinates;
   if (coords.length > 200) {
     const step = Math.ceil(coords.length / 200);
     coords = coords.filter((_, i) => i % step === 0);
-    // Always include the last point
     if (coords[coords.length - 1] !== coordinates[coordinates.length - 1]) {
       coords.push(coordinates[coordinates.length - 1]);
     }
@@ -213,7 +196,7 @@ export const divideRouteIntoStages = (
     return route;
   }
 
-  // Get all coordinates from the main route
+
   const firstStage = route.stages[0];
   if (!firstStage.geojson?.features?.[0]?.geometry) {
     return route;
@@ -233,7 +216,7 @@ export const divideRouteIntoStages = (
     return route;
   }
 
-  // Calculate cumulative distances along the route
+
   const distances: number[] = [0];
   let totalDistance = 0;
 
@@ -246,7 +229,7 @@ export const divideRouteIntoStages = (
     distances.push(totalDistance);
   }
 
-  // Calculate equidistant division points
+
   const stageDistance = totalDistance / stageCount;
   const newStages: RouteStage[] = [];
 
@@ -254,22 +237,22 @@ export const divideRouteIntoStages = (
     const startDistance = stageIndex * stageDistance;
     const endDistance = (stageIndex + 1) * stageDistance;
 
-    // Find start and end indices in coordinates
+
     const startIndex = findDistanceIndex(distances, startDistance);
     const endIndex =
       stageIndex === stageCount - 1
         ? allCoordinates.length - 1
         : findDistanceIndex(distances, endDistance);
 
-    // Extract coordinates for this stage
+
     const stageCoordinates = allCoordinates.slice(startIndex, endIndex + 1);
 
     if (stageCoordinates.length < 2) continue;
 
-    // Calculate stage statistics
+
     const stageStats = calculateStageStats(stageCoordinates);
 
-    // Create stage with GeoJSON
+
     const stageGeoJSON: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
       features: [
@@ -289,7 +272,7 @@ export const divideRouteIntoStages = (
       ],
     };
 
-    // Create simplified elevation profile
+
     const elevationProfile: ElevationPoint[] = stageCoordinates.map(
       (coord, index) => ({
         distance: (stageStats.distance / stageCoordinates.length) * index,
@@ -370,7 +353,7 @@ const calculateStageStats = (
     );
     distance += segmentDistance;
 
-    // Basic elevation simulation
+
     const altitudeDiff =
       (coordinates[i][1] - coordinates[i - 1][1]) * 111000 * 0.01;
     if (altitudeDiff > 0) {
@@ -397,10 +380,10 @@ export const createHikingRoute = async (
   hikingProfile?: HikingProfile | null
 ): Promise<HikingRoute> => {
   try {
-    // If it's a loop, add the first point as the last point
+
     const routePoints = isLoop ? [...waypoints, waypoints[0]] : waypoints;
 
-    // Calculate stages
+
     const stages: RouteStage[] = [];
     let totalDistance = 0;
     let totalAscent = 0;
@@ -408,7 +391,7 @@ export const createHikingRoute = async (
     let minElevation = Infinity;
     let maxElevation = -Infinity;
 
-    // Distribute waypoints across stages
+
     const pointsPerStage = Math.max(
       2,
       Math.ceil(routePoints.length / stageCount)
@@ -441,7 +424,7 @@ export const createHikingRoute = async (
       );
     }
 
-    // Combine all stage geometries
+
     const combinedFeatures: GeoJSON.Feature[] = [];
     stages.forEach(stage => {
       if (stage.geojson.features) {
@@ -485,19 +468,19 @@ const createRouteStage = async (
   const startPoint = waypoints[0];
   const endPoint = waypoints[waypoints.length - 1];
 
-  // Get route from ORS
+
   const coordinates = waypoints.map(point => [point.lng, point.lat]);
 
-  // Get ORS parameters based on hiking profile
+
   const { profile, options } = getOrsParametersFromProfile(hikingProfile);
 
   try {
-    // Build request body
+
     const requestBody: ORSRequestBody = {
       coordinates: coordinates,
     };
 
-    // Add options if they exist
+
     if (Object.keys(options).length > 0) {
       requestBody.options = options;
     }
@@ -517,12 +500,12 @@ const createRouteStage = async (
     const routeGeometry = routeResponse.data.features[0].geometry;
     const routeProperties = routeResponse.data.features[0].properties.summary;
 
-    // Calculate elevation profile
+
     const elevationProfile = await calculateElevationProfile(
       routeGeometry.coordinates
     );
 
-    // Calculate ascent and descent
+
     let ascent = 0;
     let descent = 0;
     for (let i = 1; i < elevationProfile.length; i++) {
@@ -639,7 +622,7 @@ const distanceToLineSegment = (
   const dy = y2 - y1;
 
   if (dx === 0 && dy === 0) {
-    // Line segment is a point
+
     return calculateDistance(point, lineStart);
   }
 
@@ -674,7 +657,7 @@ const retryRequest = async <T>(
         throw error;
       }
 
-      // Wait before retrying (exponential backoff)
+
       await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
     }
   }
@@ -689,7 +672,7 @@ export const findRefugesNearRoute = async (
   radiusKm: number = 5
 ): Promise<Refuge[]> => {
   try {
-    // Get bounding box of the route
+
     const feature = route.features[0];
     if (!feature || feature.geometry.type !== 'LineString') {
       throw new Error('Route invalide');
@@ -705,13 +688,13 @@ export const findRefugesNearRoute = async (
     const west = Math.min(...lngs);
     const east = Math.max(...lngs);
 
-    // Expand bounding box by radius
+
     const buffer = radiusKm / 111; // Rough conversion to degrees
 
-    // Use retry mechanism for the API call
+
     const response = await retryRequest(
       async () => {
-        // Reduced timeout and simplified query for better performance
+
         const overpassQuery = `
         [out:json][timeout:8];
         (
@@ -746,7 +729,7 @@ export const findRefugesNearRoute = async (
         services: extractRefugeServices(element.tags),
       }))
       .filter((refuge: Refuge) => {
-        // Filter by actual distance to route
+
         const distanceToRoute = calculateDistanceToRoute(
           refuge.lat,
           refuge.lng,
@@ -807,7 +790,7 @@ export const findWaterPointsNearRoute = async (
 
     const buffer = radiusKm / 111;
 
-    // Use retry mechanism for the API call
+
     const response = await retryRequest(
       async () => {
         const overpassQuery = `
@@ -972,14 +955,14 @@ const generateTrackPoints = (
 const generateGPXWaypoints = (route: HikingRoute): string => {
   const waypoints = [];
 
-  // Add start point
+
   const start = route.stages[0].startPoint;
   waypoints.push(`  <wpt lat="${start.lat}" lon="${start.lng}">
     <name>Départ</name>
     <sym>Flag, Green</sym>
   </wpt>`);
 
-  // Add stage endpoints
+
   route.stages.forEach((stage, index) => {
     if (index < route.stages.length - 1) {
       waypoints.push(`  <wpt lat="${stage.endPoint.lat}" lon="${stage.endPoint.lng}">
@@ -989,7 +972,7 @@ const generateGPXWaypoints = (route: HikingRoute): string => {
     }
   });
 
-  // Add end point
+
   const end = route.stages[route.stages.length - 1].endPoint;
   waypoints.push(`  <wpt lat="${end.lat}" lon="${end.lng}">
     <name>Arrivée</name>

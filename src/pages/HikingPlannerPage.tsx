@@ -45,7 +45,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
     refuges,
     waterPoints,
 
-    // UI state
+
     isLoading,
     showRefuges,
     setShowRefuges,

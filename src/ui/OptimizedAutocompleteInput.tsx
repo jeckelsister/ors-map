@@ -1,7 +1,13 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import type { LocationSuggestion } from '@/types/profile';
-import VirtualList from './VirtualList';
 import { useVirtualList } from '@/hooks/shared/useVirtualList';
+import type { LocationSuggestion } from '@/types/profile';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import VirtualList from './VirtualList';
 
 interface OptimizedAutocompleteInputProps {
   label: string;
@@ -34,16 +40,15 @@ export default function OptimizedAutocompleteInput({
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = `autocomplete-input-${Math.random().toString(36).substr(2, 9)}`;
-  
-  // Hook for VirtualList
+
   const { scrollElementRef, scrollToIndex } = useVirtualList(suggestions);
-  
-  // Calculate container height
+
   const containerHeight = useMemo(() => {
-    return Math.min(suggestions.length, maxVisibleSuggestions) * suggestionHeight;
+    return (
+      Math.min(suggestions.length, maxVisibleSuggestions) * suggestionHeight
+    );
   }, [suggestions.length, maxVisibleSuggestions, suggestionHeight]);
 
-  // Determine if we use VirtualList or a normal list
   const useVirtualScrolling = suggestions.length > 10;
 
   useEffect(() => {
@@ -51,73 +56,83 @@ export default function OptimizedAutocompleteInput({
     setFocusedIndex(-1);
   }, [suggestions, value]);
 
-  // Scroll to focused element during keyboard navigation
   useEffect(() => {
     if (focusedIndex >= 0 && useVirtualScrolling) {
       scrollToIndex(focusedIndex);
     }
   }, [focusedIndex, scrollToIndex, useVirtualScrolling]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!isOpen) return;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isOpen) return;
 
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : 0
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex(prev => 
-          prev > 0 ? prev - 1 : suggestions.length - 1
-        );
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (focusedIndex >= 0) {
-          onSuggestionClick(suggestions[focusedIndex]);
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setFocusedIndex(prev =>
+            prev < suggestions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setFocusedIndex(prev =>
+            prev > 0 ? prev - 1 : suggestions.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (focusedIndex >= 0) {
+            onSuggestionClick(suggestions[focusedIndex]);
+            setIsOpen(false);
+          }
+          break;
+        case 'Escape':
           setIsOpen(false);
-        }
-        break;
-      case 'Escape':
-        setIsOpen(false);
-        setFocusedIndex(-1);
-        break;
-    }
-  }, [isOpen, suggestions, focusedIndex, onSuggestionClick]);
+          setFocusedIndex(-1);
+          break;
+      }
+    },
+    [isOpen, suggestions, focusedIndex, onSuggestionClick]
+  );
 
-  const handleSuggestionClick = useCallback((suggestion: LocationSuggestion) => {
-    onSuggestionClick(suggestion);
-    setIsOpen(false);
-    setFocusedIndex(-1);
-  }, [onSuggestionClick]);
+  const handleSuggestionClick = useCallback(
+    (suggestion: LocationSuggestion) => {
+      onSuggestionClick(suggestion);
+      setIsOpen(false);
+      setFocusedIndex(-1);
+    },
+    [onSuggestionClick]
+  );
 
-  // Renderer for suggestion elements
-  const renderSuggestion = useCallback((suggestion: LocationSuggestion, index: number) => (
-    <div
-      onClick={() => handleSuggestionClick(suggestion)}
-      className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-        index === focusedIndex ? 'bg-blue-100' : ''
-      }`}
-      role="option"
-      aria-selected={index === focusedIndex}
-    >
-      <div className="font-medium text-gray-900 truncate">
-        {suggestion.display_name}
-      </div>
-      {suggestion.type && (
-        <div className="text-xs text-gray-500 truncate">
-          {suggestion.type}
+  const renderSuggestion = useCallback(
+    (suggestion: LocationSuggestion, index: number) => (
+      <div
+        onClick={() => handleSuggestionClick(suggestion)}
+        className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 ${
+          index === focusedIndex ? 'bg-blue-100' : ''
+        }`}
+        role="option"
+        aria-selected={index === focusedIndex}
+      >
+        <div className="font-medium text-gray-900 truncate">
+          {suggestion.display_name}
         </div>
-      )}
-    </div>
-  ), [focusedIndex, handleSuggestionClick]);
+        {suggestion.type && (
+          <div className="text-xs text-gray-500 truncate">
+            {suggestion.type}
+          </div>
+        )}
+      </div>
+    ),
+    [focusedIndex, handleSuggestionClick]
+  );
 
   return (
     <div className={`relative ${className}`}>
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+      <label
+        htmlFor={inputId}
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
         {label}
       </label>
       <input
@@ -129,7 +144,6 @@ export default function OptimizedAutocompleteInput({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(suggestions.length > 0 && value.length > 0)}
         onBlur={() => {
-          // Delay closing to allow suggestion clicks
           setTimeout(() => setIsOpen(false), 150);
         }}
         placeholder={placeholder}
@@ -138,7 +152,7 @@ export default function OptimizedAutocompleteInput({
         aria-haspopup="listbox"
         aria-autocomplete="list"
       />
-      
+
       {isOpen && suggestions.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg overflow-hidden">
           {useVirtualScrolling ? (
@@ -148,14 +162,18 @@ export default function OptimizedAutocompleteInput({
               itemHeight={suggestionHeight}
               containerHeight={containerHeight}
               renderItem={renderSuggestion}
-              getItemKey={(suggestion, index) => suggestion.place_id || `${suggestion.display_name}-${index}`}
+              getItemKey={(suggestion, index) =>
+                suggestion.place_id || `${suggestion.display_name}-${index}`
+              }
               className="max-h-60"
             />
           ) : (
             <ul className="max-h-60 overflow-auto" role="listbox">
               {suggestions.map((suggestion, index) => (
                 <li
-                  key={suggestion.place_id || `${suggestion.display_name}-${index}`}
+                  key={
+                    suggestion.place_id || `${suggestion.display_name}-${index}`
+                  }
                   role="option"
                   aria-selected={index === focusedIndex}
                 >
@@ -164,11 +182,12 @@ export default function OptimizedAutocompleteInput({
               ))}
             </ul>
           )}
-          
+
           {/* Performance indicator in development */}
           {process.env.NODE_ENV === 'development' && (
             <div className="px-2 py-1 text-xs text-gray-500 border-t bg-gray-50">
-              {suggestions.length} suggestions • {useVirtualScrolling ? 'Virtual' : 'Standard'} rendering
+              {suggestions.length} suggestions •{' '}
+              {useVirtualScrolling ? 'Virtual' : 'Standard'} rendering
             </div>
           )}
         </div>

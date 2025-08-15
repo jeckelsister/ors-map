@@ -38,9 +38,7 @@ export const validateCoordinates = (lat: number, lng: number): boolean => {
  * Validate file name for GPX export
  */
 export const validateFileName = (fileName: string): string => {
-  // Remove potentially dangerous characters
   const sanitized = fileName.replace(/[^a-zA-Z0-9_\-\s]/g, '');
-  // Limit length
   return sanitized.substring(0, 100);
 };
 
@@ -50,7 +48,6 @@ export const validateFileName = (fileName: string): string => {
 export const validateUrl = (url: string): boolean => {
   try {
     const parsedUrl = new URL(url);
-    // Only allow HTTP and HTTPS protocols
     return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
   } catch {
     return false;
@@ -65,7 +62,6 @@ export const validateApiResponse = (response: unknown): boolean => {
     return false;
   }
 
-  // Basic validation - can be extended based on specific API response structure
   return true;
 };
 

@@ -23,92 +23,105 @@ export default function useHikingRoute({
   onError,
   onSuccess,
 }: UseHikingRouteProps = {}) {
-  // Route planning state
   const [hikingProfile, setHikingProfile] = useState<HikingProfile | null>(
-    HIKING_PROFILES[0] // Default to first profile
+    HIKING_PROFILES[0]
   );
   const [waypoints, setWaypoints] = useState<Coordinates[]>([
-    { 
-      id: `waypoint-${Date.now()}-init-a`, 
-      lat: 0, 
-      lng: 0, 
-      name: 'Point A' 
+    {
+      id: `waypoint-${Date.now()}-init-a`,
+      lat: 0,
+      lng: 0,
+      name: 'Point A',
     },
-    { 
-      id: `waypoint-${Date.now()}-init-b`, 
-      lat: 0, 
-      lng: 0, 
-      name: 'Point B' 
+    {
+      id: `waypoint-${Date.now()}-init-b`,
+      lat: 0,
+      lng: 0,
+      name: 'Point B',
     },
   ]);
   const [isLoop, setIsLoop] = useState(false);
   const [stageCount, setStageCount] = useState(1);
 
-  // Route data state
   const [currentRoute, setCurrentRoute] = useState<HikingRoute | null>(null);
   const [refuges, setRefuges] = useState<Refuge[]>([]);
   const [waterPoints, setWaterPoints] = useState<WaterPoint[]>([]);
 
-  // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [showRefuges, setShowRefuges] = useState(true);
   const [showWaterPoints, setShowWaterPoints] = useState(true);
 
   // Utility function to ensure waypoints have unique IDs
-  const ensureWaypointIds = useCallback((waypoints: Coordinates[]): Coordinates[] => {
-    return waypoints.map((waypoint, index) => ({
-      ...waypoint,
-      id: waypoint.id || `waypoint-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
-    }));
-  }, []);
+  const ensureWaypointIds = useCallback(
+    (waypoints: Coordinates[]): Coordinates[] => {
+      return waypoints.map((waypoint, index) => ({
+        ...waypoint,
+        id:
+          waypoint.id ||
+          `waypoint-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+      }));
+    },
+    []
+  );
 
   // Override setWaypoints to ensure IDs
-  const setWaypointsWithIds = useCallback((waypoints: Coordinates[] | ((prev: Coordinates[]) => Coordinates[])) => {
-    if (typeof waypoints === 'function') {
-      setWaypoints(prev => ensureWaypointIds(waypoints(prev)));
-    } else {
-      setWaypoints(ensureWaypointIds(waypoints));
-    }
-  }, [ensureWaypointIds]);
+  const setWaypointsWithIds = useCallback(
+    (waypoints: Coordinates[] | ((prev: Coordinates[]) => Coordinates[])) => {
+      if (typeof waypoints === 'function') {
+        setWaypoints(prev => ensureWaypointIds(waypoints(prev)));
+      } else {
+        setWaypoints(ensureWaypointIds(waypoints));
+      }
+    },
+    [ensureWaypointIds]
+  );
 
   // Find POIs near route
-  const findPOIsNearRoute = useCallback(async (route: HikingRoute) => {
-    try {
-      const [foundRefuges, foundWaterPoints] = await Promise.allSettled([
-        findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
-        findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
-      ]);
+  const findPOIsNearRoute = useCallback(
+    async (route: HikingRoute) => {
+      try {
+        const [foundRefuges, foundWaterPoints] = await Promise.allSettled([
+          findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
+          findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
+        ]);
 
-      let hasErrors = false;
+        let hasErrors = false;
 
-      if (foundRefuges.status === 'fulfilled') {
-        setRefuges(foundRefuges.value);
-      } else {
-        console.warn('Failed to fetch refuges:', foundRefuges.reason);
-        setRefuges([]); // Set empty array on failure
-        hasErrors = true;
+        if (foundRefuges.status === 'fulfilled') {
+          setRefuges(foundRefuges.value);
+        } else {
+          console.warn('Failed to fetch refuges:', foundRefuges.reason);
+          setRefuges([]); // Set empty array on failure
+          hasErrors = true;
+        }
+
+        if (foundWaterPoints.status === 'fulfilled') {
+          setWaterPoints(foundWaterPoints.value);
+        } else {
+          console.warn(
+            'Failed to fetch water points:',
+            foundWaterPoints.reason
+          );
+          setWaterPoints([]); // Set empty array on failure
+          hasErrors = true;
+        }
+
+        // Notify user if there were errors loading POIs
+        if (hasErrors) {
+          onError?.(
+            "⚠️ Certains points d'intérêt n'ont pas pu être chargés (timeout API)"
+          );
+        }
+      } catch (error) {
+        console.error('Error finding POIs:', error);
+        // Set empty arrays if there's an overall error
+        setRefuges([]);
+        setWaterPoints([]);
+        onError?.("⚠️ Impossible de charger les points d'intérêt");
       }
-
-      if (foundWaterPoints.status === 'fulfilled') {
-        setWaterPoints(foundWaterPoints.value);
-      } else {
-        console.warn('Failed to fetch water points:', foundWaterPoints.reason);
-        setWaterPoints([]); // Set empty array on failure
-        hasErrors = true;
-      }
-
-      // Notify user if there were errors loading POIs
-      if (hasErrors) {
-        onError?.('⚠️ Certains points d\'intérêt n\'ont pas pu être chargés (timeout API)');
-      }
-    } catch (error) {
-      console.error('Error finding POIs:', error);
-      // Set empty arrays if there's an overall error
-      setRefuges([]);
-      setWaterPoints([]);
-      onError?.('⚠️ Impossible de charger les points d\'intérêt');
-    }
-  }, [onError]);
+    },
+    [onError]
+  );
 
   // Create hiking route
   const createRoute = useCallback(async () => {
@@ -136,9 +149,8 @@ export default function useHikingRoute({
       );
 
       // If stageCount > 1, automatically divide the route
-      const finalRoute = stageCount > 1 
-        ? divideRouteIntoStages(route, stageCount)
-        : route;
+      const finalRoute =
+        stageCount > 1 ? divideRouteIntoStages(route, stageCount) : route;
 
       setCurrentRoute(finalRoute);
       onSuccess?.(finalRoute);
@@ -147,7 +159,7 @@ export default function useHikingRoute({
       await findPOIsNearRoute(finalRoute);
     } catch (error) {
       console.error('Error creating hiking route:', error);
-      
+
       // Safe error message extraction
       let errorMessage = "Erreur lors de la création de l'itinéraire";
       if (error instanceof Error) {
@@ -157,7 +169,7 @@ export default function useHikingRoute({
       } else if (error && typeof error === 'object' && 'message' in error) {
         errorMessage = String(error.message);
       }
-      
+
       onError?.(errorMessage);
     } finally {
       setIsLoading(false);
@@ -220,25 +232,25 @@ export default function useHikingRoute({
   const resetAll = useCallback(() => {
     // First clear waypoints completely to trigger cleanup
     setWaypoints([]);
-    
+
     // Then set them back to initial state after a short delay
     setTimeout(() => {
       setWaypoints([
-        { 
-          id: `waypoint-reset-${Date.now()}-a`, 
-          lat: 0, 
-          lng: 0, 
-          name: 'Point A' 
+        {
+          id: `waypoint-reset-${Date.now()}-a`,
+          lat: 0,
+          lng: 0,
+          name: 'Point A',
         },
-        { 
-          id: `waypoint-reset-${Date.now()}-b`, 
-          lat: 0, 
-          lng: 0, 
-          name: 'Point B' 
+        {
+          id: `waypoint-reset-${Date.now()}-b`,
+          lat: 0,
+          lng: 0,
+          name: 'Point B',
         },
       ]);
     }, 10);
-    
+
     setIsLoop(false);
     setStageCount(1);
     clearRoute();
@@ -271,7 +283,7 @@ export default function useHikingRoute({
     refuges,
     waterPoints,
 
-    // UI state
+
     isLoading,
     showRefuges,
     setShowRefuges,

@@ -81,7 +81,7 @@ export default function AutocompleteInput({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(suggestions.length > 0 && value.length > 0)}
         onBlur={() => {
-          // Delay closing to allow suggestion clicks
+
           setTimeout(() => setIsOpen(false), 150);
         }}
         placeholder={placeholder}

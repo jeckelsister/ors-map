@@ -129,7 +129,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
         padding: [20, 20],
       });
 
-      // Add stage markers
+
       route.stages.forEach((stage, index) => {
         const startIcon = L.divIcon({
           className: 'stage-marker',

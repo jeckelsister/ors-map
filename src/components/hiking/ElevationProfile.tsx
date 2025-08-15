@@ -44,7 +44,7 @@ export default function ElevationProfile({
       return { pathData: '', markers: [], stats: null };
     }
 
-    // Calculate dimensions
+
     const width = 350;
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
     const chartWidth = width - padding.left - padding.right;
@@ -80,7 +80,7 @@ export default function ElevationProfile({
       ` L ${padding.left + chartWidth} ${padding.top + chartHeight}` +
       ` L ${padding.left} ${padding.top + chartHeight} Z`;
 
-    // Create stage markers
+
     const markers = showStages
       ? stageMarkers.map(marker => ({
           ...marker,
@@ -88,7 +88,7 @@ export default function ElevationProfile({
         }))
       : [];
 
-    // Calculate statistics
+
     const stats = {
       totalDistance: route.totalDistance,
       totalAscent: route.totalAscent,

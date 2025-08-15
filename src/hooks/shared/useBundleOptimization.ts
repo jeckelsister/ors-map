@@ -113,7 +113,7 @@ export function useBundleOptimization(): BundleOptimizationHook {
   };
 }
 
-// Hook for lazy image loading
+
 export function useLazyImage(src: string, options: ImageOptimizationOptions = {}) {
   const { optimizeImages } = useBundleOptimization();
   
@@ -126,7 +126,7 @@ export function useLazyImage(src: string, options: ImageOptimizationOptions = {}
   };
 }
 
-// Hook for conditional preloading
+
 export function useConditionalPreload(condition: boolean, componentPath: string) {
   const { preloadComponent } = useBundleOptimization();
   
