@@ -632,6 +632,33 @@ const distanceToLineSegment = (
 };
 
 /**
+ * Utility function to retry a request with exponential backoff
+ */
+const retryRequest = async <T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 2,
+  delay: number = 1000
+): Promise<T> => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isLastAttempt = i === maxRetries - 1;
+      const isTimeoutError = error instanceof Error && 
+        (error.message.includes('504') || error.message.includes('timeout'));
+      
+      if (isLastAttempt || !isTimeoutError) {
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+    }
+  }
+  throw new Error('Max retries exceeded');
+};
+
+/**
  * Find refuges near the route
  */
 export const findRefugesNearRoute = async (
@@ -658,19 +685,23 @@ export const findRefugesNearRoute = async (
     // Expand bounding box by radius
     const buffer = radiusKm / 111; // Rough conversion to degrees
 
-    const overpassQuery = `
-      [out:json][timeout:25];
-      (
-        node["tourism"="alpine_hut"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-        node["tourism"="wilderness_hut"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-        node["amenity"="shelter"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-      );
-      out geom;
-    `;
+    // Use retry mechanism for the API call
+    const response = await retryRequest(async () => {
+      // Reduced timeout and simplified query for better performance
+      const overpassQuery = `
+        [out:json][timeout:8];
+        (
+          node["tourism"="alpine_hut"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["tourism"="wilderness_hut"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
 
-    const response = await axios.post(OVERPASS_API_URL, overpassQuery, {
-      headers: { 'Content-Type': 'text/plain' },
-    });
+      return await axios.post(OVERPASS_API_URL, overpassQuery, {
+        headers: { 'Content-Type': 'text/plain' },
+        timeout: 10000, // 10 seconds timeout for the request
+      });
+    }, 2, 1000); // 2 retries with 1 second initial delay
 
     const refuges: Refuge[] = response.data.elements
       .map((element: OverpassElement) => ({
@@ -749,20 +780,22 @@ export const findWaterPointsNearRoute = async (
 
     const buffer = radiusKm / 111;
 
-    const overpassQuery = `
-      [out:json][timeout:25];
-      (
-        node["natural"="spring"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-        node["amenity"="drinking_water"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-        node["man_made"="water_well"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-        node["natural"="water"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
-      );
-      out geom;
-    `;
+    // Use retry mechanism for the API call
+    const response = await retryRequest(async () => {
+      const overpassQuery = `
+        [out:json][timeout:8];
+        (
+          node["natural"="spring"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["amenity"="drinking_water"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
 
-    const response = await axios.post(OVERPASS_API_URL, overpassQuery, {
-      headers: { 'Content-Type': 'text/plain' },
-    });
+      return await axios.post(OVERPASS_API_URL, overpassQuery, {
+        headers: { 'Content-Type': 'text/plain' },
+        timeout: 10000, // 10 seconds timeout
+      });
+    }, 2, 1000); // 2 retries with 1 second initial delay
 
     const waterPoints: WaterPoint[] = response.data.elements
       .map((element: OverpassElement) => ({

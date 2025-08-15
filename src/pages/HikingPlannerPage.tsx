@@ -5,17 +5,24 @@ import {
   Mountain,
   Rocket,
   RotateCcw,
+  Upload,
 } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
+import GPXUpload from '../components/hiking/GPXUpload';
 import HikingMap, { type HikingMapRef } from '../components/hiking/HikingMap';
 import POIDisplayControls from '../components/hiking/POIDisplayControls';
 import RouteStagesPlanner from '../components/hiking/RouteStagesPlanner';
 import Navigation from '../components/shared/Navigation';
 import useHikingRoute from '../hooks/hiking/useHikingRoute';
 import { useToast } from '../hooks/shared/useToast';
-import type { HikingProfile, Refuge, WaterPoint } from '../types/hiking';
+import type {
+  HikingProfile,
+  Refuge,
+  WaterPoint,
+  Coordinates,
+} from '../types/hiking';
 
 export default function HikingPlannerPage(): React.JSX.Element {
   const { showToast } = useToast();
@@ -74,7 +81,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
   }, [resetAll]);
 
   const [selectedTab, setSelectedTab] = useState<
-    'planning' | 'profile' | 'export' | 'poi'
+    'planning' | 'profile' | 'export' | 'poi' | 'gpx'
   >('planning');
 
   const handleProfileChange = (profile: HikingProfile) => {
@@ -257,7 +264,7 @@ export default function HikingPlannerPage(): React.JSX.Element {
           <div className="lg:col-span-1 space-y-4 md:space-y-6 order-2 lg:order-1">
             {/* Tab Navigation */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 md:p-4 shadow-xl border border-white/20 sticky top-4 z-40">
-              <div className="flex space-x-1 bg-gray-100 rounded-2xl p-1">
+              <div className="flex flex-wrap lg:flex-nowrap gap-1 bg-gray-100 rounded-2xl p-1">
                 {[
                   {
                     id: 'planning',
@@ -275,6 +282,11 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     icon: <MapPin className="w-4 h-4" />,
                   },
                   {
+                    id: 'gpx',
+                    label: 'Import',
+                    icon: <Upload className="w-4 h-4" />,
+                  },
+                  {
                     id: 'export',
                     label: 'Export',
                     icon: <Download className="w-4 h-4" />,
@@ -283,14 +295,16 @@ export default function HikingPlannerPage(): React.JSX.Element {
                   <button
                     key={tab.id}
                     onClick={() => setSelectedTab(tab.id as typeof selectedTab)}
-                    className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 px-2 md:px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                    className={`flex-1 lg:flex-auto flex flex-col lg:flex-row items-center justify-center gap-1 px-2 lg:px-4 py-2 rounded-xl text-xs font-medium transition-all min-w-0 ${
                       selectedTab === tab.id
                         ? 'bg-white text-emerald-600 shadow-sm'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
-                    <span className="text-emerald-600">{tab.icon}</span>
-                    <span className="hidden sm:inline text-xs md:text-sm">
+                    <span className="text-emerald-600 flex-shrink-0">
+                      {tab.icon}
+                    </span>
+                    <span className="hidden lg:inline text-xs xl:text-sm font-medium whitespace-nowrap">
                       {tab.label}
                     </span>
                   </button>
@@ -357,6 +371,25 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     onToggleWaterPoints={setShowWaterPoints}
                     onRefugeSelect={handleRefugeSelect}
                     onWaterPointSelect={handleWaterPointSelect}
+                  />
+                </div>
+              )}
+
+              {selectedTab === 'gpx' && (
+                <div className="max-h-96 overflow-y-auto">
+                  <GPXUpload
+                    onGPXImported={(waypoints: Coordinates[], metadata) => {
+                      setWaypoints(waypoints);
+                      showToast(
+                        metadata?.name
+                          ? `✅ ${metadata.name} importé avec ${waypoints.length} points`
+                          : `✅ GPX importé avec ${waypoints.length} points`,
+                        'success'
+                      );
+                    }}
+                    onError={(error: string) => {
+                      showToast(`❌ Erreur GPX: ${error}`, 'error');
+                    }}
                   />
                 </div>
               )}

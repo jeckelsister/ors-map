@@ -79,17 +79,36 @@ export default function useHikingRoute({
         findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
       ]);
 
+      let hasErrors = false;
+
       if (foundRefuges.status === 'fulfilled') {
         setRefuges(foundRefuges.value);
+      } else {
+        console.warn('Failed to fetch refuges:', foundRefuges.reason);
+        setRefuges([]); // Set empty array on failure
+        hasErrors = true;
       }
 
       if (foundWaterPoints.status === 'fulfilled') {
         setWaterPoints(foundWaterPoints.value);
+      } else {
+        console.warn('Failed to fetch water points:', foundWaterPoints.reason);
+        setWaterPoints([]); // Set empty array on failure
+        hasErrors = true;
+      }
+
+      // Notify user if there were errors loading POIs
+      if (hasErrors) {
+        onError?.('⚠️ Certains points d\'intérêt n\'ont pas pu être chargés (timeout API)');
       }
     } catch (error) {
       console.error('Error finding POIs:', error);
+      // Set empty arrays if there's an overall error
+      setRefuges([]);
+      setWaterPoints([]);
+      onError?.('⚠️ Impossible de charger les points d\'intérêt');
     }
-  }, []);
+  }, [onError]);
 
   // Create hiking route
   const createRoute = useCallback(async () => {

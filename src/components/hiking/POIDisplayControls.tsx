@@ -108,7 +108,10 @@ export default function POIDisplayControls({
             ))}
             {filteredRefuges.length === 0 && (
               <div className="text-gray-500 text-sm text-center py-4">
-                No refuges found
+                {refuges.length === 0 
+                  ? '🔍 Aucun refuge trouvé (possible timeout API)'
+                  : 'Aucun refuge ne correspond aux filtres'
+                }
               </div>
             )}
           </ScrollableList>
@@ -143,7 +146,10 @@ export default function POIDisplayControls({
             ))}
             {filteredWaterPoints.length === 0 && (
               <div className="text-gray-500 text-sm text-center py-4">
-                No water points found
+                {waterPoints.length === 0 
+                  ? '🔍 Aucun point d\'eau trouvé (possible timeout API)'
+                  : 'Aucun point d\'eau ne correspond aux filtres'
+                }
               </div>
             )}
           </ScrollableList>
