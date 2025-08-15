@@ -112,7 +112,8 @@ export default function useHikingRoute({
       const route = await createHikingRoute(
         waypoints,
         isLoop,
-        1 // Créer d'abord un itinéraire simple
+        1, // Créer d'abord un itinéraire simple
+        hikingProfile // Passer le profil de randonnée
       );
 
       // Si stageCount > 1, diviser automatiquement l'itinéraire
@@ -139,6 +140,7 @@ export default function useHikingRoute({
     waypoints,
     isLoop,
     stageCount,
+    hikingProfile,
     onError,
     onSuccess,
     findPOIsNearRoute,

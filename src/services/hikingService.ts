@@ -3,6 +3,7 @@ import type {
   ElevationPoint,
   GPXExportOptions,
   HikingRoute,
+  HikingProfile,
   Refuge,
   RouteStage,
   WaterPoint,
@@ -17,11 +18,70 @@ interface OverpassElement {
   tags: Record<string, string>;
 }
 
+interface ORSOptions {
+  avoid_features?: string[];
+  avoid_borders?: string;
+  [key: string]: unknown;
+}
+
+interface ORSRequestBody {
+  coordinates: number[][];
+  options?: ORSOptions;
+}
+
 const ORS_API_KEY = import.meta.env.VITE_ORS_API_KEY;
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
 
 // Use OpenRouteService API directly
 const ORS_BASE_URL = 'https://api.openrouteservice.org';
+
+/**
+ * Convert hiking profile preferences to ORS API parameters
+ */
+const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
+  if (!hikingProfile) {
+    // Default parameters for foot-hiking
+    return {
+      profile: 'foot-hiking',
+      options: {},
+    };
+  }
+
+  const { preferences } = hikingProfile;
+  
+  // Base profile - always use foot-hiking as it's the most suitable for trails
+  const profile = 'foot-hiking';
+  let options: ORSOptions = {};
+
+  // Configure routing based on preferences
+  if (preferences.preferOfficial && !preferences.allowUnofficial) {
+    // Sentiers officiels uniquement - éviter les routes non appropriées
+    options = {
+      avoid_features: ['steps', 'ferries'], // Éviter escaliers et ferries
+      // Note: ORS foot-hiking privilégie déjà les sentiers de randonnée
+      // On peut ajuster avec des profils personnalisés si nécessaire
+    };
+  } else if (preferences.preferOfficial && preferences.allowUnofficial) {
+    // Chemins mixtes - balance entre officiels et alternatives
+    options = {
+      avoid_features: ['ferries'], // Éviter seulement les ferries
+      // Autoriser plus de variété dans les chemins
+    };
+  } else if (preferences.noPreference) {
+    // Sans préférence - utiliser le profil le plus permissif
+    options = {
+      avoid_features: [], // N'éviter aucun type de chemin
+      // Optimiser uniquement sur distance/temps/dénivelé
+    };
+  } else {
+    // Cas par défaut
+    options = {
+      avoid_features: ['ferries'],
+    };
+  }
+
+  return { profile, options };
+};
 
 /**
  * Test the ORS API with a simple request
@@ -320,7 +380,8 @@ const calculateStageStats = (coordinates: [number, number][]): {
 export const createHikingRoute = async (
   waypoints: Coordinates[],
   isLoop: boolean,
-  stageCount: number = 1
+  stageCount: number = 1,
+  hikingProfile?: HikingProfile | null
 ): Promise<HikingRoute> => {
   try {
     // If it's a loop, add the first point as the last point
@@ -349,7 +410,8 @@ export const createHikingRoute = async (
       const stagePoints = routePoints.slice(startIdx, endIdx);
       const stage = await createRouteStage(
         `Étape ${i + 1}`,
-        stagePoints
+        stagePoints,
+        hikingProfile
       );
 
       stages.push(stage);
@@ -400,7 +462,8 @@ export const createHikingRoute = async (
  */
 const createRouteStage = async (
   name: string,
-  waypoints: Coordinates[]
+  waypoints: Coordinates[],
+  hikingProfile?: HikingProfile | null
 ): Promise<RouteStage> => {
   if (waypoints.length < 2) {
     throw new Error('Au moins 2 points sont nécessaires pour créer une étape');
@@ -412,12 +475,23 @@ const createRouteStage = async (
   // Get route from ORS
   const coordinates = waypoints.map(point => [point.lng, point.lat]);
 
+  // Get ORS parameters based on hiking profile
+  const { profile, options } = getOrsParametersFromProfile(hikingProfile);
+
   try {
+    // Build request body
+    const requestBody: ORSRequestBody = {
+      coordinates: coordinates,
+    };
+
+    // Add options if they exist
+    if (Object.keys(options).length > 0) {
+      requestBody.options = options;
+    }
+
     const routeResponse = await axios.post(
-      `${ORS_BASE_URL}/v2/directions/foot-hiking/geojson`,
-      {
-        coordinates: coordinates,
-      },
+      `${ORS_BASE_URL}/v2/directions/${profile}/geojson`,
+      requestBody,
       {
         headers: {
           Authorization: ORS_API_KEY,

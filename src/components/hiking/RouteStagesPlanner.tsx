@@ -1,4 +1,4 @@
-import type { Coordinates } from '@/types/hiking';
+import type { Coordinates, HikingProfile } from '@/types/hiking';
 import {
   closestCenter,
   DndContext,
@@ -15,9 +15,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import React, { useState } from 'react';
-import { FaMinus, FaPlus, FaRedo, FaRoute } from 'react-icons/fa';
+import { FaMinus, FaPlus, FaRedo, FaRoute, FaCog } from 'react-icons/fa';
 import DraggableWaypoint from './DraggableWaypoint';
 import WaypointAutocomplete from './WaypointAutocomplete';
+import { HIKING_PROFILES } from '@/constants/hiking';
 
 interface RouteStagesPlannerProps {
   waypoints: Coordinates[];
@@ -26,6 +27,8 @@ interface RouteStagesPlannerProps {
   onLoopChange: (isLoop: boolean) => void;
   stageCount: number;
   onStageCountChange: (count: number) => void;
+  hikingProfile?: HikingProfile | null;
+  onProfileChange?: (profile: HikingProfile) => void;
   maxStages?: number;
 }
 
@@ -36,6 +39,8 @@ export default function RouteStagesPlanner({
   onLoopChange,
   stageCount,
   onStageCountChange,
+  hikingProfile,
+  onProfileChange,
   maxStages = 10,
 }: RouteStagesPlannerProps): React.JSX.Element {
   const [newWaypointName, setNewWaypointName] = useState('');
@@ -175,6 +180,101 @@ export default function RouteStagesPlanner({
             : 'Itinéraire du point A au point B'}
         </div>
       </div>
+
+      {/* Trail Preferences Section */}
+      {onProfileChange && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <FaCog className="w-4 h-4 text-gray-600" />
+            <h4 className="text-sm font-semibold text-gray-700">Préférences de sentiers</h4>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            {HIKING_PROFILES.map(profile => {
+              const IconComponent = profile.icon;
+              const isSelected = hikingProfile?.id === profile.id;
+              
+              return (
+                <button
+                  key={profile.id}
+                  onClick={() => onProfileChange(profile)}
+                  className={`
+                    flex items-center gap-2 p-2 rounded-lg border text-xs transition-all
+                    ${
+                      isSelected
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  <div
+                    className={`
+                      flex items-center justify-center w-6 h-6 rounded
+                      ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}
+                    `}
+                  >
+                    <IconComponent className={`w-3 h-3 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="font-medium">{profile.name}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {hikingProfile && (
+            <div className="bg-gray-50 border border-gray-200 p-2 rounded text-xs">
+              <div className="font-medium text-gray-700 mb-1">{hikingProfile.name}</div>
+              <div className="text-gray-600 mb-2">{hikingProfile.description}</div>
+              
+              <div className="space-y-1 mb-2">
+                <div className="font-medium text-gray-700">Effets sur le calcul d'itinéraire :</div>
+                {hikingProfile.preferences.preferOfficial && !hikingProfile.preferences.allowUnofficial && (
+                  <div className="flex items-start gap-1">
+                    <span className="w-1 h-1 bg-green-500 rounded-full mt-1 flex-shrink-0"></span>
+                    <span>Évite les escaliers urbains et ferries, privilégie les sentiers de randonnée balisés</span>
+                  </div>
+                )}
+                {hikingProfile.preferences.preferOfficial && hikingProfile.preferences.allowUnofficial && (
+                  <div className="flex items-start gap-1">
+                    <span className="w-1 h-1 bg-orange-500 rounded-full mt-1 flex-shrink-0"></span>
+                    <span>Équilibre entre sentiers officiels et alternatifs, évite seulement les ferries</span>
+                  </div>
+                )}
+                {hikingProfile.preferences.noPreference && (
+                  <div className="flex items-start gap-1">
+                    <span className="w-1 h-1 bg-gray-500 rounded-full mt-1 flex-shrink-0"></span>
+                    <span>Optimise uniquement sur distance et dénivelé, autorise tous types de chemins</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <div className="font-medium text-gray-700">Types de sentiers :</div>
+                {hikingProfile.preferences.preferOfficial && (
+                  <div className="flex items-center gap-1">
+                    <span className="w-1 h-1 bg-green-500 rounded-full"></span>
+                    <span>Privilégie les sentiers officiels (GR, HRP, etc.)</span>
+                  </div>
+                )}
+                {hikingProfile.preferences.allowUnofficial && (
+                  <div className="flex items-center gap-1">
+                    <span className="w-1 h-1 bg-orange-500 rounded-full"></span>
+                    <span>Autorise les sentiers non-officiels</span>
+                  </div>
+                )}
+                {hikingProfile.preferences.noPreference && (
+                  <div className="flex items-center gap-1">
+                    <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                    <span>Aucune préférence de type de sentier</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stage Count Selector */}
       <div className="space-y-2">

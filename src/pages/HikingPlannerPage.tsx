@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from 'react';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
 import HikingMap, { type HikingMapRef } from '../components/hiking/HikingMap';
-import HikingProfileSelector from '../components/hiking/HikingProfileSelector';
 import POIDisplayControls from '../components/hiking/POIDisplayControls';
 import RouteStagesPlanner from '../components/hiking/RouteStagesPlanner';
 import Navigation from '../components/shared/Navigation';
@@ -239,11 +238,6 @@ export default function HikingPlannerPage(): React.JSX.Element {
             <div className="bg-white rounded-lg p-4 shadow-sm">
               {selectedTab === 'planning' && (
                 <div className="space-y-4">
-                  <HikingProfileSelector
-                    selectedProfile={hikingProfile?.id || null}
-                    onProfileChange={handleProfileChange}
-                  />
-
                   <RouteStagesPlanner
                     waypoints={waypoints}
                     onWaypointsChange={setWaypoints}
@@ -251,6 +245,8 @@ export default function HikingPlannerPage(): React.JSX.Element {
                     onLoopChange={setIsLoop}
                     stageCount={stageCount}
                     onStageCountChange={setStageCount}
+                    hikingProfile={hikingProfile}
+                    onProfileChange={handleProfileChange}
                   />
 
                   <div className="flex gap-2">
