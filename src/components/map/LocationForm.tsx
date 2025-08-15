@@ -6,7 +6,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import IconButton from '@/ui/IconButton';
 import { GeolocationIcon, MapPinIcon } from '@/ui/Icons';
 import StatusIndicator from '@/ui/StatusIndicator';
-import AutocompleteInput from './AutocompleteInput';
+import LocationInput from '@/ui/LocationInput';
 
 interface LocationFormProps {
   startQuery: string;
@@ -62,27 +62,31 @@ const LocationForm = ({
   const [isMapClickMode, setIsMapClickMode] = useState(false);
   const [isEndMapClickMode, setIsEndMapClickMode] = useState(false);
 
-  // Use geolocation hook
   const { getCurrentPosition } = useGeolocation();
 
-  // Optimized cleanup on unmount with useEffect cleanup
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (isMapClickMode) {
-        disableMapClickForStart();
-      }
-      if (isEndMapClickMode) {
-        disableMapClickForEnd();
-      }
+      if (isMapClickMode) disableMapClickForStart();
+      if (isEndMapClickMode) disableMapClickForEnd();
     };
-  }, [
-    isMapClickMode,
-    isEndMapClickMode,
-    disableMapClickForStart,
-    disableMapClickForEnd,
-  ]);
+  }, [isMapClickMode, isEndMapClickMode, disableMapClickForStart, disableMapClickForEnd]);
 
-  // Simplified geolocation handler using the hook
+  // Helper pour créer une location à partir de coordonnées
+  const createLocationFromCoords = useCallback((lat: number, lng: number, name: string): Location => ({
+    lat,
+    lng,
+    name
+  }), []);
+
+  // Helper pour créer une location à partir d'une suggestion
+  const createLocationFromSuggestion = useCallback((suggestion: LocationSuggestion): Location => ({
+    lat: Number(suggestion.lat),
+    lng: Number(suggestion.lon),
+    name: suggestion.display_name
+  }), []);
+
+  // Geolocation handler
   const handleGeolocation = useCallback(() => {
     getCurrentPosition(
       location => {
@@ -91,24 +95,16 @@ const LocationForm = ({
         setTraceStart(location);
         createStartMarkerFromLocation(location);
       },
-      error => {
-        alert(error);
-      }
+      error => alert(error)
     );
-  }, [
-    getCurrentPosition,
-    setStartQuery,
-    setTraceStart,
-    createStartMarkerFromLocation,
-  ]);
+  }, [getCurrentPosition, setStartQuery, setTraceStart, createStartMarkerFromLocation]);
 
-  // Optimized map click mode handler with better state management
+  // Map click mode handlers
   const handleMapClickMode = useCallback(() => {
     if (isMapClickMode) {
       disableMapClickForStart();
       setIsMapClickMode(false);
     } else {
-      // Disable end mode if active
       if (isEndMapClickMode) {
         disableMapClickForEnd();
         setIsEndMapClickMode(false);
@@ -116,13 +112,9 @@ const LocationForm = ({
 
       enableMapClickForStart((lat: number, lng: number) => {
         const coordString = formatCoordinates(lat, lng);
+        const location = createLocationFromCoords(lat, lng, 'Point sélectionné sur la carte');
         setStartQuery(coordString);
-        setTraceStart({
-          lat,
-          lng,
-          name: 'Point sélectionné sur la carte',
-        });
-        // Auto-disable after selection
+        setTraceStart(location);
         setIsMapClickMode(false);
         disableMapClickForStart();
       });
@@ -136,43 +128,14 @@ const LocationForm = ({
     disableMapClickForEnd,
     setStartQuery,
     setTraceStart,
+    createLocationFromCoords
   ]);
 
-  // Memoized input change handler
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setStartQuery(newValue);
-      // Only clear the marker if the field is completely emptied
-      if (newValue.trim() === '') {
-        clearStartMarker();
-      }
-    },
-    [setStartQuery, clearStartMarker]
-  );
-
-  // Memoized suggestion click handler
-  const handleSuggestionClick = useCallback(
-    (suggestion: LocationSuggestion) => {
-      handleStartSuggestion(suggestion);
-      // Create marker for the selected start location
-      const location: Location = {
-        lat: Number(suggestion.lat),
-        lng: Number(suggestion.lon),
-        name: suggestion.display_name,
-      };
-      createStartMarkerFromLocation(location);
-    },
-    [handleStartSuggestion, createStartMarkerFromLocation]
-  );
-
-  // Optimized map click mode handler for end point
   const handleEndMapClickMode = useCallback(() => {
     if (isEndMapClickMode) {
       disableMapClickForEnd();
       setIsEndMapClickMode(false);
     } else {
-      // Disable start mode if active
       if (isMapClickMode) {
         disableMapClickForStart();
         setIsMapClickMode(false);
@@ -180,13 +143,9 @@ const LocationForm = ({
 
       enableMapClickForEnd((lat: number, lng: number) => {
         const coordString = formatCoordinates(lat, lng);
+        const location = createLocationFromCoords(lat, lng, "Point d'arrivée sélectionné sur la carte");
         setEndQuery(coordString);
-        setTraceEnd({
-          lat,
-          lng,
-          name: "Point d'arrivée sélectionné sur la carte",
-        });
-        // Auto-disable after selection
+        setTraceEnd(location);
         setIsEndMapClickMode(false);
         disableMapClickForEnd();
       });
@@ -200,172 +159,129 @@ const LocationForm = ({
     disableMapClickForStart,
     setEndQuery,
     setTraceEnd,
+    createLocationFromCoords
   ]);
 
-  // Memoized end input change handler
-  const handleEndInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setEndQuery(newValue);
-      // Only clear the marker if the field is completely emptied
-      if (newValue.trim() === '') {
-        clearEndMarker();
-      }
-    },
-    [setEndQuery, clearEndMarker]
-  );
+  // Input change handlers
+  const handleStartInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setStartQuery(newValue);
+    if (newValue.trim() === '') clearStartMarker();
+  }, [setStartQuery, clearStartMarker]);
 
-  // Memoized end suggestion click handler
-  const handleEndSuggestionClick = useCallback(
-    (suggestion: LocationSuggestion) => {
-      handleEndSuggestion(suggestion);
-      // Create marker for the selected end location
-      const location: Location = {
-        lat: Number(suggestion.lat),
-        lng: Number(suggestion.lon),
-        name: suggestion.display_name,
-      };
-      createEndMarkerFromLocation(location);
-    },
-    [handleEndSuggestion, createEndMarkerFromLocation]
-  );
+  const handleEndInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setEndQuery(newValue);
+    if (newValue.trim() === '') clearEndMarker();
+  }, [setEndQuery, clearEndMarker]);
 
-  // Memoized icons using centralized icon components
-  const startMapIcon = useMemo(
-    () => <MapPinIcon isAnimated={isMapClickMode} />,
-    [isMapClickMode]
-  );
+  // Suggestion handlers
+  const handleStartSuggestionClick = useCallback((suggestion: LocationSuggestion) => {
+    handleStartSuggestion(suggestion);
+    const location = createLocationFromSuggestion(suggestion);
+    createStartMarkerFromLocation(location);
+  }, [handleStartSuggestion, createLocationFromSuggestion, createStartMarkerFromLocation]);
 
-  const endMapIcon = useMemo(
-    () => <MapPinIcon isAnimated={isEndMapClickMode} />,
-    [isEndMapClickMode]
-  );
+  const handleEndSuggestionClick = useCallback((suggestion: LocationSuggestion) => {
+    handleEndSuggestion(suggestion);
+    const location = createLocationFromSuggestion(suggestion);
+    createEndMarkerFromLocation(location);
+  }, [handleEndSuggestion, createLocationFromSuggestion, createEndMarkerFromLocation]);
 
-  const geolocationIcon = useMemo(() => <GeolocationIcon />, []);
-
-  // Memoized validation for form submission
+  // Memoized validation
   const canCreateTrace = useMemo(() => {
     return startQuery.trim() !== '' && endQuery.trim() !== '';
   }, [startQuery, endQuery]);
 
-  // Memoized CSS classes to prevent recalculation
-  const startButtonClasses = useMemo(
-    () =>
-      `ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 hover:shadow-md ${
-        isMapClickMode
-          ? 'border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200'
-          : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
-      }`,
-    [isMapClickMode]
-  );
+  // Memoized button styles
+  const getMapClickButtonStyle = useCallback((isActive: boolean, color: 'green' | 'red') => {
+    const baseClasses = 'flex items-center gap-1 border shadow-sm transition-all duration-200 hover:shadow-md';
+    const activeClasses = color === 'green' 
+      ? 'border-green-500 bg-green-100 text-green-800 hover:bg-green-200 ring-2 ring-green-200'
+      : 'border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200';
+    const inactiveClasses = 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50';
+    
+    return `ml-1 ${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
+  }, []);
 
-  const endButtonClasses = useMemo(
-    () =>
-      `ml-1 flex items-center gap-1 border shadow-sm transition-all duration-200 hover:shadow-md ${
-        isEndMapClickMode
-          ? 'border-red-500 bg-red-100 text-red-800 hover:bg-red-200 ring-2 ring-red-200'
-          : 'border-gray-400 bg-white text-gray-600 hover:bg-gray-50'
-      }`,
-    [isEndMapClickMode]
-  );
+  const traceButtonStyle = useMemo(() => {
+    const baseClasses = 'w-full font-semibold py-3 rounded-lg transition-all duration-200';
+    return canCreateTrace
+      ? `${baseClasses} bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg`
+      : `${baseClasses} bg-gray-300 text-gray-500 cursor-not-allowed`;
+  }, [canCreateTrace]);
 
-  const traceButtonClasses = useMemo(
-    () =>
-      `w-full font-semibold py-3 rounded-lg transition-all duration-200 ${
-        canCreateTrace
-          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg'
-          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-      }`,
-    [canCreateTrace]
-  );
+  // Boutons d'action pour les inputs
+  const startActions = useMemo(() => [
+    <IconButton
+      key="geolocation"
+      icon={<GeolocationIcon />}
+      onClick={handleGeolocation}
+      title="Utiliser ma position GPS"
+      label="Ma position"
+      className="flex items-center gap-1 border border-blue-400 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-150"
+      aria-label="Utiliser ma position GPS"
+    />,
+    <IconButton
+      key="map-click"
+      icon={<MapPinIcon isAnimated={isMapClickMode} />}
+      onClick={handleMapClickMode}
+      isActive={isMapClickMode}
+      title={isMapClickMode
+        ? 'Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver'
+        : 'Activer le mode de sélection par clic sur la carte'
+      }
+      label={<StatusIndicator isActive={isMapClickMode} inactiveLabel="Clic carte" />}
+      className={getMapClickButtonStyle(isMapClickMode, 'green')}
+      aria-label={isMapClickMode ? 'Désactiver le mode clic carte' : 'Activer le mode clic carte'}
+    />
+  ], [handleGeolocation, handleMapClickMode, isMapClickMode, getMapClickButtonStyle]);
+
+  const endActions = useMemo(() => [
+    <IconButton
+      key="map-click"
+      icon={<MapPinIcon isAnimated={isEndMapClickMode} />}
+      onClick={handleEndMapClickMode}
+      isActive={isEndMapClickMode}
+      title={isEndMapClickMode
+        ? "Mode actif - Cliquez sur la carte pour sélectionner l'arrivée, ou cliquez ici pour désactiver"
+        : "Activer le mode de sélection par clic sur la carte pour l'arrivée"
+      }
+      label={<StatusIndicator isActive={isEndMapClickMode} inactiveLabel="Clic carte" />}
+      className={getMapClickButtonStyle(isEndMapClickMode, 'red')}
+      aria-label={isEndMapClickMode 
+        ? 'Désactiver le mode clic carte pour arrivée' 
+        : 'Activer le mode clic carte pour arrivée'
+      }
+    />
+  ], [handleEndMapClickMode, isEndMapClickMode, getMapClickButtonStyle]);
 
   return (
     <>
-      {/* Start Location Input */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <AutocompleteInput
-            label="Départ :"
-            value={startQuery}
-            onChange={handleInputChange}
-            suggestions={startSuggestions}
-            onSuggestionClick={handleSuggestionClick}
-            setSuggestions={setStartSuggestions}
-            placeholder="Rechercher un lieu de départ..."
-          />
-          <IconButton
-            icon={geolocationIcon}
-            onClick={handleGeolocation}
-            title="Utiliser ma position GPS"
-            label="Ma position"
-            className="flex items-center gap-1 border border-blue-400 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:shadow-md transition-all duration-150"
-            aria-label="Utiliser ma position GPS"
-          />
-          <IconButton
-            icon={startMapIcon}
-            onClick={handleMapClickMode}
-            isActive={isMapClickMode}
-            title={
-              isMapClickMode
-                ? 'Mode actif - Cliquez sur la carte pour sélectionner le départ, ou cliquez ici pour désactiver'
-                : 'Activer le mode de sélection par clic sur la carte'
-            }
-            label={
-              <StatusIndicator
-                isActive={isMapClickMode}
-                inactiveLabel="Clic carte"
-              />
-            }
-            className={startButtonClasses}
-            aria-label={
-              isMapClickMode
-                ? 'Désactiver le mode clic carte'
-                : 'Activer le mode clic carte'
-            }
-          />
-        </div>
-      </div>
+      <LocationInput
+        label="Départ :"
+        value={startQuery}
+        onChange={handleStartInputChange}
+        suggestions={startSuggestions}
+        onSuggestionClick={handleStartSuggestionClick}
+        setSuggestions={setStartSuggestions}
+        placeholder="Rechercher un lieu de départ..."
+        actions={startActions}
+      />
 
-      {/* End Location Input */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <AutocompleteInput
-            label="Arrivée :"
-            value={endQuery}
-            onChange={handleEndInputChange}
-            suggestions={endSuggestions}
-            onSuggestionClick={handleEndSuggestionClick}
-            setSuggestions={setEndSuggestions}
-            placeholder="Rechercher un lieu d'arrivée..."
-          />
-          <IconButton
-            icon={endMapIcon}
-            onClick={handleEndMapClickMode}
-            isActive={isEndMapClickMode}
-            title={
-              isEndMapClickMode
-                ? "Mode actif - Cliquez sur la carte pour sélectionner l'arrivée, ou cliquez ici pour désactiver"
-                : "Activer le mode de sélection par clic sur la carte pour l'arrivée"
-            }
-            label={
-              <StatusIndicator
-                isActive={isEndMapClickMode}
-                inactiveLabel="Clic carte"
-              />
-            }
-            className={endButtonClasses}
-            aria-label={
-              isEndMapClickMode
-                ? 'Désactiver le mode clic carte pour arrivée'
-                : 'Activer le mode clic carte pour arrivée'
-            }
-          />
-        </div>
-      </div>
+      <LocationInput
+        label="Arrivée :"
+        value={endQuery}
+        onChange={handleEndInputChange}
+        suggestions={endSuggestions}
+        onSuggestionClick={handleEndSuggestionClick}
+        setSuggestions={setEndSuggestions}
+        placeholder="Rechercher un lieu d'arrivée..."
+        actions={endActions}
+      />
 
-      {/* Create Trace Button */}
       <Button
-        className={traceButtonClasses}
+        className={traceButtonStyle}
         onClick={onCreateTrace}
         disabled={!canCreateTrace}
         aria-label="Créer la trace avec les points sélectionnés"
@@ -376,5 +292,4 @@ const LocationForm = ({
   );
 };
 
-// Memoize the component to prevent unnecessary re-renders
 export default memo(LocationForm);
