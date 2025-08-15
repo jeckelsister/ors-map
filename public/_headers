@@ -1,0 +1,22 @@
+# Security headers for GitHub Pages
+/*
+  # Content Security Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.openrouteservice.org https://overpass-api.de https://api.open-elevation.com https://*.tile.openstreetmap.fr https://*.tile.opentopomap.org https://*.tile-cyclosm.openstreetmap.fr; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';
+
+  # Prevent MIME type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Enable XSS protection
+  X-XSS-Protection: 1; mode=block
+
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+
+  # Strict transport security (only over HTTPS)
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+  # Referrer policy
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Permissions policy
+  Permissions-Policy: geolocation=(self), microphone=(), camera=(), payment=(), usb=()

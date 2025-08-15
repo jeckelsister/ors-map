@@ -10,10 +10,13 @@ export default defineConfig({
       // Optimize React for production
       babel: {
         // Remove React DevTools in production
-        plugins: process.env.NODE_ENV === 'production' ? ['transform-remove-console'] : [],
+        plugins:
+          process.env.NODE_ENV === 'production'
+            ? ['transform-remove-console']
+            : [],
       },
     }),
-    tailwindcss()
+    tailwindcss(),
   ],
   base: '/ors-map/',
   resolve: {
@@ -42,20 +45,20 @@ export default defineConfig({
           // Core React libraries
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          
+
           // Large external libraries - separate chunks for better caching
           leaflet: ['leaflet'],
-          
+
           // Icons - separate chunk since they're used throughout the app
           icons: ['react-icons/fa', 'react-icons/md', 'react-icons/hi'],
-          
+
           // DnD libraries
           dnd: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
         },
         // Optimize asset file names
-        assetFileNames: (assetInfo) => {
+        assetFileNames: assetInfo => {
           if (!assetInfo.name) return 'assets/[name]-[hash][extname]';
-          
+
           if (/\.(png|jpe?g|gif|svg|webp|avif)$/i.test(assetInfo.name)) {
             return `img/[name]-[hash][extname]`;
           }
@@ -81,13 +84,13 @@ export default defineConfig({
   // Performance optimizations
   optimizeDeps: {
     include: [
-      'leaflet', 
-      'react', 
-      'react-dom', 
+      'leaflet',
+      'react',
+      'react-dom',
       'react-router-dom',
       'react-icons/fa',
       '@dnd-kit/core',
-      '@dnd-kit/sortable'
+      '@dnd-kit/sortable',
     ],
     exclude: ['@testing-library/react', '@testing-library/user-event'],
   },
@@ -99,6 +102,12 @@ export default defineConfig({
     // Enable HMR for faster development
     hmr: {
       overlay: true,
+    },
+    // Security headers for development
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
     },
   },
   // Enable CSS optimization
