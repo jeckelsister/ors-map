@@ -338,16 +338,6 @@ cp .env.example .env.local
 npm run dev
 ```
 
-### 🚀 Workflow de Contribution
-
-1. **🍴 Fork** le projet sur GitHub
-2. **🌿 Créez une branche** feature (`git checkout -b feature/awesome-feature`)
-3. **💻 Développez** votre fonctionnalité avec tests
-4. **✅ Validez** que tous les tests passent (`npm run test:run`)
-5. **📝 Commit** vos changements (`git commit -m 'feat: add awesome feature'`)
-6. **📤 Push** vers votre branche (`git push origin feature/awesome-feature`)
-7. **🔄 Ouvrez** une Pull Request avec description détaillée
-
 ### 📋 Checklist avant PR
 
 - [ ] ✅ Tous les tests passent (`npm run test:run`)
@@ -393,65 +383,6 @@ chore: tâches de maintenance
 perf: amélioration de performance
 ```
 
-## 🛠️ Dépannage et FAQ
-
-### ❓ Problèmes Courants
-
-**🗺️ Carte ne s'affiche pas**
-```bash
-# Vérifiez votre clé API
-cat .env.local | grep VITE_ORS_API_KEY
-
-# Rechargez la page et vérifiez la console
-# F12 > Console > recherchez les erreurs
-```
-
-**📱 Problèmes de responsive**
-```bash
-# Testez avec les outils dev
-# F12 > Toggle device toolbar
-# Testez sur différentes tailles d'écran
-```
-
-**⚡ Performance lente**
-```bash
-# Vérifiez le bundle size
-npm run build
-# Regardez les tailles des chunks générés
-
-# Profiling React
-# Installez React DevTools Profiler
-```
-
-### 🔧 Configuration Avancée
-
-**🌍 Proxy pour développement local**
-```typescript
-// vite.config.ts
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': 'https://api.openrouteservice.org'
-    }
-  }
-});
-```
-
-**📦 Variables d'environnement par mode**
-```bash
-# .env.development
-VITE_API_BASE_URL=http://localhost:3000
-
-# .env.production
-VITE_API_BASE_URL=https://api.production.com
-```
-
-## 📄 Licence et Crédits
-
-### 📜 Licence
-
-Ce projet est sous **licence MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
 ### 🙏 Crédits et Remerciements
 
 - **🗺️ [OpenRouteService](https://openrouteservice.org/)** - API de calcul d'itinéraires
@@ -461,10 +392,6 @@ Ce projet est sous **licence MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 - **💧 [DataGouv](https://www.data.gouv.fr/)** - Données publiques françaises
 - **⚛️ [React](https://react.dev/)** & **🔧 [Vite](https://vitejs.dev/)** - Technologies de base
 - **🗺️ [Leaflet](https://leafletjs.com/)** - Bibliothèque cartographique
-
-### 🌟 Contributrices et Contributeurs
-
-Un grand merci à toutes les personnes qui contribuent à améliorer WayMaker !
 
 ---
 
