@@ -1,7 +1,5 @@
 # 🥾 WayMaker - Planificateur de Randonnées Avancé
 
-> **🎯 Pour les recruteurs** : Ce projet démontre une maîtrise approfondie de React, TypeScript, de l'architecture frontend moderne et de l'intégration d'APIs géospatiales. [Testez l'application en ligne](https://jeckelsister.github.io/ors-map/) | [Voir les tests](https://github.com/jeckelsister/ors-map/tree/main/tests) | [Architecture technique](#-architecture-technique)
-
 Application React moderne de planification de randonnées avec profils altimétriques, export GPX et gestion des points d'intérêt. Utilise l'API OpenRouteService pour des calculs d'itinéraires précis et des données cartographiques françaises spécialisées.
 
 ## 🌐 Demo en ligne
@@ -10,7 +8,7 @@ Application React moderne de planification de randonnées avec profils altimétr
 
 ---
 
-## 🎯 **Points Techniques Clés (Pour Recruteurs)**
+## 🎯 **Points Techniques Clés**
 
 ### **📊 Métriques du Projet**
 - **180+ tests unitaires** avec 85%+ de couverture
