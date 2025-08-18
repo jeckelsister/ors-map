@@ -1,10 +1,41 @@
 # 🥾 WayMaker - Planificateur de Randonnées Avancé
 
+> **🎯 Pour les recruteurs** : Ce projet démontre une maîtrise approfondie de React, TypeScript, de l'architecture frontend moderne et de l'intégration d'APIs géospatiales. [Testez l'application en ligne](https://jeckelsister.github.io/ors-map/) | [Voir les tests](https://github.com/jeckelsister/ors-map/tree/main/tests) | [Architecture technique](#-architecture-technique)
+
 Application React moderne de planification de randonnées avec profils altimétriques, export GPX et gestion des points d'intérêt. Utilise l'API OpenRouteService pour des calculs d'itinéraires précis et des données cartographiques françaises spécialisées.
 
 ## 🌐 Demo en ligne
 
 **🚀 Accédez à l'application :** [https://jeckelsister.github.io/ors-map/](https://jeckelsister.github.io/ors-map/)
+
+---
+
+## 🎯 **Points Techniques Clés (Pour Recruteurs)**
+
+### **📊 Métriques du Projet**
+- **180+ tests unitaires** avec 85%+ de couverture
+- **100% TypeScript** avec configuration stricte
+- **Architecture modulaire** scalable et maintenable
+- **Performance optimisée** : Code splitting, lazy loading, compression
+- **CI/CD complet** avec déploiement automatique
+
+### **🚀 Compétences Techniques Démontrées**
+- **Frontend avancé** : React 19, hooks personnalisés, gestion d'état complexe
+- **TypeScript expert** : Types avancés, génériques, type guards
+- **Architecture logicielle** : Separation of concerns, patterns modernes
+- **Testing** : TDD, mocking, tests d'intégration, couverture
+- **Performance** : Optimisations, profiling, bundle analysis
+- **DevOps** : CI/CD, déploiement automatisé, GitHub Actions
+- **APIs géospatiales** : Intégration complexe, gestion d'erreurs, retry logic
+
+### **🛠️ Défis Techniques Relevés**
+- **Gestion d'état géospatial** complexe avec synchronisation carte/données
+- **Optimisations mémoire** pour le rendu de milliers de points
+- **Architecture modulaire** permettant l'ajout facile de nouvelles fonctionnalités
+- **Parsing robuste** de fichiers GPX avec gestion d'erreurs avancée
+- **Responsive design** avec adaptation mobile native
+
+---
 
 ## ✨ Fonctionnalités Principales
 
