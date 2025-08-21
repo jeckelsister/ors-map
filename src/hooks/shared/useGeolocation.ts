@@ -45,7 +45,7 @@ const useGeolocation = (
       navigator.geolocation.getCurrentPosition(
         position => {
           const { latitude, longitude } = position.coords;
-          const location: Location = {
+          const location = {
             lat: latitude,
             lng: longitude,
             name: 'Ma position',

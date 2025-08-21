@@ -72,8 +72,8 @@ export default function HikingPlannerMapSection({
   return (
     <div className="lg:col-span-2 space-y-6">
       {/* Hiking Map */}
-      <Card className="p-0">
-        <CardContent className="p-0">
+      <Card className="!p-0">
+        <CardContent className="!p-0">
           <HikingMap
             ref={mapRef}
             route={currentRoute}

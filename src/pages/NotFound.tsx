@@ -21,10 +21,10 @@ export default function NotFound(): React.JSX.Element {
             Go Home
           </Link>
           <Link
-            to="/map"
+            to="/hiking"
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200"
           >
-            Open Map
+            Planificateur Randonnée
           </Link>
         </div>
       </div>

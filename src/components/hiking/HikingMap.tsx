@@ -1,9 +1,3 @@
-import MapLayerSelector from '@/components/map/MapLayerSelector';
-import {
-  changeMapLayer,
-  initializeMap,
-  MAP_LAYERS,
-} from '@/services/mapService';
 import type {
   EnrichedPOIs,
   HikingRoute,
@@ -19,6 +13,74 @@ import {
   useRef,
   useState,
 } from 'react';
+
+// Map layers - inline to avoid module issues
+const MAP_LAYERS = {
+  osmFrance: {
+    url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors',
+    name: 'OSM France (Rando)',
+  },
+  openTopoMap: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap contributors | &copy; OpenTopoMap (CC-BY-SA)',
+    name: 'OpenTopoMap',
+  },
+  cyclOSM: {
+    url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    attribution:
+      '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors',
+    name: 'CyclOSM France',
+  },
+};
+
+// Simple map functions
+let currentLayerGroup: L.TileLayer | null = null;
+
+const initializeMap = (
+  container: HTMLElement,
+  initialLat: number = 45.764043,
+  initialLng: number = 4.835659,
+  initialZoom: number = 13
+): L.Map => {
+  const map = L.map(container, {
+    center: [initialLat, initialLng],
+    zoom: initialZoom,
+    zoomControl: true,
+  });
+
+  const defaultLayer = L.tileLayer(MAP_LAYERS.osmFrance.url, {
+    attribution: MAP_LAYERS.osmFrance.attribution,
+    maxZoom: 19,
+  });
+
+  defaultLayer.addTo(map);
+  currentLayerGroup = defaultLayer;
+
+  return map;
+};
+
+const changeMapLayer = (
+  map: L.Map,
+  layerKey: keyof typeof MAP_LAYERS
+): void => {
+  if (!map) return;
+
+  if (currentLayerGroup) {
+    map.removeLayer(currentLayerGroup);
+  }
+
+  const layerConfig = MAP_LAYERS[layerKey];
+  const newLayer = L.tileLayer(layerConfig.url, {
+    attribution: layerConfig.attribution,
+    maxZoom: 19,
+  });
+
+  newLayer.addTo(map);
+  currentLayerGroup = newLayer;
+};
 
 interface HikingMapProps {
   route?: HikingRoute | null;
@@ -164,7 +226,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
     if (mapContainer && !mapRef.current) {
       // Default to France center for hiking
       const center: [number, number] = [45.0, 2.0];
-      const map = initializeMap('hiking-map', center, 6, 'osmFrance');
+      const map = initializeMap(mapContainer, center[0], center[1], 6);
 
       // Disable double-click zoom to prevent conflicts
       map.doubleClickZoom.disable();
@@ -750,12 +812,60 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
         </button>
 
         {showLayerSelector && (
-          <div className="absolute top-16 left-0 min-w-[280px]">
-            <MapLayerSelector
-              map={mapRef.current}
-              currentLayer={currentMapLayer}
-              onLayerChange={handleMapLayerChange}
-            />
+          <div className="absolute top-16 left-0 min-w-[280px] bg-white rounded-lg shadow-lg border p-4">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">
+              Fond de carte
+            </h3>
+            <div className="space-y-2">
+              {Object.entries(MAP_LAYERS).map(
+                ([key, layer]: [
+                  string,
+                  { name: string; url: string; attribution: string },
+                ]) => (
+                  <label
+                    key={key}
+                    className={`
+                    flex items-center p-2 rounded-md border cursor-pointer transition-colors hover:bg-gray-50
+                    ${
+                      currentMapLayer === key
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'border-gray-200'
+                    }
+                  `}
+                  >
+                    <input
+                      type="radio"
+                      name="mapLayer"
+                      value={key}
+                      checked={currentMapLayer === key}
+                      onChange={() =>
+                        handleMapLayerChange(key as keyof typeof MAP_LAYERS)
+                      }
+                      className="sr-only"
+                    />
+                    <div
+                      className={`
+                    w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center
+                    ${
+                      currentMapLayer === key
+                        ? 'border-blue-500 bg-blue-500'
+                        : 'border-gray-300'
+                    }
+                  `}
+                    >
+                      {currentMapLayer === key && (
+                        <div className="w-2 h-2 bg-white rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-800">
+                        {layer.name}
+                      </div>
+                    </div>
+                  </label>
+                )
+              )}
+            </div>
           </div>
         )}
       </div>

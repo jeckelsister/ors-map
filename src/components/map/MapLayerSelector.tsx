@@ -34,10 +34,15 @@ const MapLayerSelector: React.FC<MapLayerSelectorProps> = ({
         Fond de carte
       </h3>
       <div className="space-y-2">
-        {availableLayers.map(layer => (
-          <label
-            key={layer.key}
-            className={`
+        {availableLayers.map(
+          (layer: {
+            key: keyof typeof MAP_LAYERS;
+            name: string;
+            available: boolean;
+          }) => (
+            <label
+              key={layer.key}
+              className={`
               flex items-center p-2 rounded-md border cursor-pointer transition-colors
               ${layer.available ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'}
               ${
@@ -46,18 +51,18 @@ const MapLayerSelector: React.FC<MapLayerSelectorProps> = ({
                   : 'border-gray-200'
               }
             `}
-          >
-            <input
-              type="radio"
-              name="mapLayer"
-              value={layer.key}
-              checked={currentLayer === layer.key}
-              onChange={() => handleLayerChange(layer.key)}
-              disabled={!layer.available}
-              className="sr-only"
-            />
-            <div
-              className={`
+            >
+              <input
+                type="radio"
+                name="mapLayer"
+                value={layer.key}
+                checked={currentLayer === layer.key}
+                onChange={() => handleLayerChange(layer.key)}
+                disabled={!layer.available}
+                className="sr-only"
+              />
+              <div
+                className={`
               w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center
               ${
                 currentLayer === layer.key && layer.available
@@ -65,38 +70,39 @@ const MapLayerSelector: React.FC<MapLayerSelectorProps> = ({
                   : 'border-gray-300'
               }
             `}
-            >
-              {currentLayer === layer.key && layer.available && (
-                <div className="w-2 h-2 bg-white rounded-full" />
-              )}
-            </div>
-            <div className="flex-1">
-              <div
-                className={`
+              >
+                {currentLayer === layer.key && layer.available && (
+                  <div className="w-2 h-2 bg-white rounded-full" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div
+                  className={`
                 text-sm font-medium
                 ${layer.available ? 'text-gray-800' : 'text-gray-400'}
               `}
-              >
-                {layer.name}
+                >
+                  {layer.name}
+                </div>
+                {layer.key === 'osmFrance' && (
+                  <div className="text-xs text-blue-600 mt-1">
+                    🥇 TOP Rando : GR/GRP + refuges + sources
+                  </div>
+                )}
+                {layer.key === 'openTopoMap' && (
+                  <div className="text-xs text-purple-600 mt-1">
+                    🏔️ Style Suisse + courbes + relief
+                  </div>
+                )}
+                {layer.key === 'cyclOSM' && (
+                  <div className="text-xs text-orange-600 mt-1">
+                    🚴 Pistes cyclables + sentiers
+                  </div>
+                )}
               </div>
-              {layer.key === 'osmFrance' && (
-                <div className="text-xs text-blue-600 mt-1">
-                  🥇 TOP Rando : GR/GRP + refuges + sources
-                </div>
-              )}
-              {layer.key === 'openTopoMap' && (
-                <div className="text-xs text-purple-600 mt-1">
-                  🏔️ Style Suisse + courbes + relief
-                </div>
-              )}
-              {layer.key === 'cyclOSM' && (
-                <div className="text-xs text-orange-600 mt-1">
-                  🚴 Pistes cyclables + sentiers
-                </div>
-              )}
-            </div>
-          </label>
-        ))}
+            </label>
+          )
+        )}
       </div>
 
       {/* Information about map layers */}

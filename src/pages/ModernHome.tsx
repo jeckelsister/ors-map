@@ -1,4 +1,4 @@
-import { Download, Map, Mountain, Route } from 'lucide-react';
+import { Download, Mountain, Route } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../components/shared/Logo';
@@ -9,12 +9,6 @@ const features = [
     icon: Mountain,
     title: 'Randonnée Avancée',
     description: 'Itinéraires multi-étapes avec GR, HRP et sentiers locaux',
-    badge: null,
-  },
-  {
-    icon: Map,
-    title: 'Cartes Détaillées',
-    description: 'IGN, OpenStreetMap et cartes topographiques spécialisées',
     badge: null,
   },
   {
@@ -53,12 +47,6 @@ export default function ModernHome(): React.JSX.Element {
               <Link to="/hiking">
                 <Mountain className="w-5 h-5" />
                 Planificateur Randonnée
-              </Link>
-            </ModernButton>
-            <ModernButton asChild variant="outline" size="lg" className="gap-2">
-              <Link to="/map">
-                <Map className="w-5 h-5" />
-                Carte Interactive
               </Link>
             </ModernButton>
           </div>

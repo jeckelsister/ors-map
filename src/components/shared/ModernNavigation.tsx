@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import clsx from 'clsx';
-import { Home, Map, Menu, Mountain } from 'lucide-react';
+import { Home, Menu, Mountain } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 
 const navigationItems = [
   { path: '/', icon: Home, label: 'Home', mobileLabel: 'Home' },
-  { path: '/map', icon: Map, label: 'Carte', mobileLabel: 'Carte Interactive' },
   {
     path: '/hiking',
     icon: Mountain,
