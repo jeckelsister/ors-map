@@ -9,7 +9,7 @@ import {
   useMemo,
 } from 'react';
 
-interface FormFieldProps {
+interface ModernFormFieldProps {
   label: string;
   children: ReactNode;
   className?: string;
@@ -17,13 +17,14 @@ interface FormFieldProps {
   required?: boolean;
   error?: string;
   helpText?: string;
+  description?: string;
 }
 
 /**
- * Composant champ de formulaire réutilisable avec label, erreur et texte d'aide
- * Optimisé pour l'accessibilité et la réutilisabilité avec shadcn/ui
+ * Composant champ de formulaire modernisé avec shadcn/ui
+ * Optimisé pour l'accessibilité et la cohérence visuelle
  */
-const FormField = memo<FormFieldProps>(
+const ModernFormField = memo<ModernFormFieldProps>(
   ({
     label,
     children,
@@ -32,29 +33,23 @@ const FormField = memo<FormFieldProps>(
     required = false,
     error,
     helpText,
+    description,
   }) => {
     const fieldId = useMemo(
       () => `field-${label.toLowerCase().replace(/\s+/g, '-')}`,
       [label]
     );
 
-    const labelClasses = useMemo(
-      () =>
-        cn(
-          'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-          labelClassName
-        ),
-      [labelClassName]
-    );
-
-    const containerClasses = useMemo(
-      () => cn('space-y-2', className),
-      [className]
-    );
-
     return (
-      <div className={containerClasses}>
-        <Label htmlFor={fieldId} className={labelClasses}>
+      <div className={cn('space-y-2', className)}>
+        <Label
+          htmlFor={fieldId}
+          className={cn(
+            'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+            error && 'text-destructive',
+            labelClassName
+          )}
+        >
           {label}
           {required && (
             <span className="text-destructive ml-1" aria-label="obligatoire">
@@ -63,6 +58,10 @@ const FormField = memo<FormFieldProps>(
           )}
         </Label>
 
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+
         <div className="relative">
           {isValidElement(children)
             ? cloneElement(
@@ -70,10 +69,9 @@ const FormField = memo<FormFieldProps>(
                 {
                   id: fieldId,
                   className: cn(
-                    error &&
-                      'border-destructive focus-visible:ring-destructive',
                     (children as ReactElement<{ className?: string }>).props
-                      ?.className
+                      .className,
+                    error && 'border-destructive focus-visible:ring-destructive'
                   ),
                 }
               )
@@ -81,7 +79,7 @@ const FormField = memo<FormFieldProps>(
 
           {error && (
             <p
-              className="text-sm text-destructive mt-2"
+              className="text-sm font-medium text-destructive mt-2"
               role="alert"
               aria-live="polite"
             >
@@ -98,6 +96,6 @@ const FormField = memo<FormFieldProps>(
   }
 );
 
-FormField.displayName = 'FormField';
+ModernFormField.displayName = 'ModernFormField';
 
-export default FormField;
+export default ModernFormField;

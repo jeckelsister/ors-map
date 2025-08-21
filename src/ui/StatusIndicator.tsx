@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { memo, ReactNode, useMemo } from 'react';
 
 interface StatusIndicatorProps {
@@ -5,7 +6,7 @@ interface StatusIndicatorProps {
   activeLabel?: string;
   inactiveLabel?: string;
   activeIcon?: ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error';
+  variant?: 'default' | 'success' | 'warning' | 'destructive';
 }
 
 /**
@@ -20,23 +21,26 @@ const StatusIndicator = memo<StatusIndicatorProps>(
     activeIcon,
     variant = 'default',
   }) => {
-    // Memoized variant classes
+    // Memoized variant classes using shadcn/ui colors
     const variantClasses = useMemo(() => {
       const variants = {
-        default: 'bg-green-500',
+        default: 'bg-primary',
         success: 'bg-green-500',
         warning: 'bg-yellow-500',
-        error: 'bg-red-500',
+        destructive: 'bg-destructive',
       };
       return variants[variant];
     }, [variant]);
 
     const ActiveComponent = useMemo(
       () => (
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 text-sm font-medium">
           {activeIcon || (
             <span
-              className={`inline-block w-2 h-2 ${variantClasses} rounded-full animate-ping`}
+              className={cn(
+                'inline-block w-2 h-2 rounded-full animate-ping',
+                variantClasses
+              )}
             ></span>
           )}
           {activeLabel}
@@ -46,7 +50,9 @@ const StatusIndicator = memo<StatusIndicatorProps>(
     );
 
     if (!isActive) {
-      return <span>{inactiveLabel}</span>;
+      return (
+        <span className="text-sm text-muted-foreground">{inactiveLabel}</span>
+      );
     }
 
     return ActiveComponent;

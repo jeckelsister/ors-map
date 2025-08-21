@@ -1,3 +1,5 @@
+import { Button as ShadcnButton } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,16 +16,13 @@ export default function Button({
   ...props
 }: ButtonProps): React.JSX.Element {
   return (
-    <button
+    <ShadcnButton
       type={type}
-      className={
-        'px-3 py-2 rounded-lg border font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 ' +
-        className
-      }
+      className={cn('transition-all duration-150', className)}
       onClick={onClick}
       {...props}
     >
       {children}
-    </button>
+    </ShadcnButton>
   );
 }
