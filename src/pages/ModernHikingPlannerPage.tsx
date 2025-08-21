@@ -525,22 +525,6 @@ export default function HikingPlannerPage(): React.JSX.Element {
           </div>
         </div>
       </div>
-
-      {/* Mobile Bottom Fab Button for quick route creation */}
-      <div className="fixed bottom-4 right-4 lg:hidden z-50">
-        <Button
-          onClick={createRoute}
-          disabled={isLoading || waypoints.length < 2}
-          size="lg"
-          className="rounded-full w-14 h-14 shadow-lg"
-        >
-          {isLoading ? (
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-          ) : (
-            <Rocket className="w-5 h-5" />
-          )}
-        </Button>
-      </div>
     </div>
   );
 }

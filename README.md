@@ -425,3 +425,8 @@ perf: amélioration de performance
 ---
 
 **🚀 Prêt pour l'aventure ?** [Lancez WayMaker](https://jeckelsister.github.io/ors-map/) et planifiez votre prochaine randonnée ! 🥾⛰️
+# Deployment avec checks automatiques
+
+Cette version inclut une pipeline complète avec validation automatique des déploiements.
+
+Pipeline activée avec checks obligatoires ✅
