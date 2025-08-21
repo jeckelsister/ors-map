@@ -720,7 +720,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
   return (
     <div className={`relative bg-white rounded-lg shadow-sm ${className}`}>
       {/* Map Layer Selector */}
-      <div className="absolute top-4 left-4 z-[9999]" style={{ zIndex: 9999 }}>
+      <div className="absolute top-4 left-4 z-40" style={{ zIndex: 9999 }}>
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
           className={`
@@ -765,7 +765,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
 
         {showLayerSelector && (
           <div
-            className="absolute top-16 left-0 min-w-[280px] z-[9999]"
+            className="absolute top-16 left-0 min-w-[280px] z-40"
             style={{ zIndex: 9999 }}
           >
             <MapLayerSelector
@@ -779,7 +779,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
 
       {/* Map legend */}
       <div
-        className="absolute bottom-4 left-4 z-[9998] bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200"
+        className="absolute bottom-4 left-4 z-40 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200"
         style={{ zIndex: 9998 }}
       >
         <div className="flex items-center space-x-4 flex-wrap">

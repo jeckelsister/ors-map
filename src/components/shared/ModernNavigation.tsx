@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -41,8 +40,7 @@ export default function ModernNavigation(): React.JSX.Element {
             onClick={closeMobileMenu}
           >
             <Logo size="sm" />
-            <span className="hidden sm:inline">WayMaker</span>
-            <span className="sm:hidden">WM</span>
+            <span>WayMaker</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -81,7 +79,7 @@ export default function ModernNavigation(): React.JSX.Element {
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+              <SheetContent side="right" className="w-[280px] sm:w-[350px] p-4">
                 <div className="flex flex-col space-y-4 mt-6">
                   <div className="flex items-center gap-2 mb-6">
                     <Logo size="sm" />
@@ -104,11 +102,6 @@ export default function ModernNavigation(): React.JSX.Element {
                       <Link to={path}>
                         <Icon className="w-5 h-5" />
                         {mobileLabel}
-                        {isActive(path) && (
-                          <Badge variant="secondary" className="ml-auto">
-                            Actif
-                          </Badge>
-                        )}
                       </Link>
                     </Button>
                   ))}
