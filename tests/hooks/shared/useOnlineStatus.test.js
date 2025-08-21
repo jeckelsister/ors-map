@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import useOnlineStatus from '../../../src/hooks/shared/useOnlineStatus';
+import { useOnlineStatus } from '../../../src/hooks/shared/useOnlineStatus';
 
 describe('useOnlineStatus Hook', () => {
   let mockNavigator;

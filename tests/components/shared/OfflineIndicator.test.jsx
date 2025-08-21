@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OfflineIndicator from '../../../src/components/shared/OfflineIndicator';
-import useOnlineStatus from '../../../src/hooks/shared/useOnlineStatus';
+import { useOnlineStatus } from '../../../src/hooks/shared/useOnlineStatus';
 
 // Mock the hook
 vi.mock('../../../src/hooks/shared/useOnlineStatus', () => ({
-  default: vi.fn(),
+  useOnlineStatus: vi.fn(),
 }));
 
 describe('OfflineIndicator Component', () => {

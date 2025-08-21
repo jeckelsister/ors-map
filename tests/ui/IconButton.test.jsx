@@ -38,7 +38,7 @@ describe('IconButton Component', () => {
     render(<IconButton {...defaultProps} isActive={true} />);
 
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-blue-600', 'text-white');
+    expect(button).toHaveClass('bg-primary', 'text-primary-foreground');
   });
 
   it('has correct title attribute', () => {

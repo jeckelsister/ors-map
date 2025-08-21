@@ -5,19 +5,7 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react({
-      // Optimize React for production
-      babel: {
-        // Remove React DevTools in production
-        plugins:
-          process.env.NODE_ENV === 'production'
-            ? ['transform-remove-console']
-            : [],
-      },
-    }),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   base: '/ors-map/',
   resolve: {
     alias: {

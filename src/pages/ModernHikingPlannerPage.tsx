@@ -416,20 +416,18 @@ export default function HikingPlannerPage(): React.JSX.Element {
             {/* Hiking Map */}
             <Card>
               <CardContent className="p-0">
-                <div className="h-[50vh] lg:h-[70vh] relative">
-                  <HikingMap
-                    ref={hikingMapRef}
-                    route={currentRoute}
-                    refuges={refuges}
-                    waterPoints={waterPoints}
-                    showRefuges={showRefuges}
-                    showWaterPoints={showWaterPoints}
-                    onToggleRefuges={setShowRefuges}
-                    onToggleWaterPoints={setShowWaterPoints}
-                    waypoints={waypoints}
-                    onMapClick={handleMapClick}
-                  />
-                </div>
+                <HikingMap
+                  ref={hikingMapRef}
+                  route={currentRoute}
+                  refuges={refuges}
+                  waterPoints={waterPoints}
+                  showRefuges={showRefuges}
+                  showWaterPoints={showWaterPoints}
+                  onToggleRefuges={setShowRefuges}
+                  onToggleWaterPoints={setShowWaterPoints}
+                  waypoints={waypoints}
+                  onMapClick={handleMapClick}
+                />
               </CardContent>
             </Card>
 

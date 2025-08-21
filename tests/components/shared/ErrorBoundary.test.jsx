@@ -53,13 +53,15 @@ describe('ErrorBoundary Component', () => {
     );
 
     expect(screen.getByText('⚠️')).toBeInTheDocument();
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "We're sorry for the inconvenience. Please try refreshing the page."
+        'Nous sommes désolés pour la gêne occasionnée. Veuillez essayer de rafraîchir la page.'
       )
     ).toBeInTheDocument();
-    expect(screen.getByText('Refresh Page')).toBeInTheDocument();
+    expect(screen.getByText('🔄 Rafraîchir la page')).toBeInTheDocument();
   });
 
   it('calls window.location.reload when refresh button is clicked', () => {
@@ -69,7 +71,7 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    const refreshButton = screen.getByText('Refresh Page');
+    const refreshButton = screen.getByText('🔄 Rafraîchir la page');
     fireEvent.click(refreshButton);
 
     expect(mockReload).toHaveBeenCalled();
@@ -84,7 +86,14 @@ describe('ErrorBoundary Component', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'ErrorBoundary caught an error:',
-      expect.any(Error),
+      'Test error message'
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error stack:',
+      expect.any(String)
+    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error info:',
       expect.any(Object)
     );
   });
@@ -100,7 +109,7 @@ describe('ErrorBoundary Component', () => {
 
     expect(screen.getByText('Custom error message')).toBeInTheDocument();
     expect(
-      screen.queryByText('Oops! Something went wrong')
+      screen.queryByText("Oops! Quelque chose s'est mal passé")
     ).not.toBeInTheDocument();
   });
 
@@ -114,11 +123,13 @@ describe('ErrorBoundary Component', () => {
     );
 
     expect(
-      screen.getByText('Error Details (Development Only)')
+      screen.getByText("Détails de l'erreur (Développement uniquement)")
     ).toBeInTheDocument();
 
     // Click to expand details
-    const detailsToggle = screen.getByText('Error Details (Development Only)');
+    const detailsToggle = screen.getByText(
+      "Détails de l'erreur (Développement uniquement)"
+    );
     fireEvent.click(detailsToggle);
 
     // Should show error stack
@@ -146,7 +157,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
 
     // Re-render with no error - should still show error UI
     rerender(
@@ -155,7 +168,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
   });
 
   it('resets error state when new error occurs', () => {
@@ -165,7 +180,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
 
     // New error should update the error state
     rerender(
@@ -174,7 +191,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
   });
 
   it('has proper styling classes', () => {
@@ -186,20 +205,23 @@ describe('ErrorBoundary Component', () => {
 
     // Find the outermost container with the styling classes
     const outerContainer = screen
-      .getByText('Oops! Something went wrong')
+      .getByText("Oops! Quelque chose s'est mal passé")
       .closest('.min-h-screen');
     expect(outerContainer).toHaveClass(
       'min-h-screen',
+      'bg-gradient-to-br',
+      'from-emerald-400',
+      'via-teal-500',
+      'to-green-600',
       'flex',
       'items-center',
-      'justify-center',
-      'bg-gray-50'
+      'justify-center'
     );
 
-    const refreshButton = screen.getByText('Refresh Page');
+    const refreshButton = screen.getByText('🔄 Rafraîchir la page');
     expect(refreshButton).toHaveClass(
-      'bg-blue-600',
-      'hover:bg-blue-700',
+      'bg-emerald-600',
+      'hover:bg-emerald-700',
       'text-white'
     );
   });
@@ -211,7 +233,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Oops! Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText("Oops! Quelque chose s'est mal passé")
+    ).toBeInTheDocument();
   });
 
   it('static getDerivedStateFromError returns correct state', () => {

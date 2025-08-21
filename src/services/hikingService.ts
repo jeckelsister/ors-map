@@ -70,40 +70,13 @@ const getOrsParametersFromProfile = (hikingProfile?: HikingProfile | null) => {
   return { profile, options };
 };
 
-/**
- * Test the ORS API with a simple request
- */
-const testOrsApi = async () => {
-  try {
-    await axios.post(
-      `${ORS_BASE_URL}/v2/directions/foot-hiking/geojson`,
-      {
-        coordinates: [
-          [2.3522, 48.8566],
-          [2.2945, 48.8584],
-        ],
-      },
-      {
-        headers: {
-          Authorization: ORS_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-  } catch (error) {
-    console.error('❌ ORS API test failed:', error);
-  }
-};
-
 if (!ORS_API_KEY || ORS_API_KEY === 'your_api_key_here') {
   console.error(
     '⚠️ OpenRouteService API key not configured. Route creation will fail.'
   );
 } else {
-  console.log('✅ OpenRouteService API key configured');
+  // ✅ OpenRouteService API key configured
   // Note: API test is done only when creating routes to avoid network errors on module load
-  // testOrsApi();
 }
 
 /**
