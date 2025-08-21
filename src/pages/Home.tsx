@@ -26,7 +26,7 @@ const features = [
   },
 ];
 
-export default function ModernHome(): React.JSX.Element {
+export default function Home(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-primary/10 to-background flex items-center justify-center p-4">
       <div className="max-w-6xl mx-auto">

@@ -28,7 +28,7 @@ const Toast: React.FC<ToastProps> = ({
     // Entry animation
     const enterTimer = setTimeout(() => setIsVisible(true), 50);
 
-    // Timer pour la fermeture automatique
+    // Timer for automatic closing
     const autoCloseTimer = setTimeout(() => {
       handleClose();
     }, duration);

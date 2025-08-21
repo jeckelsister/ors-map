@@ -78,19 +78,19 @@ export function parseGPXString(gpxString: string): GPXParseResult {
     metadata: extractMetadata(gpxElement),
   };
 
-  // Extraction des waypoints
+  // Extract waypoints
   const wptElements = gpxElement.querySelectorAll('wpt');
   result.waypoints = Array.from(wptElements).map((wpt, index) =>
     parseWaypoint(wpt as Element, `waypoint-${index}`)
   );
 
-  // Extraction des tracks
+  // Extract tracks
   const trkElements = gpxElement.querySelectorAll('trk');
   result.tracks = Array.from(trkElements).map((trk, index) =>
     parseTrack(trk as Element, `track-${index}`)
   );
 
-  // Extraction des routes
+  // Extract routes
   const rteElements = gpxElement.querySelectorAll('rte');
   result.routes = Array.from(rteElements).map((rte, index) =>
     parseRoute(rte as Element, `route-${index}`)
@@ -253,7 +253,7 @@ export function calculateDistance(
   lat2: number,
   lng2: number
 ): number {
-  const R = 6371; // Rayon de la Terre en km
+  const R = 6371; // Earth radius in km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =

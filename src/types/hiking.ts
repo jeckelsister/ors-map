@@ -60,7 +60,7 @@ export interface Refuge {
   lng: number;
   elevation: number;
   capacity?: number;
-  open_season?: string;
+  openSeason?: string;
   contact?: string;
   services: RefugeService[];
 }
@@ -91,7 +91,7 @@ export interface Peak {
   elevation: number;
   prominence?: number; // Topographic prominence in meters
   difficulty?: 'facile' | 'modéré' | 'difficile' | 'très difficile';
-  climbing_grade?: string; // Climbing grade if applicable
+  climbingGrade?: string; // Climbing grade if applicable
   description?: string;
 }
 
@@ -104,7 +104,7 @@ export interface Pass {
   type: 'col' | 'brèche' | 'seuil' | 'pas';
   connects?: string[]; // Connected valleys or regions
   difficulty?: 'facile' | 'modéré' | 'difficile';
-  seasonal_access?: string; // Seasonal accessibility period
+  seasonalAccess?: string; // Seasonal accessibility period
   description?: string;
 }
 
@@ -114,10 +114,10 @@ export interface Viewpoint {
   lat: number;
   lng: number;
   elevation: number;
-  direction?: string; // Direction de la vue (N, NE, etc.)
+  direction?: string; // Direction of the view (N, NE, etc.)
   panoramic: boolean; // Panoramic view or not
-  visible_peaks?: string[]; // Visible peaks
-  best_time?: string; // Meilleur moment pour la vue
+  visiblePeaks?: string[]; // Visible peaks
+  bestTime?: string; // Best time for the view
   description?: string;
 }
 
@@ -134,9 +134,9 @@ export interface Heritage {
     | 'site_archéologique'
     | 'village';
   period?: string; // Historical period
-  unesco?: boolean; // Site UNESCO ou non
-  entry_fee?: boolean; // Paid entry
-  opening_hours?: string;
+  unesco?: boolean; // UNESCO site or not
+  entryFee?: boolean; // Paid entry
+  openingHours?: string;
   description?: string;
 }
 
@@ -152,9 +152,9 @@ export interface GeologicalSite {
     | 'formation_rocheuse'
     | 'fossiles'
     | 'minéraux';
-  geological_period?: string;
+  geologicalPeriod?: string;
   accessibility?: 'facile' | 'modéré' | 'difficile';
-  safety_notes?: string; // Safety notes
+  safetyNotes?: string; // Safety notes
   description?: string;
 }
 
@@ -164,11 +164,11 @@ export interface NotableLake {
   lat: number;
   lng: number;
   elevation: number;
-  area?: number; // Superficie en hectares
-  max_depth?: number; // Max depth in meters
+  area?: number; // Area in hectares
+  maxDepth?: number; // Max depth in meters
   type: 'lac_alpin' | 'lac_glaciaire' | 'lac_artificiel' | 'étang';
   activities?: string[]; // Swimming, fishing, etc.
-  access_difficulty?: 'facile' | 'modéré' | 'difficile';
+  accessDifficulty?: 'facile' | 'modéré' | 'difficile';
   description?: string;
 }
 

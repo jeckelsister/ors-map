@@ -1,9 +1,9 @@
-import { Toaster } from '@/components/ui/sonner';
+import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import React from 'react';
 
-export default function ModernToaster(): React.JSX.Element {
+export default function Toaster(): React.JSX.Element {
   return (
-    <Toaster
+    <SonnerToaster
       position="bottom-right"
       toastOptions={{
         style: {

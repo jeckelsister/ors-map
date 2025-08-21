@@ -212,7 +212,7 @@ export const useEnrichedPOIMarkers = (
               <small>Altitude: ${peak.elevation}m</small><br>
               ${peak.prominence ? `<small>Proéminence: ${peak.prominence}m</small><br>` : ''}
               ${peak.difficulty ? `<small>Difficulté: ${peak.difficulty}</small><br>` : ''}
-              ${peak.climbing_grade ? `<small>Cotation: ${peak.climbing_grade}</small><br>` : ''}
+              ${peak.climbingGrade ? `<small>Cotation: ${peak.climbingGrade}</small><br>` : ''}
               ${peak.description ? `<small>${peak.description}</small>` : ''}
             </div>
           `);
@@ -246,7 +246,7 @@ export const useEnrichedPOIMarkers = (
               <small>Type: ${pass.type}</small><br>
               ${pass.connects ? `<small>Relie: ${pass.connects.join(', ')}</small><br>` : ''}
               ${pass.difficulty ? `<small>Difficulté: ${pass.difficulty}</small><br>` : ''}
-              ${pass.seasonal_access ? `<small>Accès: ${pass.seasonal_access}</small><br>` : ''}
+              ${pass.seasonalAccess ? `<small>Accès: ${pass.seasonalAccess}</small><br>` : ''}
               ${pass.description ? `<small>${pass.description}</small>` : ''}
             </div>
           `);
@@ -280,8 +280,8 @@ export const useEnrichedPOIMarkers = (
               <small>Altitude: ${viewpoint.elevation}m</small><br>
               ${viewpoint.direction ? `<small>Direction: ${viewpoint.direction}</small><br>` : ''}
               <small>Vue panoramique: ${viewpoint.panoramic ? 'Oui' : 'Non'}</small><br>
-              ${viewpoint.visible_peaks ? `<small>Sommets visibles: ${viewpoint.visible_peaks.join(', ')}</small><br>` : ''}
-              ${viewpoint.best_time ? `<small>Meilleur moment: ${viewpoint.best_time}</small><br>` : ''}
+              ${viewpoint.visiblePeaks ? `<small>Sommets visibles: ${viewpoint.visiblePeaks.join(', ')}</small><br>` : ''}
+              ${viewpoint.bestTime ? `<small>Meilleur moment: ${viewpoint.bestTime}</small><br>` : ''}
               ${viewpoint.description ? `<small>${viewpoint.description}</small>` : ''}
             </div>
           `);
@@ -315,8 +315,8 @@ export const useEnrichedPOIMarkers = (
               <small>Type: ${heritage.type}</small><br>
               ${heritage.period ? `<small>Période: ${heritage.period}</small><br>` : ''}
               ${heritage.unesco ? `<small>Site UNESCO: Oui</small><br>` : ''}
-              ${heritage.entry_fee ? `<small>Entrée payante</small><br>` : ''}
-              ${heritage.opening_hours ? `<small>Horaires: ${heritage.opening_hours}</small><br>` : ''}
+              ${heritage.entryFee ? `<small>Entrée payante</small><br>` : ''}
+              ${heritage.openingHours ? `<small>Horaires: ${heritage.openingHours}</small><br>` : ''}
               ${heritage.description ? `<small>${heritage.description}</small>` : ''}
             </div>
           `);
@@ -349,9 +349,9 @@ export const useEnrichedPOIMarkers = (
               <small>Altitude: ${lake.elevation}m</small><br>
               <small>Type: ${lake.type}</small><br>
               ${lake.area ? `<small>Superficie: ${lake.area} ha</small><br>` : ''}
-              ${lake.max_depth ? `<small>Profondeur max: ${lake.max_depth}m</small><br>` : ''}
+              ${lake.maxDepth ? `<small>Profondeur max: ${lake.maxDepth}m</small><br>` : ''}
               ${lake.activities ? `<small>Activités: ${lake.activities.join(', ')}</small><br>` : ''}
-              ${lake.access_difficulty ? `<small>Accès: ${lake.access_difficulty}</small><br>` : ''}
+              ${lake.accessDifficulty ? `<small>Accès: ${lake.accessDifficulty}</small><br>` : ''}
               ${lake.description ? `<small>${lake.description}</small>` : ''}
             </div>
           `);

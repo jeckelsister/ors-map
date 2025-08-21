@@ -56,7 +56,7 @@ export default function GPXUpload({
         );
       }
 
-      // Calculer des statistiques pour l'affichage
+      // Calculate statistics for display
       const distance = calculateTotalDistance(waypoints);
       const trackName =
         gpxResult.metadata?.name ||
@@ -81,7 +81,7 @@ export default function GPXUpload({
       onError?.(errorMsg);
     } finally {
       setIsProcessing(false);
-      // Reset l'input file
+      // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

@@ -16,7 +16,7 @@ const navigationItems = [
   },
 ];
 
-export default function ModernNavigation(): React.JSX.Element {
+export default function Navigation(): React.JSX.Element {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

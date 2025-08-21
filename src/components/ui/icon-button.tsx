@@ -22,7 +22,7 @@ interface IconButtonProps {
 
 /**
  * Composant bouton avec icône réutilisable
- * Utilise shadcn/ui pour un style moderne
+ * Uses shadcn/ui for modern styling
  */
 const IconButton = memo<IconButtonProps>(
   ({

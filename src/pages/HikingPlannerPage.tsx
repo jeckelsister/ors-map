@@ -3,7 +3,7 @@ import type { HikingMapRef } from '../components/hiking/HikingMap';
 import HikingPlannerHeader from '../components/hiking/HikingPlannerHeader';
 import HikingPlannerMapSection from '../components/hiking/HikingPlannerMapSection';
 import HikingPlannerSidebar from '../components/hiking/HikingPlannerSidebar';
-import Navigation from '../components/shared/ModernNavigation';
+import Navigation from '../components/shared/Navigation';
 import { TOAST_MESSAGES } from '../constants/hikingPlanner';
 import { useGPXHandlers } from '../hooks/hiking/useGPXHandlers';
 import useHikingRoute from '../hooks/hiking/useHikingRoute';

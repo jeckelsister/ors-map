@@ -9,7 +9,7 @@ import {
   useMemo,
 } from 'react';
 
-interface ModernFormFieldProps {
+interface FormFieldProps {
   label: string;
   children: ReactNode;
   className?: string;
@@ -21,10 +21,10 @@ interface ModernFormFieldProps {
 }
 
 /**
- * Composant champ de formulaire modernisé avec shadcn/ui
- * Optimisé pour l'accessibilité et la cohérence visuelle
+ * Form field component with shadcn/ui styling
+ * Optimized for accessibility and visual consistency
  */
-const ModernFormField = memo<ModernFormFieldProps>(
+const FormField = memo<FormFieldProps>(
   ({
     label,
     children,
@@ -96,6 +96,6 @@ const ModernFormField = memo<ModernFormFieldProps>(
   }
 );
 
-ModernFormField.displayName = 'ModernFormField';
+FormField.displayName = 'FormField';
 
-export default ModernFormField;
+export default FormField;

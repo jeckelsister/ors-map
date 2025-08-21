@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import React from 'react';
 
-interface ModernButtonProps
+interface CustomButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?:
@@ -17,14 +17,14 @@ interface ModernButtonProps
   asChild?: boolean;
 }
 
-export default function ModernButton({
+export default function CustomButton({
   children,
   variant = 'default',
   size = 'default',
   className,
   asChild = false,
   ...props
-}: ModernButtonProps): React.JSX.Element {
+}: CustomButtonProps): React.JSX.Element {
   return (
     <Button
       variant={variant}

@@ -188,9 +188,9 @@ export default function EnrichedPOIControls({
         </div>
         <MapPin className="w-4 h-4 text-gray-400" />
       </div>
-      {peak.climbing_grade && (
+      {peak.climbingGrade && (
         <p className="text-xs text-gray-600 mt-1">
-          Grade: {peak.climbing_grade}
+          Grade: {peak.climbingGrade}
         </p>
       )}
     </div>
@@ -215,9 +215,9 @@ export default function EnrichedPOIControls({
         </div>
         <MapPin className="w-4 h-4 text-amber-400" />
       </div>
-      {pass.seasonal_access && (
+      {pass.seasonalAccess && (
         <p className="text-xs text-gray-600 mt-1">
-          Accès: {pass.seasonal_access}
+          Accès: {pass.seasonalAccess}
         </p>
       )}
     </div>
@@ -244,9 +244,9 @@ export default function EnrichedPOIControls({
         </div>
         <MapPin className="w-4 h-4 text-purple-400" />
       </div>
-      {viewpoint.best_time && (
+      {viewpoint.bestTime && (
         <p className="text-xs text-gray-600 mt-1">
-          Meilleur moment: {viewpoint.best_time}
+          Meilleur moment: {viewpoint.bestTime}
         </p>
       )}
     </div>

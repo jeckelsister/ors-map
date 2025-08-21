@@ -680,7 +680,7 @@ export const findRefugesNearRoute = async (
         capacity: element.tags.capacity
           ? parseInt(element.tags.capacity)
           : undefined,
-        open_season: element.tags.opening_hours,
+        openSeason: element.tags.opening_hours,
         contact: element.tags.phone || element.tags.website,
         services: extractRefugeServices(element.tags),
       }))
@@ -1013,7 +1013,7 @@ export const findPeaksNearRoute = async (
           ? parseInt(element.tags.prominence)
           : undefined,
         difficulty: determinePeakDifficulty(element.tags),
-        climbing_grade:
+        climbingGrade:
           element.tags.climbing || element.tags['climbing:grade:french'],
         description: element.tags.description,
       }))
@@ -1090,7 +1090,7 @@ export const findPassesNearRoute = async (
         type: determinePassType(element.tags),
         connects: extractConnections(element.tags),
         difficulty: determinePassDifficulty(element.tags),
-        seasonal_access: element.tags.seasonal || element.tags.opening_hours,
+        seasonalAccess: element.tags.seasonal || element.tags.opening_hours,
         description: element.tags.description,
       }))
       .filter((pass: Pass) => {
@@ -1166,9 +1166,8 @@ export const findViewpointsNearRoute = async (
         panoramic:
           element.tags.panoramic === 'yes' ||
           element.tags.name?.includes('panoram'),
-        visible_peaks: extractVisiblePeaks(element.tags),
-        best_time:
-          element.tags.best_time || determineBestViewTime(element.tags),
+        visiblePeaks: extractVisiblePeaks(element.tags),
+        bestTime: element.tags.best_time || determineBestViewTime(element.tags),
         description: element.tags.description,
       }))
       .filter((viewpoint: Viewpoint) => {
@@ -1244,8 +1243,8 @@ export const findHeritageNearRoute = async (
         unesco:
           element.tags.unesco === 'yes' ||
           element.tags.heritage === 'world_heritage',
-        entry_fee: element.tags.fee === 'yes',
-        opening_hours: element.tags.opening_hours,
+        entryFee: element.tags.fee === 'yes',
+        openingHours: element.tags.opening_hours,
         description: element.tags.description || element.tags.wikipedia,
       }))
       .filter((site: Heritage) => {
@@ -1318,12 +1317,12 @@ export const findLakesNearRoute = async (
         lng: element.lon,
         elevation: element.tags.ele ? parseInt(element.tags.ele) : 0,
         area: element.tags.area ? parseFloat(element.tags.area) : undefined,
-        max_depth: element.tags.maxdepth
+        maxDepth: element.tags.maxdepth
           ? parseFloat(element.tags.maxdepth)
           : undefined,
         type: determineLakeType(element.tags),
         activities: extractLakeActivities(element.tags),
-        access_difficulty: determineLakeAccessDifficulty(element.tags),
+        accessDifficulty: determineLakeAccessDifficulty(element.tags),
         description: element.tags.description,
       }))
       .filter((lake: NotableLake) => {

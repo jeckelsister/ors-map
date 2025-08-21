@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import clsx from 'clsx';
 
-interface ModernBadgeProps {
+interface CustomBadgeProps {
   children: React.ReactNode;
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   size?: 'sm' | 'default' | 'lg';
@@ -9,13 +9,13 @@ interface ModernBadgeProps {
   pulse?: boolean;
 }
 
-export default function ModernBadge({
+export default function CustomBadge({
   children,
   variant = 'default',
   size = 'default',
   className,
   pulse = false,
-}: ModernBadgeProps): React.JSX.Element {
+}: CustomBadgeProps): React.JSX.Element {
   const sizeVariants = {
     sm: 'text-xs px-1.5 py-0.5',
     default: 'text-sm px-2 py-1',

@@ -9,7 +9,7 @@ import {
 import clsx from 'clsx';
 import { ReactNode } from 'react';
 
-interface ModernCardProps {
+interface CustomCardProps {
   title?: string;
   description?: string;
   children: ReactNode;
@@ -21,7 +21,7 @@ interface ModernCardProps {
   variant?: 'default' | 'elevated' | 'bordered';
 }
 
-export default function ModernCard({
+export default function CustomCard({
   title,
   description,
   children,
@@ -31,7 +31,7 @@ export default function ModernCard({
   contentClassName,
   footerClassName,
   variant = 'default',
-}: ModernCardProps): React.JSX.Element {
+}: CustomCardProps): React.JSX.Element {
   const cardVariants = {
     default: '',
     elevated: 'shadow-lg border-2',
