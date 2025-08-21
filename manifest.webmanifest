@@ -1,0 +1,1 @@
+{"name":"ORS Map - Hiking Planner","short_name":"ORSMap","description":"Plan your hiking routes with OpenRouteService","start_url":"/ors-map/","display":"standalone","background_color":"#ffffff","theme_color":"#2563eb","lang":"en","scope":"/ors-map/","icons":[{"src":"logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
