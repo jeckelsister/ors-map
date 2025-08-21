@@ -34,4 +34,4 @@ coverage
 # OS generated files
 Thumbs.db
 
-.github/instructions
+.github/*
