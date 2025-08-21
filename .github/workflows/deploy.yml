@@ -16,6 +16,57 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ✅ Check 1: Tests unitaires et d'intégration
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Generate test coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov (optional)
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  # ✅ Check 2: Lint et formatage du code
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check TypeScript types
+        run: npm run type-check
+
+  # ✅ Check 3: Vérification de sécurité
   security-check:
     runs-on: ubuntu-latest
     steps:
@@ -34,9 +85,80 @@ jobs:
       - name: Security audit
         run: npm run security:check
 
+      - name: Check for unused dependencies
+        run: npx knip --reporter json > knip-report.json || true
+
+      - name: Fail if critical unused dependencies found
+        run: |
+          if [ -s knip-report.json ]; then
+            echo "⚠️  Unused dependencies found - please run 'npx knip' locally to clean up"
+            cat knip-report.json
+            # Ne pas faire échouer pour l'instant, juste avertir
+            # exit 1
+          fi
+
+  # ✅ Check 4: Build et validation
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, lint, security-check]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check build size
+        run: |
+          BUILD_SIZE=$(du -sh dist | cut -f1)
+          echo "🏗️  Build size: $BUILD_SIZE"
+
+          # Vérifier que le build ne dépasse pas 50MB
+          BUILD_SIZE_MB=$(du -sm dist | cut -f1)
+          if [ $BUILD_SIZE_MB -gt 50 ]; then
+            echo "❌ Build size too large: ${BUILD_SIZE_MB}MB (max: 50MB)"
+            exit 1
+          fi
+          echo "✅ Build size OK: ${BUILD_SIZE_MB}MB"
+
+      - name: Validate critical files exist
+        run: |
+          # Vérifier que les fichiers critiques existent
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ Missing index.html in build"
+            exit 1
+          fi
+
+          if [ ! -d "dist/assets" ]; then
+            echo "❌ Missing assets directory in build"
+            exit 1
+          fi
+
+          echo "✅ Critical build files validated"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+          retention-days: 7
+
+  # 🚀 Déploiement (uniquement si tous les checks passent)
   deploy:
     runs-on: ubuntu-latest
-    needs: security-check
+    needs: [test, lint, security-check, build]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -51,11 +173,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build for production
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Notify deployment success
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "🌐 Site URL: ${{ steps.deployment.outputs.page_url }}"

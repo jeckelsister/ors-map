@@ -1,0 +1,241 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+# Security: minimal permissions
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  # ✅ Tests avec commentaire des résultats
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Comment test results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              // Lire les résultats de coverage s'ils existent
+              const coverageExists = fs.existsSync('coverage/coverage-summary.json');
+              let message = '## 🧪 Test Results\n\n';
+
+              if (coverageExists) {
+                const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+                const pct = coverage.total.statements.pct;
+
+                message += `- ✅ Tests completed\n`;
+                message += `- 📊 Coverage: ${pct}%\n`;
+
+                if (pct >= 80) {
+                  message += `- 🎉 Great coverage! Keep it up!\n`;
+                } else if (pct >= 60) {
+                  message += `- ⚠️  Consider adding more tests to improve coverage\n`;
+                } else {
+                  message += `- ❌ Coverage is below 60% - please add more tests\n`;
+                }
+              } else {
+                message += `- ✅ Tests completed (coverage report not found)\n`;
+              }
+
+              // Poster le commentaire
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            } catch (error) {
+              console.log('Could not post test results:', error);
+            }
+
+  # ✅ Lint et qualité du code
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check TypeScript types
+        run: npm run type-check
+
+      - name: Check code formatting
+        run: npm run format:check
+
+  # ✅ Sécurité et dépendances
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: npm run security:check
+
+      - name: Check for unused dependencies
+        run: npx knip --reporter json > knip-report.json || true
+
+      - name: Comment unused dependencies
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              if (fs.existsSync('knip-report.json')) {
+                const knipReport = fs.readFileSync('knip-report.json', 'utf8');
+                if (knipReport.trim()) {
+                  const message = `## 🧹 Code Cleanup Report\n\n` +
+                    `Knip found some unused dependencies or exports:\n\n` +
+                    `\`\`\`json\n${knipReport}\n\`\`\`\n\n` +
+                    `Consider running \`npx knip\` locally to clean up your code.`;
+
+                  github.rest.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: message
+                  });
+                }
+              }
+            } catch (error) {
+              console.log('Could not post knip results:', error);
+            }
+
+  # ✅ Build preview
+  build-preview:
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check build size and performance
+        run: |
+          BUILD_SIZE_MB=$(du -sm dist | cut -f1)
+          echo "Build size: ${BUILD_SIZE_MB}MB"
+
+          # Compter les fichiers JS/CSS
+          JS_FILES=$(find dist -name "*.js" | wc -l)
+          CSS_FILES=$(find dist -name "*.css" | wc -l)
+
+          echo "## 🏗️ Build Summary" >> build-summary.md
+          echo "" >> build-summary.md
+          echo "- **Size**: ${BUILD_SIZE_MB}MB" >> build-summary.md
+          echo "- **JS files**: $JS_FILES" >> build-summary.md
+          echo "- **CSS files**: $CSS_FILES" >> build-summary.md
+          echo "" >> build-summary.md
+
+          if [ $BUILD_SIZE_MB -gt 50 ]; then
+            echo "- ⚠️  **Warning**: Build size is large (>${BUILD_SIZE_MB}MB)" >> build-summary.md
+          else
+            echo "- ✅ Build size is optimal" >> build-summary.md
+          fi
+
+      - name: Comment build results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const buildSummary = fs.readFileSync('build-summary.md', 'utf8');
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: buildSummary
+              });
+            } catch (error) {
+              console.log('Could not post build results:', error);
+            }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-build-${{ github.event.number }}
+          path: dist/
+          retention-days: 3
+
+  # ✅ Status check final
+  status-check:
+    runs-on: ubuntu-latest
+    needs: [test, lint, security, build-preview]
+    if: always()
+    steps:
+      - name: Check all jobs status
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ Tests failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ Lint check failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.security.result }}" != "success" ]]; then
+            echo "❌ Security check failed"
+            exit 1
+          fi
+
+          if [[ "${{ needs.build-preview.result }}" != "success" ]]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          echo "✅ All checks passed! Ready to merge 🎉"
