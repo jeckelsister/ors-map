@@ -2,10 +2,83 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['logo.svg', '_headers'],
+      manifest: {
+        name: 'ORS Map - Hiking Planner',
+        short_name: 'ORSMap',
+        description: 'Plan your hiking routes with OpenRouteService',
+        theme_color: '#2563eb',
+        background_color: '#ffffff',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'logo.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.openrouteservice\.org\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ors-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/overpass-api\.de\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'overpass-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 12, // 12 hours
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/.*\.openstreetmap\.(fr|org)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'osm-tiles-cache',
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\.open-elevation\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'elevation-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
   base: '/ors-map/',
   resolve: {
     alias: {
