@@ -762,7 +762,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
 
       {/* Map legend */}
       <div className="absolute bottom-4 left-4 z-10 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200">
-        <div className="flex items-center space-x-4 space-y-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {waypoints.length > 0 && (
             <>
               <div className="flex items-center space-x-1">
