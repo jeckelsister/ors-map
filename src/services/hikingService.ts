@@ -1351,11 +1351,11 @@ export const findEnrichedPOIsNearRoute = async (
   try {
     const [peaks, passes, viewpoints, heritage, lakes] =
       await Promise.allSettled([
-        findPeaksNearRoute(route, 10),
-        findPassesNearRoute(route, 8),
-        findViewpointsNearRoute(route, 5),
-        findHeritageNearRoute(route, 6),
-        findLakesNearRoute(route, 8),
+        findPeaksNearRoute(route, 3), // Réduit de 10km à 3km pour des sommets plus proches
+        findPassesNearRoute(route, 3), // Réduit de 8km à 3km
+        findViewpointsNearRoute(route, 3), // Réduit de 5km à 3km
+        findHeritageNearRoute(route, 3), // Réduit de 6km à 3km
+        findLakesNearRoute(route, 3), // Réduit de 8km à 3km
       ]);
 
     return {
