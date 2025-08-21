@@ -1,10 +1,10 @@
+import Legend from '@/components/ui/legend';
 import {
   FilterSelect,
-  Legend,
   POIItem,
   ScrollableList,
-  ToggleSection,
-} from '@/components/ui';
+} from '@/components/ui/poi-components';
+import ToggleSection from '@/components/ui/toggle-section';
 import { useCallback, useMemo, useState } from 'react';
 import { FaHome, FaTint } from 'react-icons/fa';
 import type { Refuge, WaterPoint } from '../../types/hiking';

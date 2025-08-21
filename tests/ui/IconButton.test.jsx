@@ -1,4 +1,4 @@
-import { IconButton } from '@/components/ui';
+import IconButton from '@/components/ui/icon-button';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

@@ -2,9 +2,8 @@ import React from 'react';
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import OfflineIndicator from './components/shared/OfflineIndicator';
+import ModernToaster from './components/ui/toaster';
 import { ToastProvider } from './hooks/shared/useToast';
-// Importation explicite du fichier moderne
-import { ModernToaster } from './components/ui';
 import ModernHikingPlannerPage from './pages/ModernHikingPlannerPage';
 import ModernHome from './pages/ModernHome';
 import NotFound from './pages/NotFound';
