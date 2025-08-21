@@ -1,6 +1,7 @@
+import { FaCompass, FaMapSigns, FaMountain, FaRoute } from 'react-icons/fa';
+
 import type { HikingProfile } from '@/types/hiking';
 import type { IconType } from 'react-icons';
-import { FaCompass, FaMapSigns, FaMountain, FaRoute } from 'react-icons/fa';
 
 interface HikingProfileWithIcon extends HikingProfile {
   icon: IconType;

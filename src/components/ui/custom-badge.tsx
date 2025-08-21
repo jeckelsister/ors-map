@@ -1,5 +1,6 @@
-import { Badge } from '@/components/ui/badge';
 import clsx from 'clsx';
+
+import { Badge } from '@/components/ui/badge';
 
 interface CustomBadgeProps {
   children: React.ReactNode;

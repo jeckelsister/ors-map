@@ -1,5 +1,6 @@
-import { MAP_LAYERS, type MapLayerKey } from '@/utils/map/mapLayers';
 import { useState } from 'react';
+
+import { MAP_LAYERS, type MapLayerKey } from '@/utils/map/mapLayers';
 
 interface MapLayerSelectorProps {
   currentLayer: MapLayerKey;

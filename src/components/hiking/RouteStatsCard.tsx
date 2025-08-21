@@ -1,8 +1,10 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { HikingRoute } from '@/types/hiking';
 import { Mountain } from 'lucide-react';
 import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import type { HikingRoute } from '@/types/hiking';
 
 interface RouteStatsCardProps {
   route: HikingRoute;

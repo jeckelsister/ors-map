@@ -1,6 +1,7 @@
-import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 import React from 'react';
+
+import { Button } from '@/components/ui/button';
 
 interface CustomButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {

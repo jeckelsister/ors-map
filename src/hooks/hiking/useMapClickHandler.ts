@@ -1,5 +1,6 @@
-import type { Coordinates } from '@/types/hiking';
 import { useCallback, useRef } from 'react';
+
+import type { Coordinates } from '@/types/hiking';
 
 interface UseMapClickHandlerProps {
   setWaypoints: (

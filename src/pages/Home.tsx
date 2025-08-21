@@ -1,9 +1,10 @@
-import CustomBadge from '@/components/ui/custom-badge';
-import CustomButton from '@/components/ui/custom-button';
-import CustomCard from '@/components/ui/custom-card';
 import { Download, Mountain, Route } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
+
+import CustomBadge from '@/components/ui/custom-badge';
+import CustomButton from '@/components/ui/custom-button';
+import CustomCard from '@/components/ui/custom-card';
 
 const features = [
   {

@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import type {
   Coordinates,
   ElevationPoint,
@@ -14,7 +16,6 @@ import type {
   Viewpoint,
   WaterPoint,
 } from '@/types/hiking';
-import axios from 'axios';
 
 interface OverpassElement {
   id: number;

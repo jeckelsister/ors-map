@@ -1,5 +1,6 @@
-import type { LocationSuggestion } from '@/types/profile';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import type { LocationSuggestion } from '@/types/profile';
 
 interface WaypointAutocompleteProps {
   value: string;

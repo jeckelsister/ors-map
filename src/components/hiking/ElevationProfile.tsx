@@ -1,6 +1,7 @@
-import type { ElevationPoint, HikingRoute } from '@/types/hiking';
 import React, { useMemo } from 'react';
 import { FaArrowDown, FaArrowUp, FaMountain } from 'react-icons/fa';
+
+import type { ElevationPoint, HikingRoute } from '@/types/hiking';
 
 interface ElevationProfileProps {
   route: HikingRoute | null;

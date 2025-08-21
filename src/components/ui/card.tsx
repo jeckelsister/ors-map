@@ -1,6 +1,6 @@
+import clsx from 'clsx';
 import * as React from 'react';
 
-import clsx from 'clsx';
 
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (

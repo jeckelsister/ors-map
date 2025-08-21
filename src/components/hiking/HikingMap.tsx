@@ -1,9 +1,3 @@
-import type {
-  EnrichedPOIs,
-  HikingRoute,
-  Refuge,
-  WaterPoint,
-} from '@/types/hiking';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -30,6 +24,13 @@ import {
   initializeMap,
   type MapLayerKey,
 } from '@/utils/map/mapLayers';
+
+import type {
+  EnrichedPOIs,
+  HikingRoute,
+  Refuge,
+  WaterPoint,
+} from '@/types/hiking';
 
 interface HikingMapProps {
   route?: HikingRoute | null;

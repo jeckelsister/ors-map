@@ -1,14 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type {
-  EnrichedPOIs,
-  Heritage,
-  NotableLake,
-  Pass,
-  Peak,
-  Viewpoint,
-} from '@/types/hiking';
 import {
   ChevronDown,
   ChevronUp,
@@ -20,6 +9,19 @@ import {
   Waves,
 } from 'lucide-react';
 import React, { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import type {
+  EnrichedPOIs,
+  Heritage,
+  NotableLake,
+  Pass,
+  Peak,
+  Viewpoint,
+} from '@/types/hiking';
 
 // Simple Switch component
 const Switch = ({

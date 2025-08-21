@@ -1,12 +1,13 @@
 import React, {
   createContext,
-  ReactNode,
+  type ReactNode,
   useCallback,
   useContext,
   useMemo,
   useRef,
   useState,
 } from 'react';
+
 import Toast from '../../components/shared/Toast';
 
 interface ToastItem {

@@ -1,12 +1,14 @@
+import React, { useState } from 'react';
+import { FaCog, FaDownload, FaFile } from 'react-icons/fa';
+
 import { exportToGPX } from '@/services/hikingService';
+
 import type {
   GPXExportOptions,
   HikingRoute,
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
-import React, { useState } from 'react';
-import { FaCog, FaDownload, FaFile } from 'react-icons/fa';
 
 interface GPXExportControlsProps {
   route: HikingRoute | null;

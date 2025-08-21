@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { FaFilter } from 'react-icons/fa';
 
 interface FilterSelectProps {

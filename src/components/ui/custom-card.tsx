@@ -1,3 +1,6 @@
+import clsx from 'clsx';
+import { type ReactNode } from 'react';
+
 import {
   Card,
   CardContent,
@@ -6,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import clsx from 'clsx';
-import { ReactNode } from 'react';
 
 interface CustomCardProps {
   title?: string;

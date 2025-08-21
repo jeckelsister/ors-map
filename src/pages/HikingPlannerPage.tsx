@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import type { HikingMapRef } from '../components/hiking/HikingMap';
+
 import HikingPlannerHeader from '../components/hiking/HikingPlannerHeader';
 import HikingPlannerMapSection from '../components/hiking/HikingPlannerMapSection';
 import HikingPlannerSidebar from '../components/hiking/HikingPlannerSidebar';
@@ -11,7 +11,10 @@ import { useMapClickHandler } from '../hooks/hiking/useMapClickHandler';
 import { usePOIHandlers } from '../hooks/hiking/usePOIHandlers';
 import { useTabManagement } from '../hooks/hiking/useTabManagement';
 import { useToast } from '../hooks/shared/useToast';
+
+import type { HikingMapRef } from '../components/hiking/HikingMap';
 import type { HikingProfile } from '../types/hiking';
+
 
 export default function HikingPlannerPage(): React.JSX.Element {
   const { showToast } = useToast();

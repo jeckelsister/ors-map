@@ -1,7 +1,19 @@
+import { Rocket, RotateCcw } from 'lucide-react';
+import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TAB_CONFIGS } from '@/constants/hikingPlanner';
+
+
+import ElevationProfile from './ElevationProfile';
+import EnrichedPOIControls from './EnrichedPOIControls';
+import GPXExportControls from './GPXExportControls';
+import GPXUpload from './GPXUpload';
+import POIDisplayControls from './POIDisplayControls';
+import RouteStagesPlanner from './RouteStagesPlanner';
+
 import type { GPXHandlers } from '@/hooks/hiking/useGPXHandlers';
 import type { POIHandlers } from '@/hooks/hiking/usePOIHandlers';
 import type { TabType } from '@/hooks/hiking/useTabManagement';
@@ -13,14 +25,6 @@ import type {
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
-import { Rocket, RotateCcw } from 'lucide-react';
-import React from 'react';
-import ElevationProfile from './ElevationProfile';
-import EnrichedPOIControls from './EnrichedPOIControls';
-import GPXExportControls from './GPXExportControls';
-import GPXUpload from './GPXUpload';
-import POIDisplayControls from './POIDisplayControls';
-import RouteStagesPlanner from './RouteStagesPlanner';
 
 interface HikingPlannerSidebarProps {
   // Tab management

@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import type { HikingMapRef } from '@/components/hiking/HikingMap';
 import type {
   Heritage,
@@ -8,7 +10,6 @@ import type {
   Viewpoint,
   WaterPoint,
 } from '@/types/hiking';
-import { useCallback } from 'react';
 
 interface UsePOIHandlersProps {
   hikingMapRef: React.RefObject<HikingMapRef | null>;

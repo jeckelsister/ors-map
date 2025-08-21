@@ -1,10 +1,12 @@
-import type { EnrichedPOIs, Refuge, WaterPoint } from '@/types/hiking';
+import L from 'leaflet';
+import { useEffect, useRef } from 'react';
+
 import {
   createPOIIconHtml,
   createWaypointIconHtml,
 } from '@/utils/map/mapIcons';
-import L from 'leaflet';
-import { useEffect, useRef } from 'react';
+
+import type { EnrichedPOIs, Refuge, WaterPoint } from '@/types/hiking';
 
 /**
  * Hook for managing waypoint markers on the map

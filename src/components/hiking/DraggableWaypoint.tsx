@@ -1,9 +1,12 @@
-import type { Coordinates } from '@/types/hiking';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
 import { FaGripVertical, FaMinus } from 'react-icons/fa';
+
 import WaypointAutocomplete from './WaypointAutocomplete';
+
+import type { Coordinates } from '@/types/hiking';
+
 
 interface DraggableWaypointProps {
   waypoint: Coordinates;
@@ -75,7 +78,7 @@ export default function DraggableWaypoint({
       {/* Waypoint Label */}
       <div
         className={`
-          flex-shrink-0 w-6 h-6 text-white text-xs rounded-full 
+          flex-shrink-0 w-6 h-6 text-white text-xs rounded-full
           flex items-center justify-center font-bold
           ${getWaypointColor()}
         `}
@@ -87,7 +90,7 @@ export default function DraggableWaypoint({
       <div className="flex-1">
         <WaypointAutocomplete
           value={waypoint.name || ''}
-          onChange={(value) => onUpdate('name', value)}
+          onChange={value => onUpdate('name', value)}
           onLocationSelect={(lat, lng, name) => {
             onUpdate('lat', lat);
             onUpdate('lng', lng);

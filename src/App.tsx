@@ -1,5 +1,6 @@
 import React from 'react';
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
+
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import OfflineIndicator from './components/shared/OfflineIndicator';
 import Toaster from './components/ui/toaster';

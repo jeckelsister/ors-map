@@ -1,6 +1,7 @@
-import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
-import { memo, ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
+
+import { Button } from '@/components/ui/button';
 
 interface IconButtonProps {
   icon: ReactNode;

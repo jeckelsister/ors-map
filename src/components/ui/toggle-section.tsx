@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface ToggleSectionProps {

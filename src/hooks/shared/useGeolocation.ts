@@ -1,5 +1,6 @@
-import type { Location } from '@/types/profile';
 import { useCallback } from 'react';
+
+import type { Location } from '@/types/profile';
 
 interface UseGeolocationOptions {
   enableHighAccuracy?: boolean;

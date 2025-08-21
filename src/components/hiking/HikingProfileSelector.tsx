@@ -1,6 +1,8 @@
-import { HIKING_PROFILES } from '@/constants/hiking';
-import type { HikingProfile } from '@/types/hiking';
 import React from 'react';
+
+import { HIKING_PROFILES } from '@/constants/hiking';
+
+import type { HikingProfile } from '@/types/hiking';
 
 interface HikingProfileSelectorProps {
   selectedProfile: string | null;

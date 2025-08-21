@@ -1,3 +1,5 @@
+import { useCallback, useState } from 'react';
+
 import { HIKING_PROFILES } from '@/constants/hiking';
 import {
   createHikingRoute,
@@ -6,6 +8,7 @@ import {
   findRefugesNearRoute,
   findWaterPointsNearRoute,
 } from '@/services/hikingService';
+
 import type {
   Coordinates,
   EnrichedPOIs,
@@ -14,7 +17,6 @@ import type {
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
-import { useCallback, useState } from 'react';
 
 interface UseHikingRouteProps {
   onError?: (error: string) => void;

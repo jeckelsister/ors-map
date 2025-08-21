@@ -1,5 +1,6 @@
-import type { Coordinates } from '@/types/hiking';
 import { useCallback } from 'react';
+
+import type { Coordinates } from '@/types/hiking';
 
 interface UseGPXHandlersProps {
   setWaypoints: (waypoints: Coordinates[]) => void;

@@ -1,5 +1,6 @@
-import type { TabType } from '@/hooks/hiking/useTabManagement';
 import { Download, Map, MapPin, Mountain, Upload } from 'lucide-react';
+
+import type { TabType } from '@/hooks/hiking/useTabManagement';
 
 export interface TabConfig {
   id: TabType;
