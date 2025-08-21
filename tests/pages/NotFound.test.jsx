@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { describe, test, expect } from 'vitest';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { describe, expect, test } from 'vitest';
 import NotFound from '../../src/pages/NotFound';
 
 // Helper function to render components with router
@@ -24,13 +24,19 @@ describe('NotFound Page', () => {
     ).toBeInTheDocument();
   });
 
-  test('renders navigation links', () => {
-    renderWithRouter(<NotFound />);
+  it('renders navigation links', () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>
+    );
 
     const homeLink = screen.getByRole('link', { name: 'Go Home' });
-    const mapLink = screen.getByRole('link', { name: 'Open Map' });
+    const hikingLink = screen.getByRole('link', {
+      name: 'Planificateur Randonnée',
+    });
 
     expect(homeLink).toHaveAttribute('href', '/');
-    expect(mapLink).toHaveAttribute('href', '/map');
+    expect(hikingLink).toHaveAttribute('href', '/hiking');
   });
 });

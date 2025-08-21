@@ -4,10 +4,10 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 import OfflineIndicator from './components/shared/OfflineIndicator';
 import { ToastProvider } from './hooks/shared/useToast';
 // Importation explicite du fichier moderne
+import { ModernToaster } from './components/ui';
 import ModernHikingPlannerPage from './pages/ModernHikingPlannerPage';
 import ModernHome from './pages/ModernHome';
 import NotFound from './pages/NotFound';
-import ModernToaster from './ui/ModernToaster';
 
 export default function App(): React.JSX.Element {
   return (
