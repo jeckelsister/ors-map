@@ -49,4 +49,4 @@ export { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export { Textarea } from '@/components/ui/textarea';
 
 // Utility functions
-export { cn } from '@/lib/utils';
+export { clsx } from 'clsx';

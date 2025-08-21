@@ -1,5 +1,5 @@
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import {
   cloneElement,
   isValidElement,
@@ -41,10 +41,10 @@ const ModernFormField = memo<ModernFormFieldProps>(
     );
 
     return (
-      <div className={cn('space-y-2', className)}>
+      <div className={clsx('space-y-2', className)}>
         <Label
           htmlFor={fieldId}
-          className={cn(
+          className={clsx(
             'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
             error && 'text-destructive',
             labelClassName
@@ -68,7 +68,7 @@ const ModernFormField = memo<ModernFormFieldProps>(
                 children as ReactElement<{ id?: string; className?: string }>,
                 {
                   id: fieldId,
-                  className: cn(
+                  className: clsx(
                     (children as ReactElement<{ className?: string }>).props
                       .className,
                     error && 'border-destructive focus-visible:ring-destructive'

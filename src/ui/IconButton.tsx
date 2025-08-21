@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { memo, ReactNode } from 'react';
 
 interface IconButtonProps {
@@ -42,7 +42,7 @@ const IconButton = memo<IconButtonProps>(
       <Button
         variant={buttonVariant}
         size={size}
-        className={cn(
+        className={clsx(
           'transition-all duration-200',
           isActive && 'bg-primary text-primary-foreground shadow-md',
           className

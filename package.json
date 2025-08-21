@@ -22,7 +22,6 @@
     "security:check": "npm run security:audit && npm run lint && npm run type-check",
     "knip": "knip",
     "knip:production": "knip --production",
-    "validate:deployment": "./scripts/validate-deployment.sh",
     "validate:quick": "npm run test:run && npm run lint && npm run type-check && npm run build"
   },
   "dependencies": {
@@ -36,6 +35,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
@@ -47,8 +47,7 @@
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.7.1",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.3.1"
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

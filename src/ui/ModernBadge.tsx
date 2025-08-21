@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 
 interface ModernBadgeProps {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ export default function ModernBadge({
   return (
     <Badge
       variant={variant}
-      className={cn(sizeVariants[size], pulse && 'animate-pulse', className)}
+      className={clsx(sizeVariants[size], pulse && 'animate-pulse', className)}
     >
       {children}
     </Badge>

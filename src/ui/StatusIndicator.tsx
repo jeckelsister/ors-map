@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { memo, ReactNode, useMemo } from 'react';
 
 interface StatusIndicatorProps {
@@ -37,7 +37,7 @@ const StatusIndicator = memo<StatusIndicatorProps>(
         <span className="flex items-center gap-1 text-sm font-medium">
           {activeIcon || (
             <span
-              className={cn(
+              className={clsx(
                 'inline-block w-2 h-2 rounded-full animate-ping',
                 variantClasses
               )}

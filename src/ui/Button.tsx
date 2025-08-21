@@ -1,5 +1,5 @@
 import { Button as ShadcnButton } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,7 +18,7 @@ export default function Button({
   return (
     <ShadcnButton
       type={type}
-      className={cn('transition-all duration-150', className)}
+      className={clsx('transition-all duration-150', className)}
       onClick={onClick}
       {...props}
     >

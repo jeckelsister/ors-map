@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { ReactNode } from 'react';
 
 interface ModernCardProps {
@@ -39,9 +39,9 @@ export default function ModernCard({
   };
 
   return (
-    <Card className={cn(cardVariants[variant], className)}>
+    <Card className={clsx(cardVariants[variant], className)}>
       {(title || description) && (
-        <CardHeader className={cn(headerClassName)}>
+        <CardHeader className={clsx(headerClassName)}>
           {title && (
             <CardTitle className="text-xl font-semibold">{title}</CardTitle>
           )}
@@ -53,10 +53,10 @@ export default function ModernCard({
         </CardHeader>
       )}
 
-      <CardContent className={cn(contentClassName)}>{children}</CardContent>
+      <CardContent className={clsx(contentClassName)}>{children}</CardContent>
 
       {footer && (
-        <CardFooter className={cn(footerClassName)}>{footer}</CardFooter>
+        <CardFooter className={clsx(footerClassName)}>{footer}</CardFooter>
       )}
     </Card>
   );

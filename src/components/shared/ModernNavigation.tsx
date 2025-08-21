@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import { Home, Map, Menu, Mountain } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -51,7 +51,7 @@ export default function ModernNavigation(): React.JSX.Element {
                 asChild
                 variant={isActive(path) ? 'default' : 'ghost'}
                 size="sm"
-                className={cn(
+                className={clsx(
                   'gap-2 text-sm font-medium transition-all',
                   isActive(path)
                     ? 'bg-primary text-primary-foreground shadow-md'
@@ -91,7 +91,7 @@ export default function ModernNavigation(): React.JSX.Element {
                       key={path}
                       asChild
                       variant={isActive(path) ? 'default' : 'ghost'}
-                      className={cn(
+                      className={clsx(
                         'justify-start gap-3 h-12 text-base',
                         isActive(path)
                           ? 'bg-primary text-primary-foreground'

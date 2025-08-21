@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import clsx from 'clsx';
 import React from 'react';
 
 interface ModernButtonProps
@@ -29,7 +29,7 @@ export default function ModernButton({
     <Button
       variant={variant}
       size={size}
-      className={cn(className)}
+      className={clsx(className)}
       asChild={asChild}
       {...props}
     >
