@@ -22,10 +22,11 @@ export default function ModernMapPage(): React.JSX.Element {
 
       {/* Map Component */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <ModernCard className="overflow-hidden shadow-lg">
-          {/* <div className="h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[calc(100vh-200px)]"> */}
+        <ModernCard
+          className="overflow-hidden shadow-lg p-0"
+          contentClassName="p-0"
+        >
           <Map />
-          {/* </div> */}
         </ModernCard>
       </div>
     </div>

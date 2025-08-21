@@ -1,5 +1,5 @@
 import type { LocationSuggestion } from '@/types/profile';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface WaypointAutocompleteProps {
   value: string;
@@ -36,7 +36,7 @@ export default function WaypointAutocomplete({
           query
         )}&limit=5`
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data);
@@ -74,7 +74,7 @@ export default function WaypointAutocomplete({
     const lat = parseFloat(suggestion.lat);
     const lng = parseFloat(suggestion.lon);
     const name = suggestion.display_name;
-    
+
     onChange(name);
     onLocationSelect(lat, lng, name);
     setShowSuggestions(false);
@@ -115,18 +115,18 @@ export default function WaypointAutocomplete({
         placeholder={placeholder}
         className={`${className} w-full`}
       />
-      
+
       {showSuggestions && (suggestions.length > 0 || isLoading) && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
+          className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
         >
           {isLoading && (
             <div className="px-3 py-2 text-xs text-gray-500">
               Recherche en cours...
             </div>
           )}
-          
+
           {!isLoading && suggestions.length > 0 && (
             <ul>
               {suggestions.map((suggestion, index) => (
@@ -139,7 +139,8 @@ export default function WaypointAutocomplete({
                     {suggestion.display_name}
                   </div>
                   <div className="text-gray-500 text-[10px] mt-1">
-                    {parseFloat(suggestion.lat).toFixed(4)}, {parseFloat(suggestion.lon).toFixed(4)}
+                    {parseFloat(suggestion.lat).toFixed(4)},{' '}
+                    {parseFloat(suggestion.lon).toFixed(4)}
                   </div>
                 </li>
               ))}

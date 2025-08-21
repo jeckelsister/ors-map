@@ -186,9 +186,9 @@ const Map = (): React.JSX.Element => {
   );
 
   return (
-    <div className="relative h-screen w-screen bg-black">
+    <div className="relative h-screen bg-black">
       {/* Control Panel */}
-      <div className="absolute top-6 left-6 z-10 bg-white p-6 rounded-xl min-w-[350px] w-fit flex flex-col gap-4 shadow-lg">
+      <div className="absolute top-24 left-6 bg-white p-6 rounded-xl min-w-[350px] w-fit flex flex-col gap-4 shadow-lg z-10">
         <LocationSearchBox
           query={focusQuery}
           onQueryChange={setFocusQuery}
@@ -210,7 +210,7 @@ const Map = (): React.JSX.Element => {
       </div>
 
       {/* Map Layer Selector Toggle */}
-      <div className="absolute top-6 left-6 z-50">
+      <div className="absolute top-6 left-6 z-10">
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
           className={`
@@ -220,9 +220,6 @@ const Map = (): React.JSX.Element => {
           `}
           title="🗺️ Changer le fond de carte"
         >
-          {/* Badge with indicator */}
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-
           <svg
             className={`w-6 h-6 transition-colors ${
               showLayerSelector
@@ -243,7 +240,7 @@ const Map = (): React.JSX.Element => {
         </button>
 
         {showLayerSelector && (
-          <div className="absolute top-12 left-0 min-w-[280px] z-50">
+          <div className="absolute top-12 left-0 min-w-[280px]">
             <MapLayerSelector
               map={mapRef?.current || null}
               currentLayer={currentMapLayer}
@@ -254,7 +251,7 @@ const Map = (): React.JSX.Element => {
       </div>
 
       {/* Map Container */}
-      <div id="map" className="h-screen w-screen z-0" />
+      <div id="map" className="w-full h-full z-0" />
     </div>
   );
 };

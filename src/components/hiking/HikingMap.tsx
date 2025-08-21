@@ -720,7 +720,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
   return (
     <div className={`relative bg-white rounded-lg shadow-sm ${className}`}>
       {/* Map Layer Selector */}
-      <div className="absolute top-4 left-4 z-40" style={{ zIndex: 9999 }}>
+      <div className="absolute top-4 left-4" style={{ zIndex: 9999 }}>
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
           className={`
@@ -739,7 +739,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
             className="absolute -bottom-10 left-1/2 transform -translate-x-1/2
                          bg-gray-900 text-white text-xs px-3 py-2 rounded-lg
                          opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                         whitespace-nowrap z-50 pointer-events-none"
+                         whitespace-nowrap pointer-events-none"
           >
             🗺️ OSM France • OpenTopoMap • CyclOSM
           </div>
@@ -765,7 +765,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
 
         {showLayerSelector && (
           <div
-            className="absolute top-16 left-0 min-w-[280px] z-40"
+            className="absolute top-16 left-0 min-w-[280px]"
             style={{ zIndex: 9999 }}
           >
             <MapLayerSelector
@@ -778,10 +778,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
       </div>
 
       {/* Map legend */}
-      <div
-        className="absolute bottom-4 left-4 z-40 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200"
-        style={{ zIndex: 9998 }}
-      >
+      <div className="absolute bottom-4 left-4 z-40 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200">
         <div className="flex items-center space-x-4 flex-wrap">
           {waypoints.length > 0 && (
             <>
