@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 
 import type { HikingMapRef } from '@/components/hiking/HikingMap';
+import { MAP_CONSTANTS } from '@/constants/mapConstants';
 import type {
   Heritage,
   NotableLake,
@@ -53,18 +54,22 @@ export function usePOIHandlers({
         poi.lng === 0
       ) {
         showToast(
-          `❌ Erreur: Coordonnées invalides pour ${poi.name || 'ce point'}`,
+          `❌ Error: Invalid coordinates for ${poi.name || 'this point'}`,
           'error'
         );
         return;
       }
 
       // Zoom to the POI on the map
-      hikingMapRef.current?.zoomToPOI(poi.lat, poi.lng, 16);
+      hikingMapRef.current?.zoomToPOI(
+        poi.lat,
+        poi.lng,
+        MAP_CONSTANTS.POI_DETAIL_ZOOM
+      );
 
       // Show success toast with POI info
       const infoText = extraInfo ? ` (${extraInfo})` : '';
-      showToast(`${icon} Zoom sur: ${poi.name || 'point'}${infoText}`, 'info');
+      showToast(`${icon} Zoomed to: ${poi.name || 'point'}${infoText}`, 'info');
     },
     [hikingMapRef, showToast]
   );

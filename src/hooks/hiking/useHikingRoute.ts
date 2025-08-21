@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { HIKING_PROFILES } from '@/constants/hiking';
+import { MAP_CONSTANTS, ROUTE_CONSTANTS } from '@/constants/mapConstants';
+import { usePOIVisibility } from '@/hooks/shared/usePOIVisibility';
 import {
   createHikingRoute,
   divideRouteIntoStages,
@@ -16,16 +18,28 @@ import type {
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
+import type {
+  RouteData,
+  RouteOperations,
+  RoutePlanningActions,
+  RoutePlanningState,
+  RouteValidation,
+} from '@/types/UseHikingRouteTypes';
 
 interface UseHikingRouteProps {
   onError?: (error: string) => void;
   onSuccess?: (route: HikingRoute) => void;
 }
 
+/**
+ * Enhanced hiking route management hook with improved readability
+ * Groups related functionality for better organization and maintainability
+ */
 export default function useHikingRoute({
   onError,
   onSuccess,
 }: UseHikingRouteProps = {}) {
+  // Route planning state
   const [hikingProfile, setHikingProfile] = useState<HikingProfile | null>(
     HIKING_PROFILES[0]
   );
@@ -44,8 +58,11 @@ export default function useHikingRoute({
     },
   ]);
   const [isLoop, setIsLoop] = useState(false);
-  const [stageCount, setStageCount] = useState(1);
+  const [stageCount, setStageCount] = useState<number>(
+    ROUTE_CONSTANTS.DEFAULT_STAGE_COUNT
+  );
 
+  // Route data
   const [currentRoute, setCurrentRoute] = useState<HikingRoute | null>(null);
   const [refuges, setRefuges] = useState<Refuge[]>([]);
   const [waterPoints, setWaterPoints] = useState<WaterPoint[]>([]);
@@ -59,13 +76,9 @@ export default function useHikingRoute({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showRefuges, setShowRefuges] = useState(true);
-  const [showWaterPoints, setShowWaterPoints] = useState(true);
-  const [showPeaks, setShowPeaks] = useState(true);
-  const [showPasses, setShowPasses] = useState(true);
-  const [showViewpoints, setShowViewpoints] = useState(true);
-  const [showHeritage, setShowHeritage] = useState(true);
-  const [showLakes, setShowLakes] = useState(true);
+
+  // POI visibility management
+  const poiVisibility = usePOIVisibility();
 
   // Utility function to ensure waypoints have unique IDs
   const ensureWaypointIds = useCallback(
@@ -98,9 +111,15 @@ export default function useHikingRoute({
       try {
         const [foundRefuges, foundWaterPoints, foundEnrichedPOIs] =
           await Promise.allSettled([
-            findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
-            findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
-            findEnrichedPOIsNearRoute(route.geojson), // Enriched POI with optimized distances
+            findRefugesNearRoute(
+              route.geojson,
+              MAP_CONSTANTS.REFUGE_SEARCH_RADIUS
+            ),
+            findWaterPointsNearRoute(
+              route.geojson,
+              MAP_CONSTANTS.WATER_POINT_SEARCH_RADIUS
+            ),
+            findEnrichedPOIsNearRoute(route.geojson),
           ]);
 
         let hasErrors = false;
@@ -109,7 +128,7 @@ export default function useHikingRoute({
           setRefuges(foundRefuges.value);
         } else {
           console.warn('Failed to fetch refuges:', foundRefuges.reason);
-          setRefuges([]); // Set empty array on failure
+          setRefuges([]);
           hasErrors = true;
         }
 
@@ -120,7 +139,7 @@ export default function useHikingRoute({
             'Failed to fetch water points:',
             foundWaterPoints.reason
           );
-          setWaterPoints([]); // Set empty array on failure
+          setWaterPoints([]);
           hasErrors = true;
         }
 
@@ -142,130 +161,118 @@ export default function useHikingRoute({
           hasErrors = true;
         }
 
-        // Notify user if there were errors loading POIs
-        if (hasErrors) {
-          onError?.(
-            "⚠️ Certains points d'intérêt n'ont pas pu être chargés (timeout API)"
-          );
+        if (hasErrors && onError) {
+          onError('Some POIs could not be loaded. Check console for details.');
         }
       } catch (error) {
-        console.error('Error finding POIs:', error);
-        // Set empty arrays if there's an overall error
-        setRefuges([]);
-        setWaterPoints([]);
-        setEnrichedPOIs({
-          peaks: [],
-          passes: [],
-          viewpoints: [],
-          heritage: [],
-          geologicalSites: [],
-          lakes: [],
-        });
-        onError?.("⚠️ Impossible de charger les points d'intérêt");
+        console.error('Error finding POIs near route:', error);
+        if (onError) {
+          onError('Failed to find POIs near route');
+        }
       }
     },
     [onError]
   );
 
-  // Create hiking route
+  // Create route
   const createRoute = useCallback(async () => {
-    if (waypoints.length < 2) {
-      onError?.('Au moins 2 points sont nécessaires pour créer un itinéraire');
+    const validWaypoints = waypoints.filter(wp => wp.lat !== 0 && wp.lng !== 0);
+
+    if (validWaypoints.length < MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE) {
+      if (onError) {
+        onError(
+          `Please add at least ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} valid waypoints`
+        );
+      }
       return;
     }
 
-    // Check if all waypoints have valid coordinates
-    const invalidWaypoints = waypoints.filter(
-      wp => wp.lat === 0 && wp.lng === 0
-    );
-    if (invalidWaypoints.length > 0) {
-      onError?.('Veuillez positionner tous les points sur la carte');
+    if (!hikingProfile) {
+      if (onError) {
+        onError('Please select a hiking profile');
+      }
       return;
     }
 
     setIsLoading(true);
+
     try {
       const route = await createHikingRoute(
-        waypoints,
+        validWaypoints,
         isLoop,
-        1, // First create a simple route
-        hikingProfile // Pass the hiking profile
+        stageCount,
+        hikingProfile
       );
+      const routeWithStages = divideRouteIntoStages(route, stageCount);
 
-      // If stageCount > 1, automatically divide the route
-      const finalRoute =
-        stageCount > 1 ? divideRouteIntoStages(route, stageCount) : route;
+      setCurrentRoute(routeWithStages);
+      await findPOIsNearRoute(routeWithStages);
 
-      setCurrentRoute(finalRoute);
-      onSuccess?.(finalRoute);
-
-      // Find POIs near the route
-      await findPOIsNearRoute(finalRoute);
-    } catch (error) {
-      console.error('Error creating hiking route:', error);
-
-      // Safe error message extraction
-      let errorMessage = "Erreur lors de la création de l'itinéraire";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = String(error.message);
+      if (onSuccess) {
+        onSuccess(routeWithStages);
       }
-
-      onError?.(errorMessage);
+    } catch (error) {
+      console.error('Error creating route:', error);
+      if (onError) {
+        onError(
+          error instanceof Error ? error.message : 'Failed to create route'
+        );
+      }
     } finally {
       setIsLoading(false);
     }
   }, [
     waypoints,
+    hikingProfile,
     isLoop,
     stageCount,
-    hikingProfile,
     onError,
     onSuccess,
     findPOIsNearRoute,
   ]);
 
-  // Update waypoint coordinates
+  // Other route operations
   const updateWaypointCoordinates = useCallback(
     (index: number, lat: number, lng: number) => {
-      setWaypoints(prev => {
-        const newWaypoints = [...prev];
-        if (newWaypoints[index]) {
-          newWaypoints[index] = { ...newWaypoints[index], lat, lng };
-        }
-        return newWaypoints;
-      });
+      setWaypoints(prev =>
+        prev.map((wp, i) => (i === index ? { ...wp, lat, lng } : wp))
+      );
     },
     []
   );
 
-  // Add new waypoint
-  const addWaypoint = useCallback(
-    (lat: number, lng: number, name?: string) => {
-      const newWaypoint: Coordinates = {
-        lat,
-        lng,
-        name: name || `Point ${waypoints.length + 1}`,
-      };
-      setWaypoints(prev => [...prev, newWaypoint]);
-    },
-    [waypoints.length]
-  );
+  const addWaypoint = useCallback(() => {
+    if (waypoints.length >= MAP_CONSTANTS.MAX_WAYPOINTS) {
+      if (onError) {
+        onError(`Maximum ${MAP_CONSTANTS.MAX_WAYPOINTS} waypoints allowed`);
+      }
+      return;
+    }
 
-  // Remove waypoint
+    const newWaypoint: Coordinates = {
+      id: `waypoint-${Date.now()}-${waypoints.length}`,
+      lat: 0,
+      lng: 0,
+      name: `Point ${String.fromCharCode(65 + waypoints.length)}`,
+    };
+    setWaypoints(prev => [...prev, newWaypoint]);
+  }, [waypoints.length, onError]);
+
   const removeWaypoint = useCallback(
     (index: number) => {
-      if (waypoints.length <= 2) return; // Keep at least 2 points
-
+      if (waypoints.length <= MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE) {
+        if (onError) {
+          onError(
+            `Minimum ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} waypoints required`
+          );
+        }
+        return;
+      }
       setWaypoints(prev => prev.filter((_, i) => i !== index));
     },
-    [waypoints.length]
+    [waypoints.length, onError]
   );
 
-  // Clear route
   const clearRoute = useCallback(() => {
     setCurrentRoute(null);
     setRefuges([]);
@@ -280,22 +287,17 @@ export default function useHikingRoute({
     });
   }, []);
 
-  // Reset all data
   const resetAll = useCallback(() => {
-    // First clear waypoints completely to trigger cleanup
-    setWaypoints([]);
-
-    // Then set them back to initial state after a short delay
     setTimeout(() => {
       setWaypoints([
         {
-          id: `waypoint-reset-${Date.now()}-a`,
+          id: `waypoint-${Date.now()}-reset-a`,
           lat: 0,
           lng: 0,
           name: 'Point A',
         },
         {
-          id: `waypoint-reset-${Date.now()}-b`,
+          id: `waypoint-${Date.now()}-reset-b`,
           lat: 0,
           lng: 0,
           name: 'Point B',
@@ -304,23 +306,62 @@ export default function useHikingRoute({
     }, 10);
 
     setIsLoop(false);
-    setStageCount(1);
+    setStageCount(ROUTE_CONSTANTS.DEFAULT_STAGE_COUNT);
     clearRoute();
   }, [clearRoute]);
 
-  // Auto-create route when parameters change (debounced) - disabled for now
-  // useEffect(() => {
-  //   if (!currentRoute) return;
+  // Group return values by functionality
+  const planning: RoutePlanningState = {
+    hikingProfile,
+    waypoints,
+    isLoop,
+    stageCount,
+  };
 
-  //   const timer = setTimeout(() => {
-  //     createRoute();
-  //   }, 1000); // 1 second debounce
+  const planningActions: RoutePlanningActions = {
+    setHikingProfile,
+    setWaypoints: setWaypointsWithIds,
+    setIsLoop,
+    setStageCount: setStageCount,
+    updateWaypointCoordinates,
+    addWaypoint,
+    removeWaypoint,
+  };
 
-  //   return () => clearTimeout(timer);
-  // }, [waypoints, isLoop, stageCount, hikingProfile, createRoute, currentRoute]);
+  const data: RouteData = {
+    currentRoute,
+    refuges,
+    waterPoints,
+    enrichedPOIs,
+  };
+
+  const operations: RouteOperations = {
+    createRoute,
+    clearRoute,
+    resetAll,
+    findPOIsNearRoute,
+  };
+
+  const validation: RouteValidation = {
+    isRouteValid: currentRoute !== null,
+    hasValidWaypoints: waypoints.every(wp => wp.lat !== 0 || wp.lng !== 0),
+    totalWaypoints: waypoints.length,
+    isLoading,
+  };
 
   return {
-    // Route planning
+    // Grouped structure for new components (improved readability)
+    planning,
+    planningActions,
+    data,
+    operations,
+    validation,
+    poiVisibility: {
+      state: poiVisibility.visibility,
+      actions: poiVisibility.actions,
+    },
+
+    // Legacy flat structure for backward compatibility
     hikingProfile,
     setHikingProfile,
     waypoints,
@@ -337,22 +378,24 @@ export default function useHikingRoute({
     enrichedPOIs,
 
     isLoading,
-    showRefuges,
-    setShowRefuges,
-    showWaterPoints,
-    setShowWaterPoints,
-    showPeaks,
-    setShowPeaks,
-    showPasses,
-    setShowPasses,
-    showViewpoints,
-    setShowViewpoints,
-    showHeritage,
-    setShowHeritage,
-    showLakes,
-    setShowLakes,
 
-    // Actions
+    // POI visibility (legacy flat structure)
+    showRefuges: poiVisibility.visibility.showRefuges,
+    setShowRefuges: poiVisibility.actions.setShowRefuges,
+    showWaterPoints: poiVisibility.visibility.showWaterPoints,
+    setShowWaterPoints: poiVisibility.actions.setShowWaterPoints,
+    showPeaks: poiVisibility.visibility.showPeaks,
+    setShowPeaks: poiVisibility.actions.setShowPeaks,
+    showPasses: poiVisibility.visibility.showPasses,
+    setShowPasses: poiVisibility.actions.setShowPasses,
+    showViewpoints: poiVisibility.visibility.showViewpoints,
+    setShowViewpoints: poiVisibility.actions.setShowViewpoints,
+    showHeritage: poiVisibility.visibility.showHeritage,
+    setShowHeritage: poiVisibility.actions.setShowHeritage,
+    showLakes: poiVisibility.visibility.showLakes,
+    setShowLakes: poiVisibility.actions.setShowLakes,
+
+    // Actions (legacy)
     createRoute,
     updateWaypointCoordinates,
     addWaypoint,
@@ -361,7 +404,7 @@ export default function useHikingRoute({
     resetAll,
     findPOIsNearRoute,
 
-    // Computed values
+    // Computed values (legacy)
     isRouteValid: currentRoute !== null,
     hasValidWaypoints: waypoints.every(wp => wp.lat !== 0 || wp.lng !== 0),
     totalWaypoints: waypoints.length,
