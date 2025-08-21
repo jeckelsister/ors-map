@@ -17,7 +17,7 @@ export default function ProfileTab({
 }: ProfileTabProps): React.JSX.Element {
   return (
     <div>
-      <h3 className="font-semibold mb-3">Elevation Profile</h3>
+      <h3 className="font-semibold mb-3">Profil altimétrique</h3>
       <ElevationProfile route={currentRoute} showStages={true} />
     </div>
   );

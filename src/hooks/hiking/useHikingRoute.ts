@@ -162,12 +162,14 @@ export default function useHikingRoute({
         }
 
         if (hasErrors && onError) {
-          onError('Some POIs could not be loaded. Check console for details.');
+          onError(
+            "Certains POI n'ont pas pu être chargés. Consultez la console pour plus de détails."
+          );
         }
       } catch (error) {
         console.error('Error finding POIs near route:', error);
         if (onError) {
-          onError('Failed to find POIs near route');
+          onError("Échec de la recherche de POI près de l'itinéraire");
         }
       }
     },
@@ -181,7 +183,7 @@ export default function useHikingRoute({
     if (validWaypoints.length < MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE) {
       if (onError) {
         onError(
-          `Please add at least ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} valid waypoints`
+          `Veuillez ajouter au moins ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} points valides`
         );
       }
       return;
@@ -189,7 +191,7 @@ export default function useHikingRoute({
 
     if (!hikingProfile) {
       if (onError) {
-        onError('Please select a hiking profile');
+        onError('Veuillez sélectionner un profil de randonnée');
       }
       return;
     }
@@ -215,7 +217,9 @@ export default function useHikingRoute({
       console.error('Error creating route:', error);
       if (onError) {
         onError(
-          error instanceof Error ? error.message : 'Failed to create route'
+          error instanceof Error
+            ? error.message
+            : "Échec de la création de l'itinéraire"
         );
       }
     } finally {
@@ -244,7 +248,7 @@ export default function useHikingRoute({
   const addWaypoint = useCallback(() => {
     if (waypoints.length >= MAP_CONSTANTS.MAX_WAYPOINTS) {
       if (onError) {
-        onError(`Maximum ${MAP_CONSTANTS.MAX_WAYPOINTS} waypoints allowed`);
+        onError(`Maximum ${MAP_CONSTANTS.MAX_WAYPOINTS} points autorisés`);
       }
       return;
     }
@@ -263,7 +267,7 @@ export default function useHikingRoute({
       if (waypoints.length <= MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE) {
         if (onError) {
           onError(
-            `Minimum ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} waypoints required`
+            `Minimum ${MAP_CONSTANTS.MIN_WAYPOINTS_FOR_ROUTE} points requis`
           );
         }
         return;

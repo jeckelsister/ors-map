@@ -44,7 +44,7 @@ export default function PlanningTab({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="font-semibold mb-3">Route Configuration</h3>
+        <h3 className="font-semibold mb-3">Configuration de l'itinéraire</h3>
         <RouteStagesPlanner
           waypoints={waypoints}
           onWaypointsChange={onWaypointsChange}
@@ -64,11 +64,11 @@ export default function PlanningTab({
           className="flex-1"
         >
           {isLoading ? (
-            'Creating...'
+            'Création...'
           ) : (
             <>
               <Rocket className="w-4 h-4 mr-2" />
-              Create Route
+              Créer l'itinéraire
             </>
           )}
         </Button>

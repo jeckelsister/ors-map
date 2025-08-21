@@ -54,7 +54,7 @@ export function usePOIHandlers({
         poi.lng === 0
       ) {
         showToast(
-          `❌ Error: Invalid coordinates for ${poi.name || 'this point'}`,
+          `❌ Erreur: Coordonnées invalides pour ${poi.name || 'ce point'}`,
           'error'
         );
         return;
@@ -69,7 +69,7 @@ export function usePOIHandlers({
 
       // Show success toast with POI info
       const infoText = extraInfo ? ` (${extraInfo})` : '';
-      showToast(`${icon} Zoomed to: ${poi.name || 'point'}${infoText}`, 'info');
+      showToast(`${icon} Zoom sur: ${poi.name || 'point'}${infoText}`, 'info');
     },
     [hikingMapRef, showToast]
   );

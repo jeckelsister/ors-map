@@ -61,7 +61,7 @@ export default function POITab({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold mb-3">Refuges & Water Points</h3>
+        <h3 className="font-semibold mb-3">Refuges & Points d'eau</h3>
         <POIDisplayControls
           refuges={refuges}
           waterPoints={waterPoints}
@@ -75,7 +75,7 @@ export default function POITab({
       </div>
 
       <div>
-        <h3 className="font-semibold mb-3">Enriched Points of Interest</h3>
+        <h3 className="font-semibold mb-3">Points d'intérêt enrichis</h3>
         <EnrichedPOIControls
           enrichedPOIs={enrichedPOIs}
           showPeaks={showPeaks}
