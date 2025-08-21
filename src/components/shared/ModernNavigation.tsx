@@ -63,11 +63,6 @@ export default function ModernNavigation(): React.JSX.Element {
                 <Link to={path}>
                   <Icon className="w-4 h-4" />
                   {label}
-                  {isActive(path) && (
-                    <Badge variant="secondary" className="ml-1 text-xs">
-                      Actif
-                    </Badge>
-                  )}
                 </Link>
               </Button>
             ))}

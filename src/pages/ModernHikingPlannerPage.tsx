@@ -278,34 +278,31 @@ export default function HikingPlannerPage(): React.JSX.Element {
           {/* Control Panel - Mobile: Collapsible, Desktop: Always visible */}
           <div className="lg:col-span-1 space-y-4 md:space-y-6 order-2 lg:order-1">
             {/* Tab Navigation */}
-            <Card>
-              <CardContent className="p-3">
-                <Tabs
-                  value={selectedTab}
-                  onValueChange={value =>
-                    setSelectedTab(value as typeof selectedTab)
-                  }
-                >
-                  <TabsList className="grid grid-cols-5 w-full">
-                    <TabsTrigger value="planning" className="p-2">
-                      <Map className="w-4 h-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="profile" className="p-2">
-                      <Mountain className="w-4 h-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="poi" className="p-2">
-                      <MapPin className="w-4 h-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="gpx" className="p-2">
-                      <Upload className="w-4 h-4" />
-                    </TabsTrigger>
-                    <TabsTrigger value="export" className="p-2">
-                      <Download className="w-4 h-4" />
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </CardContent>
-            </Card>
+
+            <Tabs
+              value={selectedTab}
+              onValueChange={value =>
+                setSelectedTab(value as typeof selectedTab)
+              }
+            >
+              <TabsList className="grid grid-cols-5 w-full">
+                <TabsTrigger value="planning" className="p-2">
+                  <Map className="w-4 h-4" />
+                </TabsTrigger>
+                <TabsTrigger value="profile" className="p-2">
+                  <Mountain className="w-4 h-4" />
+                </TabsTrigger>
+                <TabsTrigger value="poi" className="p-2">
+                  <MapPin className="w-4 h-4" />
+                </TabsTrigger>
+                <TabsTrigger value="gpx" className="p-2">
+                  <Upload className="w-4 h-4" />
+                </TabsTrigger>
+                <TabsTrigger value="export" className="p-2">
+                  <Download className="w-4 h-4" />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             {/* Tab Content */}
             <Card>

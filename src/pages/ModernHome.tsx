@@ -9,13 +9,13 @@ const features = [
     icon: Mountain,
     title: 'Randonnée Avancée',
     description: 'Itinéraires multi-étapes avec GR, HRP et sentiers locaux',
-    badge: 'Nouveau',
+    badge: null,
   },
   {
     icon: Map,
     title: 'Cartes Détaillées',
     description: 'IGN, OpenStreetMap et cartes topographiques spécialisées',
-    badge: 'Populaire',
+    badge: null,
   },
   {
     icon: Route,
@@ -39,7 +39,7 @@ export default function ModernHome(): React.JSX.Element {
         <div className="text-center mb-12">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
             <Logo size="lg" />
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent leading-normal">
               WayMaker
             </h1>
           </div>
@@ -91,29 +91,6 @@ export default function ModernHome(): React.JSX.Element {
               </div>
             </ModernCard>
           ))}
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <ModernCard variant="bordered" className="max-w-2xl mx-auto">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-4">
-                Prêt à partir en aventure ?
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Rejoignez des milliers de randonneurs qui utilisent WayMaker
-                pour planifier leurs sorties
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <ModernButton asChild size="lg">
-                  <Link to="/hiking">Commencer maintenant</Link>
-                </ModernButton>
-                <ModernButton asChild variant="ghost" size="lg">
-                  <Link to="/map">Explorer la carte</Link>
-                </ModernButton>
-              </div>
-            </div>
-          </ModernCard>
         </div>
       </div>
     </div>
