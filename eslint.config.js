@@ -64,43 +64,9 @@ export default [
       'prefer-const': 'error',
       'no-var': 'error',
       'react-refresh/only-export-components': 'warn',
-      // Import ordering rules
-      'sort-imports': [
-        'error',
-        {
-          ignoreCase: true,
-          ignoreDeclarationSort: true,
-          ignoreMemberSort: false,
-          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
-        },
-      ],
-      'import/order': [
-        'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'type',
-          ],
-          pathGroups: [
-            {
-              pattern: '@/**',
-              group: 'internal',
-              position: 'before',
-            },
-          ],
-          pathGroupsExcludedImportTypes: ['builtin', 'type'],
-          'newlines-between': 'always',
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
-        },
-      ],
+      // Import ordering rules (disabled - handled by Prettier plugin)
+      'sort-imports': 'off', // Prettier handles import sorting
+      'import/order': 'off', // Prettier handles import ordering
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {

@@ -1,5 +1,3 @@
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import {
   forwardRef,
   useEffect,
@@ -7,6 +5,9 @@ import {
   useRef,
   useState,
 } from 'react';
+
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Import new components and utilities
 import { MapLayerSelector } from '@/components/map/MapLayerSelector';
@@ -18,19 +19,18 @@ import {
   useWaypointMarkers,
 } from '@/hooks/map/useMapMarkers';
 import { useRouteRenderer } from '@/hooks/map/useRouteRenderer';
-import { createHighlightMarkerHtml } from '@/utils/map/mapIcons';
-import {
-  changeMapLayer,
-  initializeMap,
-  type MapLayerKey,
-} from '@/utils/map/mapLayers';
-
 import type {
   EnrichedPOIs,
   HikingRoute,
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
+import { createHighlightMarkerHtml } from '@/utils/map/mapIcons';
+import {
+  changeMapLayer,
+  initializeMap,
+  type MapLayerKey,
+} from '@/utils/map/mapLayers';
 
 interface HikingMapProps {
   route?: HikingRoute | null;

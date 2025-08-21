@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+
 import { FaArrowDown, FaArrowUp, FaMountain } from 'react-icons/fa';
 
 import type { ElevationPoint, HikingRoute } from '@/types/hiking';
@@ -45,7 +46,6 @@ export default function ElevationProfile({
       return { pathData: '', markers: [], stats: null };
     }
 
-
     const width = 350;
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
     const chartWidth = width - padding.left - padding.right;
@@ -81,14 +81,12 @@ export default function ElevationProfile({
       ` L ${padding.left + chartWidth} ${padding.top + chartHeight}` +
       ` L ${padding.left} ${padding.top + chartHeight} Z`;
 
-
     const markers = showStages
       ? stageMarkers.map(marker => ({
           ...marker,
           x: padding.left + (marker.distance / maxDistance) * chartWidth,
         }))
       : [];
-
 
     const stats = {
       totalDistance: route.totalDistance,

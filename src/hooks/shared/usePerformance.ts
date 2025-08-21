@@ -68,5 +68,8 @@ export function useMemoizedCallback<T extends AnyFunction>(
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useCallback((...args: Parameters<T>) => fnRef.current(...args), deps) as T;
+  return useCallback(
+    (...args: Parameters<T>) => fnRef.current(...args),
+    deps
+  ) as T;
 }

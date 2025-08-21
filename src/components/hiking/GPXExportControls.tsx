@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+
 import { FaCog, FaDownload, FaFile } from 'react-icons/fa';
 
 import { exportToGPX } from '@/services/hikingService';
-
 import type {
   GPXExportOptions,
   HikingRoute,

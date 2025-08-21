@@ -8,7 +8,6 @@ import {
   findRefugesNearRoute,
   findWaterPointsNearRoute,
 } from '@/services/hikingService';
-
 import type {
   Coordinates,
   EnrichedPOIs,

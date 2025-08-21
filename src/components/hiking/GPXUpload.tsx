@@ -1,13 +1,13 @@
-import { AlertTriangle, CheckCircle, FileText, Upload } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
+import { AlertTriangle, CheckCircle, FileText, Upload } from 'lucide-react';
+
+import type { Coordinates } from '../../types/hiking';
 import {
   calculateTotalDistance,
   convertGPXToWaypoints,
   parseGPXFile,
 } from '../../utils/gpxParser';
-
-import type { Coordinates } from '../../types/hiking';
 import type { GPXParseResult } from '../../utils/gpxParser';
 
 interface GPXUploadProps {

@@ -1,3 +1,5 @@
+import React, { useState } from 'react';
+
 import {
   closestCenter,
   DndContext,
@@ -13,16 +15,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import React, { useState } from 'react';
 import { FaCog, FaMinus, FaPlus, FaRedo, FaRoute } from 'react-icons/fa';
 
 import { HIKING_PROFILES } from '@/constants/hiking';
-
+import type { Coordinates, HikingProfile } from '@/types/hiking';
 
 import DraggableWaypoint from './DraggableWaypoint';
 import WaypointAutocomplete from './WaypointAutocomplete';
-
-import type { Coordinates, HikingProfile } from '@/types/hiking';
 
 interface RouteStagesPlannerProps {
   waypoints: Coordinates[];

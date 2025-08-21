@@ -1,6 +1,5 @@
-import { createLegendIconSvg } from '@/utils/map/mapIcons';
-
 import type { EnrichedPOIs, Refuge, WaterPoint } from '@/types/hiking';
+import { createLegendIconSvg } from '@/utils/map/mapIcons';
 
 interface MapLegendProps {
   // Route and waypoint data

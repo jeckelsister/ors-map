@@ -1,12 +1,6 @@
 import React from 'react';
 
 import { Card, CardContent } from '@/components/ui/card';
-
-
-import HikingMap from './HikingMap';
-import RouteStatsCard from './RouteStatsCard';
-
-import type { HikingMapRef } from './HikingMap';
 import type {
   Coordinates,
   EnrichedPOIs,
@@ -14,6 +8,10 @@ import type {
   Refuge,
   WaterPoint,
 } from '@/types/hiking';
+
+import HikingMap from './HikingMap';
+import type { HikingMapRef } from './HikingMap';
+import RouteStatsCard from './RouteStatsCard';
 
 interface HikingPlannerMapSectionProps {
   // Map ref

@@ -1,12 +1,12 @@
-import L from 'leaflet';
 import { useEffect, useRef } from 'react';
 
+import L from 'leaflet';
+
+import type { HikingRoute } from '@/types/hiking';
 import {
   createFinishMarkerHtml,
   createStageMarkerHtml,
 } from '@/utils/map/mapIcons';
-
-import type { HikingRoute } from '@/types/hiking';
 
 /**
  * Hook for managing route display on the map

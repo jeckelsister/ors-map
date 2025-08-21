@@ -22,9 +22,11 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Safe error logging
-    const errorMessage = error && error.message ? error.message : 'Unknown error';
-    const errorStack = error && error.stack ? error.stack : 'No stack trace available';
-    
+    const errorMessage =
+      error && error.message ? error.message : 'Unknown error';
+    const errorStack =
+      error && error.stack ? error.stack : 'No stack trace available';
+
     console.error('ErrorBoundary caught an error:', errorMessage);
     console.error('Error stack:', errorStack);
     console.error('Error info:', errorInfo);
@@ -45,7 +47,8 @@ class ErrorBoundary extends Component<Props, State> {
                 Oops! Quelque chose s'est mal passé
               </h1>
               <p className="text-gray-600 mb-6">
-                Nous sommes désolés pour la gêne occasionnée. Veuillez essayer de rafraîchir la page.
+                Nous sommes désolés pour la gêne occasionnée. Veuillez essayer
+                de rafraîchir la page.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -59,7 +62,9 @@ class ErrorBoundary extends Component<Props, State> {
                     Détails de l'erreur (Développement uniquement)
                   </summary>
                   <pre className="mt-2 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-800 overflow-auto max-h-40">
-                    {this.state.error.stack || this.state.error.message || 'Erreur inconnue'}
+                    {this.state.error.stack ||
+                      this.state.error.message ||
+                      'Erreur inconnue'}
                   </pre>
                 </details>
               )}

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+
 import { FaHome, FaTint } from 'react-icons/fa';
 
 import Legend from '@/components/ui/legend';

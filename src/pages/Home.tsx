@@ -1,5 +1,6 @@
-import { Download, Mountain, Route } from 'lucide-react';
 import React from 'react';
+
+import { Download, Mountain, Route } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import CustomBadge from '@/components/ui/custom-badge';

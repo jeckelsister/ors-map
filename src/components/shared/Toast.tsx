@@ -1,5 +1,6 @@
-import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
+
+import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 
 interface ToastProps {
   message: string;

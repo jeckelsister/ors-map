@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { HIKING_PROFILES } from '@/constants/hiking';
-
 import type { HikingProfile } from '@/types/hiking';
 
 interface HikingProfileSelectorProps {

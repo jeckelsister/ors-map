@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Route, HashRouter as Router, Routes } from 'react-router-dom';
 
 import ErrorBoundary from './components/shared/ErrorBoundary';

@@ -1,24 +1,38 @@
+import React from 'react';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import React from 'react';
 import { FaGripVertical, FaMinus } from 'react-icons/fa';
-
-import WaypointAutocomplete from './WaypointAutocomplete';
 
 import type { Coordinates } from '@/types/hiking';
 
+import WaypointAutocomplete from './WaypointAutocomplete';
 
-interface DraggableWaypointProps {
+// Position and state information for the waypoint
+interface WaypointPosition {
   waypoint: Coordinates;
   index: number;
   isFirst: boolean;
   isLast: boolean;
   isLoop: boolean;
+}
+
+// Actions that can be performed on the waypoint
+interface WaypointActions {
   onUpdate: (field: keyof Coordinates, value: string | number) => void;
   onRemove: () => void;
-  canRemove: boolean;
   onLocationSelect?: (lat: number, lng: number, name: string) => void;
 }
+
+// Configuration and behavior settings
+interface WaypointConfig {
+  canRemove: boolean;
+}
+
+interface DraggableWaypointProps
+  extends WaypointPosition,
+    WaypointActions,
+    WaypointConfig {}
 
 export default function DraggableWaypoint({
   waypoint,
