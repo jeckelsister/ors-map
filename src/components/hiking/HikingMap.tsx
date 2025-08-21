@@ -720,7 +720,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
   return (
     <div className={`relative bg-white rounded-lg shadow-sm ${className}`}>
       {/* Map Layer Selector */}
-      <div className="absolute top-4 left-4" style={{ zIndex: 9999 }}>
+      <div className="absolute top-4 left-4 z-10">
         <button
           onClick={() => setShowLayerSelector(!showLayerSelector)}
           className={`
@@ -729,21 +729,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
             ${showLayerSelector ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'}
           `}
           title="🗺️ Sélectionner les cartes de randonnée"
-          style={{ zIndex: 9999, position: 'relative' }}
         >
-          {/* Discreet but visible badge */}
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-
-          {/* Label au survol */}
-          <div
-            className="absolute -bottom-10 left-1/2 transform -translate-x-1/2
-                         bg-gray-900 text-white text-xs px-3 py-2 rounded-lg
-                         opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                         whitespace-nowrap pointer-events-none"
-          >
-            🗺️ OSM France • OpenTopoMap • CyclOSM
-          </div>
-
           <svg
             className={`w-6 h-6 transition-colors ${
               showLayerSelector
@@ -764,10 +750,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
         </button>
 
         {showLayerSelector && (
-          <div
-            className="absolute top-16 left-0 min-w-[280px]"
-            style={{ zIndex: 9999 }}
-          >
+          <div className="absolute top-16 left-0 min-w-[280px]">
             <MapLayerSelector
               map={mapRef.current}
               currentLayer={currentMapLayer}
@@ -778,8 +761,8 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
       </div>
 
       {/* Map legend */}
-      <div className="absolute bottom-4 left-4 z-40 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200">
-        <div className="flex items-center space-x-4 flex-wrap">
+      <div className="absolute bottom-4 left-4 z-10 bg-white bg-opacity-95 rounded-lg p-3 text-sm shadow-lg border border-gray-200">
+        <div className="flex items-center space-x-4 space-y-2 flex-wrap">
           {waypoints.length > 0 && (
             <>
               <div className="flex items-center space-x-1">
@@ -966,7 +949,7 @@ const HikingMap = forwardRef<HikingMapRef, HikingMapProps>((props, ref) => {
       </div>
 
       {/* Map container */}
-      <div id="hiking-map" className="h-[calc(100vh-16rem)] w-full" />
+      <div id="hiking-map" className="h-[calc(100vh-16rem)] w-full z-0" />
     </div>
   );
 });
