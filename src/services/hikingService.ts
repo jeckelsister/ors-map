@@ -1025,9 +1025,9 @@ export const findPeaksNearRoute = async (
         );
         return distanceToRoute <= radiusKm;
       })
-      .filter((peak: Peak) => peak.elevation > 0); // Filtrer les sommets sans altitude
+      .filter((peak: Peak) => peak.elevation > 0); // Filter peaks without elevation
 
-    return peaks.sort((a, b) => b.elevation - a.elevation); // Trier par altitude décroissante
+    return peaks.sort((a, b) => b.elevation - a.elevation); // Sort by descending elevation
   } catch (error) {
     console.error('Error finding peaks:', error);
     return [];
@@ -1351,11 +1351,11 @@ export const findEnrichedPOIsNearRoute = async (
   try {
     const [peaks, passes, viewpoints, heritage, lakes] =
       await Promise.allSettled([
-        findPeaksNearRoute(route, 3), // Réduit de 10km à 3km pour des sommets plus proches
-        findPassesNearRoute(route, 3), // Réduit de 8km à 3km
-        findViewpointsNearRoute(route, 3), // Réduit de 5km à 3km
-        findHeritageNearRoute(route, 3), // Réduit de 6km à 3km
-        findLakesNearRoute(route, 3), // Réduit de 8km à 3km
+        findPeaksNearRoute(route, 3), // Reduced from 10km to 3km for closer peaks
+        findPassesNearRoute(route, 3), // Reduced from 8km to 3km
+        findViewpointsNearRoute(route, 3), // Reduced from 5km to 3km
+        findHeritageNearRoute(route, 3), // Reduced from 6km to 3km
+        findLakesNearRoute(route, 3), // Reduced from 8km to 3km
       ]);
 
     return {
@@ -1363,7 +1363,7 @@ export const findEnrichedPOIsNearRoute = async (
       passes: passes.status === 'fulfilled' ? passes.value : [],
       viewpoints: viewpoints.status === 'fulfilled' ? viewpoints.value : [],
       heritage: heritage.status === 'fulfilled' ? heritage.value : [],
-      geologicalSites: [], // À implémenter plus tard
+      geologicalSites: [], // To be implemented later
       lakes: lakes.status === 'fulfilled' ? lakes.value : [],
     };
   } catch (error) {

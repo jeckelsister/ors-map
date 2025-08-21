@@ -21,11 +21,11 @@ const Toast: React.FC<ToastProps> = ({
     setIsExiting(true);
     setTimeout(() => {
       onClose();
-    }, 300); // Durée de l'animation de sortie
+    }, 300); // Exit animation duration
   }, [onClose]);
 
   React.useEffect(() => {
-    // Animation d'entrée
+    // Entry animation
     const enterTimer = setTimeout(() => setIsVisible(true), 50);
 
     // Timer pour la fermeture automatique

@@ -99,7 +99,7 @@ export default function useHikingRoute({
           await Promise.allSettled([
             findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
             findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
-            findEnrichedPOIsNearRoute(route.geojson), // POI enrichis avec distances optimisées
+            findEnrichedPOIsNearRoute(route.geojson), // Enriched POI with optimized distances
           ]);
 
         let hasErrors = false;
