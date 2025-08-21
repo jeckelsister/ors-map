@@ -85,23 +85,6 @@ export interface RouteSummaryData {
   };
 }
 
-export interface ActiveRoutes {
-  [profileId: string]: boolean;
-}
-
-export interface ElevationPoint {
-  elevation: number;
-  distance: number;
-  lat: number;
-  lng: number;
-}
-
-export interface ElevationResponse {
-  geometry: {
-    coordinates: [number, number, number][];
-  };
-}
-
 // Hook return types
 export interface UseMapRouteReturn {
   mapRef: React.RefObject<LeafletMap | null>; // Properly typed Leaflet Map reference
@@ -122,12 +105,4 @@ export interface UseMapRouteReturn {
   clearEndMarker: () => void;
   createStartMarkerFromLocation: (location: Location) => void;
   createEndMarkerFromLocation: (location: Location) => void;
-}
-
-export interface UseAutocompleteReturn {
-  suggestions: LocationSuggestion[];
-  isLoading: boolean;
-  error: string | null;
-  fetchSuggestions: (query: string) => void;
-  clearSuggestions: () => void;
 }

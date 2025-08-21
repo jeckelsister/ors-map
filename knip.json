@@ -1,0 +1,24 @@
+{
+  "entry": ["src/main.tsx", "src/App.tsx"],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "tests/**/*.{ts,tsx,js,jsx}",
+    "!src/**/*.d.ts"
+  ],
+  "ignore": ["public/**", "dist/**", "coverage/**", "node_modules/**"],
+  "ignoreExportsUsedInFile": true,
+  "includeEntryExports": false,
+  "rules": {
+    "files": "error",
+    "dependencies": "error",
+    "devDependencies": "error",
+    "unlisted": "error",
+    "exports": "error",
+    "nsExports": "error",
+    "classMembers": "error",
+    "types": "error",
+    "nsTypes": "error",
+    "enumMembers": "error",
+    "duplicates": "error"
+  }
+}

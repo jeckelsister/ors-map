@@ -1,5 +1,5 @@
 import React from 'react';
-import useOnlineStatus from '../../hooks/shared/useOnlineStatus';
+import { useOnlineStatus } from '../../hooks/shared/useOnlineStatus';
 
 const OfflineIndicator: React.FC = () => {
   const isOnline = useOnlineStatus();

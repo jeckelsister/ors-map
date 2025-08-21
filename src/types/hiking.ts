@@ -83,30 +83,10 @@ export interface WaterPoint {
   notes?: string;
 }
 
-export interface PathType {
-  id: string;
-  name: string;
-  official: boolean;
-  category: 'GR' | 'GRP' | 'PR' | 'HRP' | 'TMB' | 'unofficial' | 'other';
-  difficulty: 1 | 2 | 3 | 4 | 5;
-  description?: string;
-}
-
 export interface GPXExportOptions {
   includeWaypoints: boolean;
   includeRefuges: boolean;
   includeWaterPoints: boolean;
   splitByStages: boolean;
   includeElevation: boolean;
-}
-
-export interface RouteAlternative {
-  id: string;
-  name: string;
-  description: string;
-  deviation_km: number;
-  additional_time: number; // minutes
-  difficulty_delta: number; // -2 to +2
-  geojson: GeoJSON.FeatureCollection;
-  highlights: string[];
 }

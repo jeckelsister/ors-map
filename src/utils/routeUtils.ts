@@ -49,37 +49,3 @@ export const calculateCenter = (
 ): [number, number] => {
   return [(start.lat + end.lat) / 2, (start.lng + end.lng) / 2];
 };
-
-/**
- * Valide si des coordonnées sont valides
- */
-export const areValidCoordinates = (lat?: number, lng?: number): boolean => {
-  return (
-    typeof lat === 'number' &&
-    typeof lng === 'number' &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lng >= -180 &&
-    lng <= 180
-  );
-};
-
-/**
- * Calcule la distance euclidienne entre deux points (approximation simple)
- */
-export const calculateDistance = (
-  point1: { lat: number; lng: number },
-  point2: { lat: number; lng: number }
-): number => {
-  const R = 6371; // Earth radius in km
-  const dLat = (point2.lat - point1.lat) * (Math.PI / 180);
-  const dLng = (point2.lng - point1.lng) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(point1.lat * (Math.PI / 180)) *
-      Math.cos(point2.lat * (Math.PI / 180)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
-};

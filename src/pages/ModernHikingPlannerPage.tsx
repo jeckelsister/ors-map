@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Download,
   Map,
   MapPin,
@@ -9,7 +8,6 @@ import {
   Upload,
 } from 'lucide-react';
 import React, { useCallback, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import ElevationProfile from '../components/hiking/ElevationProfile';
 import GPXExportControls from '../components/hiking/GPXExportControls';
 import GPXUpload from '../components/hiking/GPXUpload';
@@ -261,26 +259,15 @@ export default function HikingPlannerPage(): React.JSX.Element {
 
       {/* Header Section */}
       <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Retour
-              </Link>
-            </Button>
-          </div>
-          <div className="flex items-center gap-3">
-            <Mountain className="w-8 h-8 text-primary" />
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">
-                Planificateur de Randonnée
-              </h1>
-              <p className="text-muted-foreground">
-                Créez des itinéraires multi-étapes avec profil altimétrique et
-                export GPX
-              </p>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">
+              Planificateur de Randonnée
+            </h1>
+            <p className="text-muted-foreground">
+              Créez des itinéraires multi-étapes avec profil altimétrique et
+              export GPX
+            </p>
           </div>
         </div>
       </div>
