@@ -2,11 +2,13 @@ import { HIKING_PROFILES } from '@/constants/hiking';
 import {
   createHikingRoute,
   divideRouteIntoStages,
+  findEnrichedPOIsNearRoute,
   findRefugesNearRoute,
   findWaterPointsNearRoute,
 } from '@/services/hikingService';
 import type {
   Coordinates,
+  EnrichedPOIs,
   HikingProfile,
   HikingRoute,
   Refuge,
@@ -46,10 +48,23 @@ export default function useHikingRoute({
   const [currentRoute, setCurrentRoute] = useState<HikingRoute | null>(null);
   const [refuges, setRefuges] = useState<Refuge[]>([]);
   const [waterPoints, setWaterPoints] = useState<WaterPoint[]>([]);
+  const [enrichedPOIs, setEnrichedPOIs] = useState<EnrichedPOIs>({
+    peaks: [],
+    passes: [],
+    viewpoints: [],
+    heritage: [],
+    geologicalSites: [],
+    lakes: [],
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [showRefuges, setShowRefuges] = useState(true);
   const [showWaterPoints, setShowWaterPoints] = useState(true);
+  const [showPeaks, setShowPeaks] = useState(true);
+  const [showPasses, setShowPasses] = useState(true);
+  const [showViewpoints, setShowViewpoints] = useState(true);
+  const [showHeritage, setShowHeritage] = useState(true);
+  const [showLakes, setShowLakes] = useState(true);
 
   // Utility function to ensure waypoints have unique IDs
   const ensureWaypointIds = useCallback(
@@ -80,10 +95,12 @@ export default function useHikingRoute({
   const findPOIsNearRoute = useCallback(
     async (route: HikingRoute) => {
       try {
-        const [foundRefuges, foundWaterPoints] = await Promise.allSettled([
-          findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
-          findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
-        ]);
+        const [foundRefuges, foundWaterPoints, foundEnrichedPOIs] =
+          await Promise.allSettled([
+            findRefugesNearRoute(route.geojson, 2), // 2km radius - refuges proches
+            findWaterPointsNearRoute(route.geojson, 1), // 1km radius - very close water points
+            findEnrichedPOIsNearRoute(route.geojson), // POI enrichis avec distances optimisées
+          ]);
 
         let hasErrors = false;
 
@@ -106,6 +123,24 @@ export default function useHikingRoute({
           hasErrors = true;
         }
 
+        if (foundEnrichedPOIs.status === 'fulfilled') {
+          setEnrichedPOIs(foundEnrichedPOIs.value);
+        } else {
+          console.warn(
+            'Failed to fetch enriched POIs:',
+            foundEnrichedPOIs.reason
+          );
+          setEnrichedPOIs({
+            peaks: [],
+            passes: [],
+            viewpoints: [],
+            heritage: [],
+            geologicalSites: [],
+            lakes: [],
+          });
+          hasErrors = true;
+        }
+
         // Notify user if there were errors loading POIs
         if (hasErrors) {
           onError?.(
@@ -117,6 +152,14 @@ export default function useHikingRoute({
         // Set empty arrays if there's an overall error
         setRefuges([]);
         setWaterPoints([]);
+        setEnrichedPOIs({
+          peaks: [],
+          passes: [],
+          viewpoints: [],
+          heritage: [],
+          geologicalSites: [],
+          lakes: [],
+        });
         onError?.("⚠️ Impossible de charger les points d'intérêt");
       }
     },
@@ -226,6 +269,14 @@ export default function useHikingRoute({
     setCurrentRoute(null);
     setRefuges([]);
     setWaterPoints([]);
+    setEnrichedPOIs({
+      peaks: [],
+      passes: [],
+      viewpoints: [],
+      heritage: [],
+      geologicalSites: [],
+      lakes: [],
+    });
   }, []);
 
   // Reset all data
@@ -282,13 +333,23 @@ export default function useHikingRoute({
     currentRoute,
     refuges,
     waterPoints,
-
+    enrichedPOIs,
 
     isLoading,
     showRefuges,
     setShowRefuges,
     showWaterPoints,
     setShowWaterPoints,
+    showPeaks,
+    setShowPeaks,
+    showPasses,
+    setShowPasses,
+    showViewpoints,
+    setShowViewpoints,
+    showHeritage,
+    setShowHeritage,
+    showLakes,
+    setShowLakes,
 
     // Actions
     createRoute,

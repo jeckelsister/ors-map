@@ -26,6 +26,7 @@ export default function GPXExportControls({
     includeWaypoints: true,
     includeRefuges: true,
     includeWaterPoints: true,
+    includeEnrichedPOIs: false,
     splitByStages: false,
     includeElevation: true,
   });

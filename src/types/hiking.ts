@@ -83,10 +83,109 @@ export interface WaterPoint {
   notes?: string;
 }
 
+export interface Peak {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  elevation: number;
+  prominence?: number; // Proéminence topographique en mètres
+  difficulty?: 'facile' | 'modéré' | 'difficile' | 'très difficile';
+  climbing_grade?: string; // Cotation d'escalade si applicable
+  description?: string;
+}
+
+export interface Pass {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  elevation: number;
+  type: 'col' | 'brèche' | 'seuil' | 'pas';
+  connects?: string[]; // Vallées ou régions connectées
+  difficulty?: 'facile' | 'modéré' | 'difficile';
+  seasonal_access?: string; // Période d'accessibilité
+  description?: string;
+}
+
+export interface Viewpoint {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  elevation: number;
+  direction?: string; // Direction de la vue (N, NE, etc.)
+  panoramic: boolean; // Vue panoramique ou non
+  visible_peaks?: string[]; // Sommets visibles
+  best_time?: string; // Meilleur moment pour la vue
+  description?: string;
+}
+
+export interface Heritage {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type:
+    | 'château'
+    | 'ruines'
+    | 'chapelle'
+    | 'monument'
+    | 'site_archéologique'
+    | 'village';
+  period?: string; // Période historique
+  unesco?: boolean; // Site UNESCO ou non
+  entry_fee?: boolean; // Entrée payante
+  opening_hours?: string;
+  description?: string;
+}
+
+export interface GeologicalSite {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type:
+    | 'glacier'
+    | 'cascade'
+    | 'grotte'
+    | 'formation_rocheuse'
+    | 'fossiles'
+    | 'minéraux';
+  geological_period?: string;
+  accessibility?: 'facile' | 'modéré' | 'difficile';
+  safety_notes?: string; // Notes de sécurité
+  description?: string;
+}
+
+export interface NotableLake {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  elevation: number;
+  area?: number; // Superficie en hectares
+  max_depth?: number; // Profondeur max en mètres
+  type: 'lac_alpin' | 'lac_glaciaire' | 'lac_artificiel' | 'étang';
+  activities?: string[]; // Baignade, pêche, etc.
+  access_difficulty?: 'facile' | 'modéré' | 'difficile';
+  description?: string;
+}
+
+export interface EnrichedPOIs {
+  peaks: Peak[];
+  passes: Pass[];
+  viewpoints: Viewpoint[];
+  heritage: Heritage[];
+  geologicalSites: GeologicalSite[];
+  lakes: NotableLake[];
+}
+
 export interface GPXExportOptions {
   includeWaypoints: boolean;
   includeRefuges: boolean;
   includeWaterPoints: boolean;
+  includeEnrichedPOIs: boolean;
   splitByStages: boolean;
   includeElevation: boolean;
 }

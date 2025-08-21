@@ -1,11 +1,17 @@
 import type {
   Coordinates,
   ElevationPoint,
+  EnrichedPOIs,
   GPXExportOptions,
+  Heritage,
   HikingProfile,
   HikingRoute,
+  NotableLake,
+  Pass,
+  Peak,
   Refuge,
   RouteStage,
+  Viewpoint,
   WaterPoint,
 } from '@/types/hiking';
 import axios from 'axios';
@@ -949,4 +955,527 @@ const generateGPXWaterPoints = (waterPoints: WaterPoint[]): string => {
   </wpt>`
     )
     .join('\n');
+};
+
+/**
+ * Find peaks near the route
+ */
+export const findPeaksNearRoute = async (
+  route: GeoJSON.FeatureCollection,
+  radiusKm: number = 10
+): Promise<Peak[]> => {
+  try {
+    const feature = route.features[0];
+    if (!feature || feature.geometry.type !== 'LineString') {
+      throw new Error('Route invalide');
+    }
+
+    const coordinates = (feature.geometry as GeoJSON.LineString)
+      .coordinates as [number, number][];
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const west = Math.min(...lngs);
+    const east = Math.max(...lngs);
+
+    const buffer = radiusKm / 111;
+
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
+        [out:json][timeout:10];
+        (
+          node["natural"="peak"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["natural"="volcano"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
+
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 12000,
+        });
+      },
+      2,
+      1000
+    );
+
+    const peaks: Peak[] = response.data.elements
+      .map((element: OverpassElement) => ({
+        id: element.id.toString(),
+        name: element.tags.name || 'Sommet sans nom',
+        lat: element.lat,
+        lng: element.lon,
+        elevation: element.tags.ele ? parseInt(element.tags.ele) : 0,
+        prominence: element.tags.prominence
+          ? parseInt(element.tags.prominence)
+          : undefined,
+        difficulty: determinePeakDifficulty(element.tags),
+        climbing_grade:
+          element.tags.climbing || element.tags['climbing:grade:french'],
+        description: element.tags.description,
+      }))
+      .filter((peak: Peak) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          peak.lat,
+          peak.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      })
+      .filter((peak: Peak) => peak.elevation > 0); // Filtrer les sommets sans altitude
+
+    return peaks.sort((a, b) => b.elevation - a.elevation); // Trier par altitude décroissante
+  } catch (error) {
+    console.error('Error finding peaks:', error);
+    return [];
+  }
+};
+
+/**
+ * Find passes near the route
+ */
+export const findPassesNearRoute = async (
+  route: GeoJSON.FeatureCollection,
+  radiusKm: number = 8
+): Promise<Pass[]> => {
+  try {
+    const feature = route.features[0];
+    if (!feature || feature.geometry.type !== 'LineString') {
+      throw new Error('Route invalide');
+    }
+
+    const coordinates = (feature.geometry as GeoJSON.LineString)
+      .coordinates as [number, number][];
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const west = Math.min(...lngs);
+    const east = Math.max(...lngs);
+
+    const buffer = radiusKm / 111;
+
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
+        [out:json][timeout:10];
+        (
+          node["natural"="saddle"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["mountain_pass"="yes"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["natural"="pass"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
+
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 12000,
+        });
+      },
+      2,
+      1000
+    );
+
+    const passes: Pass[] = response.data.elements
+      .map((element: OverpassElement) => ({
+        id: element.id.toString(),
+        name: element.tags.name || 'Col sans nom',
+        lat: element.lat,
+        lng: element.lon,
+        elevation: element.tags.ele ? parseInt(element.tags.ele) : 0,
+        type: determinePassType(element.tags),
+        connects: extractConnections(element.tags),
+        difficulty: determinePassDifficulty(element.tags),
+        seasonal_access: element.tags.seasonal || element.tags.opening_hours,
+        description: element.tags.description,
+      }))
+      .filter((pass: Pass) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          pass.lat,
+          pass.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      })
+      .filter((pass: Pass) => pass.elevation > 0);
+
+    return passes.sort((a, b) => b.elevation - a.elevation);
+  } catch (error) {
+    console.error('Error finding passes:', error);
+    return [];
+  }
+};
+
+/**
+ * Find viewpoints near the route
+ */
+export const findViewpointsNearRoute = async (
+  route: GeoJSON.FeatureCollection,
+  radiusKm: number = 5
+): Promise<Viewpoint[]> => {
+  try {
+    const feature = route.features[0];
+    if (!feature || feature.geometry.type !== 'LineString') {
+      throw new Error('Route invalide');
+    }
+
+    const coordinates = (feature.geometry as GeoJSON.LineString)
+      .coordinates as [number, number][];
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const west = Math.min(...lngs);
+    const east = Math.max(...lngs);
+
+    const buffer = radiusKm / 111;
+
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
+        [out:json][timeout:10];
+        (
+          node["tourism"="viewpoint"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["natural"="viewpoint"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
+
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 12000,
+        });
+      },
+      2,
+      1000
+    );
+
+    const viewpoints: Viewpoint[] = response.data.elements
+      .map((element: OverpassElement) => ({
+        id: element.id.toString(),
+        name: element.tags.name || 'Point de vue',
+        lat: element.lat,
+        lng: element.lon,
+        elevation: element.tags.ele ? parseInt(element.tags.ele) : 0,
+        direction: element.tags.direction,
+        panoramic:
+          element.tags.panoramic === 'yes' ||
+          element.tags.name?.includes('panoram'),
+        visible_peaks: extractVisiblePeaks(element.tags),
+        best_time:
+          element.tags.best_time || determineBestViewTime(element.tags),
+        description: element.tags.description,
+      }))
+      .filter((viewpoint: Viewpoint) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          viewpoint.lat,
+          viewpoint.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      });
+
+    return viewpoints;
+  } catch (error) {
+    console.error('Error finding viewpoints:', error);
+    return [];
+  }
+};
+
+/**
+ * Find heritage sites near the route
+ */
+export const findHeritageNearRoute = async (
+  route: GeoJSON.FeatureCollection,
+  radiusKm: number = 6
+): Promise<Heritage[]> => {
+  try {
+    const feature = route.features[0];
+    if (!feature || feature.geometry.type !== 'LineString') {
+      throw new Error('Route invalide');
+    }
+
+    const coordinates = (feature.geometry as GeoJSON.LineString)
+      .coordinates as [number, number][];
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const west = Math.min(...lngs);
+    const east = Math.max(...lngs);
+
+    const buffer = radiusKm / 111;
+
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
+        [out:json][timeout:10];
+        (
+          node["historic"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          node["tourism"="attraction"]["historic"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          way["historic"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
+
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 12000,
+        });
+      },
+      2,
+      1000
+    );
+
+    const heritage: Heritage[] = response.data.elements
+      .map((element: OverpassElement) => ({
+        id: element.id.toString(),
+        name: element.tags.name || determineHeritageName(element.tags),
+        lat: element.lat,
+        lng: element.lon,
+        type: determineHeritageType(element.tags),
+        period: element.tags.start_date || element.tags['historic:period'],
+        unesco:
+          element.tags.unesco === 'yes' ||
+          element.tags.heritage === 'world_heritage',
+        entry_fee: element.tags.fee === 'yes',
+        opening_hours: element.tags.opening_hours,
+        description: element.tags.description || element.tags.wikipedia,
+      }))
+      .filter((site: Heritage) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          site.lat,
+          site.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      })
+      .filter((site: Heritage) => site.name && site.name !== 'Site historique');
+
+    return heritage;
+  } catch (error) {
+    console.error('Error finding heritage sites:', error);
+    return [];
+  }
+};
+
+/**
+ * Find notable lakes near the route
+ */
+export const findLakesNearRoute = async (
+  route: GeoJSON.FeatureCollection,
+  radiusKm: number = 8
+): Promise<NotableLake[]> => {
+  try {
+    const feature = route.features[0];
+    if (!feature || feature.geometry.type !== 'LineString') {
+      throw new Error('Route invalide');
+    }
+
+    const coordinates = (feature.geometry as GeoJSON.LineString)
+      .coordinates as [number, number][];
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+
+    const south = Math.min(...lats);
+    const north = Math.max(...lats);
+    const west = Math.min(...lngs);
+    const east = Math.max(...lngs);
+
+    const buffer = radiusKm / 111;
+
+    const response = await retryRequest(
+      async () => {
+        const overpassQuery = `
+        [out:json][timeout:10];
+        (
+          way["natural"="water"]["name"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+          relation["natural"="water"]["name"](${south - buffer},${west - buffer},${north + buffer},${east + buffer});
+        );
+        out geom;
+      `;
+
+        return await axios.post(OVERPASS_API_URL, overpassQuery, {
+          headers: { 'Content-Type': 'text/plain' },
+          timeout: 12000,
+        });
+      },
+      2,
+      1000
+    );
+
+    const lakes: NotableLake[] = response.data.elements
+      .map((element: OverpassElement) => ({
+        id: element.id.toString(),
+        name: element.tags.name || 'Lac',
+        lat: element.lat,
+        lng: element.lon,
+        elevation: element.tags.ele ? parseInt(element.tags.ele) : 0,
+        area: element.tags.area ? parseFloat(element.tags.area) : undefined,
+        max_depth: element.tags.maxdepth
+          ? parseFloat(element.tags.maxdepth)
+          : undefined,
+        type: determineLakeType(element.tags),
+        activities: extractLakeActivities(element.tags),
+        access_difficulty: determineLakeAccessDifficulty(element.tags),
+        description: element.tags.description,
+      }))
+      .filter((lake: NotableLake) => {
+        const distanceToRoute = calculateDistanceToRoute(
+          lake.lat,
+          lake.lng,
+          coordinates
+        );
+        return distanceToRoute <= radiusKm;
+      });
+
+    return lakes;
+  } catch (error) {
+    console.error('Error finding lakes:', error);
+    return [];
+  }
+};
+
+/**
+ * Find all enriched POIs near the route
+ */
+export const findEnrichedPOIsNearRoute = async (
+  route: GeoJSON.FeatureCollection
+): Promise<EnrichedPOIs> => {
+  try {
+    const [peaks, passes, viewpoints, heritage, lakes] =
+      await Promise.allSettled([
+        findPeaksNearRoute(route, 10),
+        findPassesNearRoute(route, 8),
+        findViewpointsNearRoute(route, 5),
+        findHeritageNearRoute(route, 6),
+        findLakesNearRoute(route, 8),
+      ]);
+
+    return {
+      peaks: peaks.status === 'fulfilled' ? peaks.value : [],
+      passes: passes.status === 'fulfilled' ? passes.value : [],
+      viewpoints: viewpoints.status === 'fulfilled' ? viewpoints.value : [],
+      heritage: heritage.status === 'fulfilled' ? heritage.value : [],
+      geologicalSites: [], // À implémenter plus tard
+      lakes: lakes.status === 'fulfilled' ? lakes.value : [],
+    };
+  } catch (error) {
+    console.error('Error finding enriched POIs:', error);
+    return {
+      peaks: [],
+      passes: [],
+      viewpoints: [],
+      heritage: [],
+      geologicalSites: [],
+      lakes: [],
+    };
+  }
+};
+
+// Helper functions for determining POI characteristics
+const determinePeakDifficulty = (
+  tags: Record<string, string>
+): 'facile' | 'modéré' | 'difficile' | 'très difficile' | undefined => {
+  if (tags.climbing) return 'très difficile';
+  if (tags.difficulty === 'difficult') return 'difficile';
+  if (tags.difficulty === 'moderate') return 'modéré';
+  if (tags.difficulty === 'easy') return 'facile';
+  return undefined;
+};
+
+const determinePassType = (
+  tags: Record<string, string>
+): 'col' | 'brèche' | 'seuil' | 'pas' => {
+  if (tags.name?.toLowerCase().includes('brèche')) return 'brèche';
+  if (tags.name?.toLowerCase().includes('pas')) return 'pas';
+  if (tags.name?.toLowerCase().includes('seuil')) return 'seuil';
+  return 'col';
+};
+
+const determinePassDifficulty = (
+  tags: Record<string, string>
+): 'facile' | 'modéré' | 'difficile' | undefined => {
+  if (tags.difficulty === 'difficult') return 'difficile';
+  if (tags.difficulty === 'moderate') return 'modéré';
+  if (tags.difficulty === 'easy') return 'facile';
+  return undefined;
+};
+
+const extractConnections = (tags: Record<string, string>): string[] => {
+  const connections = [];
+  if (tags.connects) connections.push(tags.connects);
+  if (tags.from && tags.to) connections.push(`${tags.from} - ${tags.to}`);
+  return connections;
+};
+
+const extractVisiblePeaks = (tags: Record<string, string>): string[] => {
+  if (tags.visible_peaks) return tags.visible_peaks.split(';');
+  return [];
+};
+
+const determineBestViewTime = (
+  tags: Record<string, string>
+): string | undefined => {
+  if (tags.direction?.includes('est')) return 'matin';
+  if (tags.direction?.includes('ouest')) return 'soir';
+  return 'journée';
+};
+
+const determineHeritageName = (tags: Record<string, string>): string => {
+  if (tags.historic === 'castle') return 'Château';
+  if (tags.historic === 'ruins') return 'Ruines';
+  if (tags.historic === 'chapel') return 'Chapelle';
+  if (tags.historic === 'monument') return 'Monument';
+  return 'Site historique';
+};
+
+const determineHeritageType = (
+  tags: Record<string, string>
+):
+  | 'château'
+  | 'ruines'
+  | 'chapelle'
+  | 'monument'
+  | 'site_archéologique'
+  | 'village' => {
+  if (tags.historic === 'castle') return 'château';
+  if (tags.historic === 'ruins') return 'ruines';
+  if (tags.historic === 'chapel') return 'chapelle';
+  if (tags.historic === 'monument') return 'monument';
+  if (tags.historic === 'archaeological_site') return 'site_archéologique';
+  if (tags.place === 'village') return 'village';
+  return 'monument';
+};
+
+const determineLakeType = (
+  tags: Record<string, string>
+): 'lac_alpin' | 'lac_glaciaire' | 'lac_artificiel' | 'étang' => {
+  if (tags.water === 'reservoir') return 'lac_artificiel';
+  if (tags.name?.toLowerCase().includes('étang')) return 'étang';
+  if (tags.natural === 'water' && tags.ele && parseInt(tags.ele) > 1500)
+    return 'lac_alpin';
+  return 'lac_glaciaire';
+};
+
+const extractLakeActivities = (tags: Record<string, string>): string[] => {
+  const activities = [];
+  if (tags.swimming === 'yes') activities.push('baignade');
+  if (tags.fishing === 'yes') activities.push('pêche');
+  if (tags.boat === 'yes') activities.push('navigation');
+  return activities;
+};
+
+const determineLakeAccessDifficulty = (
+  tags: Record<string, string>
+): 'facile' | 'modéré' | 'difficile' => {
+  if (tags.access && tags.access.includes('difficult')) return 'difficile';
+  if (tags.access && tags.access.includes('moderate')) return 'modéré';
+  return 'facile';
 };

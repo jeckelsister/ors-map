@@ -1,3 +1,4 @@
+import EnrichedPOIControls from '@/components/hiking/EnrichedPOIControls';
 import {
   Download,
   Map,
@@ -33,8 +34,13 @@ import useHikingRoute from '../hooks/hiking/useHikingRoute';
 import { useToast } from '../hooks/shared/useToast';
 import type {
   Coordinates,
+  Heritage,
   HikingProfile,
+  NotableLake,
+  Pass,
+  Peak,
   Refuge,
+  Viewpoint,
   WaterPoint,
 } from '../types/hiking';
 
@@ -58,12 +64,23 @@ export default function HikingPlannerPage(): React.JSX.Element {
     currentRoute,
     refuges,
     waterPoints,
+    enrichedPOIs,
 
     isLoading,
     showRefuges,
     setShowRefuges,
     showWaterPoints,
     setShowWaterPoints,
+    showPeaks,
+    setShowPeaks,
+    showPasses,
+    setShowPasses,
+    showViewpoints,
+    setShowViewpoints,
+    showHeritage,
+    setShowHeritage,
+    showLakes,
+    setShowLakes,
 
     // Actions
     createRoute,
@@ -145,6 +162,32 @@ export default function HikingPlannerPage(): React.JSX.Element {
       `📍 Zoom sur: ${waterPoint.name || "point d'eau"} (${waterPoint.quality || 'qualité inconnue'})`,
       'info'
     );
+  };
+
+  // Handlers for enriched POI selection
+  const handlePeakSelect = (peak: Peak) => {
+    hikingMapRef.current?.zoomToPOI(peak.lat, peak.lng, 16);
+    showToast(`🏔️ Zoom sur: ${peak.name} (${peak.elevation}m)`, 'info');
+  };
+
+  const handlePassSelect = (pass: Pass) => {
+    hikingMapRef.current?.zoomToPOI(pass.lat, pass.lng, 16);
+    showToast(`🛤️ Zoom sur: ${pass.name} (${pass.elevation}m)`, 'info');
+  };
+
+  const handleViewpointSelect = (viewpoint: Viewpoint) => {
+    hikingMapRef.current?.zoomToPOI(viewpoint.lat, viewpoint.lng, 16);
+    showToast(`👁️ Zoom sur: ${viewpoint.name}`, 'info');
+  };
+
+  const handleHeritageSelect = (heritage: Heritage) => {
+    hikingMapRef.current?.zoomToPOI(heritage.lat, heritage.lng, 16);
+    showToast(`🏛️ Zoom sur: ${heritage.name} (${heritage.type})`, 'info');
+  };
+
+  const handleLakeSelect = (lake: NotableLake) => {
+    hikingMapRef.current?.zoomToPOI(lake.lat, lake.lng, 16);
+    showToast(`🏞️ Zoom sur: ${lake.name} (${lake.elevation}m)`, 'info');
   };
 
   const handleGPXExport = (gpxContent: string, filename: string) => {
@@ -360,18 +403,46 @@ export default function HikingPlannerPage(): React.JSX.Element {
                   </TabsContent>
 
                   <TabsContent value="poi" className="mt-0">
-                    <div>
-                      <h3 className="font-semibold mb-3">Points d'intérêt</h3>
-                      <POIDisplayControls
-                        refuges={refuges}
-                        waterPoints={waterPoints}
-                        showRefuges={showRefuges}
-                        showWaterPoints={showWaterPoints}
-                        onToggleRefuges={setShowRefuges}
-                        onToggleWaterPoints={setShowWaterPoints}
-                        onRefugeSelect={handleRefugeSelect}
-                        onWaterPointSelect={handleWaterPointSelect}
-                      />
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="font-semibold mb-3">
+                          Refuges & Points d'eau
+                        </h3>
+                        <POIDisplayControls
+                          refuges={refuges}
+                          waterPoints={waterPoints}
+                          showRefuges={showRefuges}
+                          showWaterPoints={showWaterPoints}
+                          onToggleRefuges={setShowRefuges}
+                          onToggleWaterPoints={setShowWaterPoints}
+                          onRefugeSelect={handleRefugeSelect}
+                          onWaterPointSelect={handleWaterPointSelect}
+                        />
+                      </div>
+
+                      <div>
+                        <h3 className="font-semibold mb-3">
+                          Points d'intérêt enrichis
+                        </h3>
+                        <EnrichedPOIControls
+                          enrichedPOIs={enrichedPOIs}
+                          showPeaks={showPeaks}
+                          showPasses={showPasses}
+                          showViewpoints={showViewpoints}
+                          showHeritage={showHeritage}
+                          showLakes={showLakes}
+                          onTogglePeaks={setShowPeaks}
+                          onTogglePasses={setShowPasses}
+                          onToggleViewpoints={setShowViewpoints}
+                          onToggleHeritage={setShowHeritage}
+                          onToggleLakes={setShowLakes}
+                          onPeakSelect={handlePeakSelect}
+                          onPassSelect={handlePassSelect}
+                          onViewpointSelect={handleViewpointSelect}
+                          onHeritageSelect={handleHeritageSelect}
+                          onLakeSelect={handleLakeSelect}
+                        />
+                      </div>
                     </div>
                   </TabsContent>
 
@@ -414,17 +485,28 @@ export default function HikingPlannerPage(): React.JSX.Element {
           {/* Map and Results */}
           <div className="lg:col-span-2 space-y-6">
             {/* Hiking Map */}
-            <Card>
+            <Card className="p-0">
               <CardContent className="p-0">
                 <HikingMap
                   ref={hikingMapRef}
                   route={currentRoute}
                   refuges={refuges}
                   waterPoints={waterPoints}
+                  enrichedPOIs={enrichedPOIs}
                   showRefuges={showRefuges}
                   showWaterPoints={showWaterPoints}
+                  showPeaks={showPeaks}
+                  showPasses={showPasses}
+                  showViewpoints={showViewpoints}
+                  showHeritage={showHeritage}
+                  showLakes={showLakes}
                   onToggleRefuges={setShowRefuges}
                   onToggleWaterPoints={setShowWaterPoints}
+                  onTogglePeaks={setShowPeaks}
+                  onTogglePasses={setShowPasses}
+                  onToggleViewpoints={setShowViewpoints}
+                  onToggleHeritage={setShowHeritage}
+                  onToggleLakes={setShowLakes}
                   waypoints={waypoints}
                   onMapClick={handleMapClick}
                 />
